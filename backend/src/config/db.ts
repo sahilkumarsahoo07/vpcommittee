@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 export const connectDB = async (): Promise<boolean> => {
   try {
-    const connStr = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/vighnaharta_db';
+    const connStr = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/vighnaharta_db';
     mongoose.set('bufferCommands', false);
     await mongoose.connect(connStr, {
       serverSelectionTimeoutMS: 5000,
