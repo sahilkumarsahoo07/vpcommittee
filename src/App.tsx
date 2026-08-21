@@ -7,6 +7,7 @@ import { FestivalTimeline } from './sections/FestivalTimeline';
 import { FeatureCards } from './components/FeatureCards';
 import { ActionRowSection } from './sections/ActionRowSection';
 import { AnnouncementsSection } from './sections/AnnouncementsSection';
+import { CommunityStats } from './sections/CommunityStats';
 import { LocationSection } from './sections/LocationSection';
 import { GallerySection } from './sections/GallerySection';
 import { FinalCTA } from './sections/FinalCTA';
@@ -65,6 +66,7 @@ export function App() {
 
         {/* 8. Location Section (Find Our Pandal) & Community Statistics */}
         <LocationSection />
+        <CommunityStats />
 
         {/* 9. Latest Announcements & Updates Feed */}
         <AnnouncementsSection />

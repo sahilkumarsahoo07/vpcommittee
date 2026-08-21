@@ -153,7 +153,7 @@ export const ActionRowSection: React.FC<ActionRowSectionProps> = ({ onOpenDonate
           </div>
 
           {/* Card 3: BE PART OF THE CELEBRATION (Volunteer) */}
-          <div className="bg-[#FFFDF7] border border-[#D4A72C]/40 rounded-3xl p-6 sm:p-8 shadow-xl hover:shadow-2xl hover:border-[#D4A72C] transition-all flex flex-col justify-between text-left space-y-6 relative overflow-hidden">
+          <div className="bg-[#FFFDF7] border border-[#D4A72C]/40 rounded-3xl p-6 sm:p-8 shadow-xl hover:shadow-2xl hover:border-[#D4A72C] transition-all flex flex-col justify-between text-left space-y-6">
             <div className="space-y-3">
               <div className="w-12 h-12 rounded-2xl bg-[#5A0F16] text-[#F4B942] flex items-center justify-center border border-[#D4A72C]/50 shadow-md">
                 <Users className="w-6 h-6" />
@@ -166,26 +166,14 @@ export const ActionRowSection: React.FC<ActionRowSectionProps> = ({ onOpenDonate
               </p>
             </div>
 
-            {/* Checklist with Hand graphic side-by-side */}
-            <div className="flex items-center justify-between gap-2">
-              <div className="space-y-2 text-xs font-semibold text-[#2A1710]/90">
-                {['Volunteer', 'Decoration', 'Photography', 'Cultural Events', 'Event Management'].map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#E87516] flex-shrink-0" />
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Hand Vector Illustration Artwork */}
-              <div className="w-20 h-24 opacity-80 flex-shrink-0">
-                <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full text-[#E87516]">
-                  <path d="M30 110V60C30 54 34 50 40 50C46 50 50 54 50 60V110" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-                  <path d="M50 110V40C50 34 54 30 60 30C66 30 70 34 70 40V110" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-                  <path d="M70 110V50C70 44 74 40 80 40C86 40 90 44 90 50V110" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-                  <path d="M15 110V70C15 65 19 60 24 60C29 60 30 63 30 70V110" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-                </svg>
-              </div>
+            {/* Checklist */}
+            <div className="space-y-2 text-xs font-semibold text-[#2A1710]/90">
+              {['Volunteer Service', 'Decorations & Pandal', 'Photography & Media', 'Cultural Events', 'Event Management'].map((item, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[#E87516] flex-shrink-0" />
+                  <span>{item}</span>
+                </div>
+              ))}
             </div>
 
             <div className="pt-2">
