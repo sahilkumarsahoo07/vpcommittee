@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, Mail, MapPin, Heart } from 'lucide-react';
+import { Phone, Mail, MapPin, Heart, ShieldCheck } from 'lucide-react';
 import { OmIcon } from './DevotionalIcons';
 import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../data/translations';
@@ -58,6 +58,15 @@ export const Footer: React.FC = () => {
               <li>
                 <a href="#donate" className={`hover:text-[#F4B942] transition-colors ${fontClass}`}>
                   {t.nav.donate}
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/admin/login"
+                  className={`hover:text-[#F4B942] transition-colors inline-flex items-center gap-1.5 text-[#F4B942]/90 hover:underline font-semibold ${fontClass}`}
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#F4B942]" />
+                  {t.nav.adminLogin}
                 </a>
               </li>
             </ul>
