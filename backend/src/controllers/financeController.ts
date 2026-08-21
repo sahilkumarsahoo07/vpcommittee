@@ -153,19 +153,14 @@ export const getFinancialSummary = async (req: AuthRequest, res: Response) => {
   try {
     let totalDonations = 0;
     let totalExpenses = 0;
+    const isMongoConnected = mongoose.connection.readyState === 1;
 
-    try {
+    if (isMongoConnected) {
       const dbDonations = await Donation.find({ status: 'SUCCESS' });
       const dbExpenses = await Expense.find();
-
-      if (dbDonations.length > 0 || dbExpenses.length > 0) {
-        totalDonations = dbDonations.reduce((sum, item) => sum + item.amount, 0);
-        totalExpenses = dbExpenses.reduce((sum, item) => sum + item.amount, 0);
-      } else {
-        totalDonations = mockDonations.reduce((sum, item) => sum + item.amount, 0);
-        totalExpenses = mockExpenses.reduce((sum, item) => sum + item.amount, 0);
-      }
-    } catch {
+      totalDonations = dbDonations.reduce((sum, item) => sum + item.amount, 0);
+      totalExpenses = dbExpenses.reduce((sum, item) => sum + item.amount, 0);
+    } else {
       totalDonations = mockDonations.reduce((sum, item) => sum + item.amount, 0);
       totalExpenses = mockExpenses.reduce((sum, item) => sum + item.amount, 0);
     }
@@ -173,7 +168,7 @@ export const getFinancialSummary = async (req: AuthRequest, res: Response) => {
     const currentBalance = totalDonations - totalExpenses;
     const allocatedBudget = mockBudget.totalAllocatedBudget;
     const remainingBudget = Math.max(0, allocatedBudget - totalExpenses);
-    const utilizationPercentage = Math.round((totalExpenses / allocatedBudget) * 100);
+    const utilizationPercentage = allocatedBudget > 0 ? Math.round((totalExpenses / allocatedBudget) * 100) : 0;
 
     res.json({
       success: true,
@@ -199,13 +194,13 @@ export const getFinancialSummary = async (req: AuthRequest, res: Response) => {
 // GET Donations List
 export const getDonations = async (req: AuthRequest, res: Response) => {
   try {
+    const isMongoConnected = mongoose.connection.readyState === 1;
     let list: any[] = [];
-    try {
+    if (isMongoConnected) {
       list = await Donation.find().sort({ createdAt: -1 });
-    } catch {
+    } else {
       list = mockDonations;
     }
-    if (!list || list.length === 0) list = mockDonations;
 
     res.json({ success: true, data: list });
   } catch (error: any) {
@@ -237,9 +232,9 @@ export const createDonation = async (req: AuthRequest, res: Response) => {
       createdAt: donationDate,
     };
 
-    try {
+    if (mongoose.connection.readyState === 1) {
       await Donation.create(newDonation);
-    } catch {
+    } else {
       mockDonations.unshift(newDonation as any);
     }
 
@@ -306,13 +301,13 @@ export const createPublicDonation = async (req: Request, res: Response) => {
 // GET Expenses List
 export const getExpenses = async (req: AuthRequest, res: Response) => {
   try {
+    const isMongoConnected = mongoose.connection.readyState === 1;
     let list: any[] = [];
-    try {
+    if (isMongoConnected) {
       list = await Expense.find().sort({ date: -1 });
-    } catch {
+    } else {
       list = mockExpenses;
     }
-    if (!list || list.length === 0) list = mockExpenses;
 
     res.json({ success: true, data: list });
   } catch (error: any) {
@@ -340,9 +335,9 @@ export const createExpense = async (req: AuthRequest, res: Response) => {
       createdAt: new Date(),
     };
 
-    try {
+    if (mongoose.connection.readyState === 1) {
       await Expense.create(newExpense);
-    } catch {
+    } else {
       mockExpenses.unshift(newExpense as any);
     }
 
@@ -381,14 +376,16 @@ export const getBudget = async (req: AuthRequest, res: Response) => {
 
     // Calculate spent per category
     const spentByCategory: Record<string, number> = {};
-    mockExpenses.forEach((exp) => {
+    const isMongoConnected = mongoose.connection.readyState === 1;
+    const currentExpenses = isMongoConnected ? await Expense.find() : mockExpenses;
+    currentExpenses.forEach((exp: any) => {
       spentByCategory[exp.category] = (spentByCategory[exp.category] || 0) + exp.amount;
     });
 
     const categorySummary = budgetData.categories.map((c: any) => {
       const spent = spentByCategory[c.category] || 0;
       const remaining = Math.max(0, c.allocatedAmount - spent);
-      const percentageUsed = Math.round((spent / c.allocatedAmount) * 100);
+      const percentageUsed = c.allocatedAmount > 0 ? Math.round((spent / c.allocatedAmount) * 100) : 0;
       return {
         _id: c._id?.toString() || c._id || String(c.category),
         category: c.category,
@@ -415,15 +412,17 @@ export const getBudget = async (req: AuthRequest, res: Response) => {
 export const exportFinancialPDF = async (req: AuthRequest, res: Response) => {
   try {
     const { startDate, endDate, month } = req.query;
+    const isMongoConnected = mongoose.connection.readyState === 1;
 
-    let donationsList = mockDonations;
-    let expensesList = mockExpenses;
-    try {
-      const dbDonations = await Donation.find({ status: 'SUCCESS' }).lean();
-      const dbExpenses = await Expense.find().lean();
-      if (dbDonations.length > 0) donationsList = dbDonations as any;
-      if (dbExpenses.length > 0) expensesList = dbExpenses as any;
-    } catch { }
+    let donationsList: any[] = [];
+    let expensesList: any[] = [];
+    if (isMongoConnected) {
+      donationsList = await Donation.find({ status: 'SUCCESS' }).lean();
+      expensesList = await Expense.find().lean();
+    } else {
+      donationsList = mockDonations;
+      expensesList = mockExpenses;
+    }
 
     // Date range filter
     let dateRangeLabel = 'Overall All Dates Audit';
@@ -488,15 +487,14 @@ export const exportDonorPDF = async (req: AuthRequest, res: Response) => {
     }
 
     const searchName = String(donorName).trim().toLowerCase();
+    const isMongoConnected = mongoose.connection.readyState === 1;
 
-    // Combine MongoDB donations and mockDonations to ensure complete coverage
-    let allDonations: any[] = [...mockDonations];
-    try {
-      const dbDonations = await Donation.find().sort({ createdAt: -1 }).lean();
-      if (dbDonations && dbDonations.length > 0) {
-        allDonations = [...(dbDonations as any[]), ...mockDonations];
-      }
-    } catch { }
+    let allDonations: any[] = [];
+    if (isMongoConnected) {
+      allDonations = await Donation.find().sort({ createdAt: -1 }).lean();
+    } else {
+      allDonations = [...mockDonations];
+    }
 
     // Deduplicate by receipt number or ID
     const seenMap = new Map();
@@ -523,7 +521,7 @@ export const exportDonorPDF = async (req: AuthRequest, res: Response) => {
         {
           receiptNumber: `VPC-DON-2026-${Math.floor(100 + Math.random() * 900)}`,
           donorName: String(donorName),
-          amount: 10000,
+          amount: 0,
           paymentMethod: 'UPI',
           category: 'General Donation',
           createdAt: new Date(),
@@ -554,11 +552,13 @@ export const exportDonorPDF = async (req: AuthRequest, res: Response) => {
 export const exportDonationsExcel = async (req: AuthRequest, res: Response) => {
   try {
     const { month } = req.query;
-    let donationsList = mockDonations;
-    try {
-      const dbDonations = await Donation.find().sort({ createdAt: -1 }).lean();
-      if (dbDonations.length > 0) donationsList = dbDonations as any;
-    } catch { }
+    const isMongoConnected = mongoose.connection.readyState === 1;
+    let donationsList: any[] = [];
+    if (isMongoConnected) {
+      donationsList = await Donation.find().sort({ createdAt: -1 }).lean();
+    } else {
+      donationsList = mockDonations;
+    }
 
     if (month && month !== 'ALL') {
       const mStr = String(month).trim();
@@ -582,6 +582,8 @@ export const updateDonation = async (req: AuthRequest, res: Response) => {
   try {
     if (mongoose.Types.ObjectId.isValid(id)) {
       await Donation.findByIdAndUpdate(id, req.body);
+    } else {
+      await Donation.updateOne({ $or: [{ id }, { receiptNumber: id }] }, req.body);
     }
   } catch { }
   mockDonations = mockDonations.map((d) => (d.id === id || (d as any)._id === id ? { ...d, ...req.body } : d));
@@ -594,8 +596,9 @@ export const deleteDonation = async (req: AuthRequest, res: Response) => {
     if (mongoose.Types.ObjectId.isValid(id)) {
       await Donation.findByIdAndDelete(id);
     }
+    await Donation.deleteMany({ $or: [{ id }, { receiptNumber: id }] });
   } catch { }
-  mockDonations = mockDonations.filter((d) => d.id !== id && (d as any)._id !== id);
+  mockDonations = mockDonations.filter((d) => d.id !== id && (d as any)._id !== id && d.receiptNumber !== id);
   res.json({ success: true, message: 'Donation deleted successfully' });
 };
 
@@ -604,6 +607,8 @@ export const updateExpense = async (req: AuthRequest, res: Response) => {
   try {
     if (mongoose.Types.ObjectId.isValid(id)) {
       await Expense.findByIdAndUpdate(id, req.body);
+    } else {
+      await Expense.updateOne({ id }, req.body);
     }
   } catch { }
   mockExpenses = mockExpenses.map((e) => (e.id === id || (e as any)._id === id ? { ...e, ...req.body } : e));
@@ -616,6 +621,7 @@ export const deleteExpense = async (req: AuthRequest, res: Response) => {
     if (mongoose.Types.ObjectId.isValid(id)) {
       await Expense.findByIdAndDelete(id);
     }
+    await Expense.deleteMany({ id });
   } catch { }
   mockExpenses = mockExpenses.filter((e) => e.id !== id && (e as any)._id !== id);
   res.json({ success: true, message: 'Expense deleted successfully' });

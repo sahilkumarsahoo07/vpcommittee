@@ -40,6 +40,7 @@ import {
   createGalleryItem,
   updateGalleryItem,
   deleteGalleryItem,
+  getProxyThumbnail,
   getVolunteers,
   createVolunteer,
   updateVolunteer,
@@ -83,6 +84,7 @@ router.get('/members', getMembers);
 router.get('/events', getEvents);
 router.get('/announcements', getAnnouncements);
 router.get('/gallery', getGallery);
+router.get('/media/proxy-thumbnail', getProxyThumbnail);
 router.post('/volunteers', createVolunteer);
 router.post('/subscribers', createSubscriber);
 router.post('/donations/public', createPublicDonation);

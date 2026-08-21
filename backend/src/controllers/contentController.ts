@@ -533,8 +533,8 @@ export const resetSettings = async (req: AuthRequest, res: Response) => {
 // MEMBERS
 export const getMembers = async (req: Request, res: Response) => {
   try {
-    const members = await CommitteeMember.find().sort({ displayOrder: 1 });
-    if (members && members.length > 0) {
+    if (mongoose.connection.readyState === 1) {
+      const members = await CommitteeMember.find().sort({ displayOrder: 1 });
       return res.json({ success: true, data: members });
     }
   } catch {}
@@ -588,6 +588,7 @@ export const deleteMember = async (req: AuthRequest, res: Response) => {
     if (mongoose.Types.ObjectId.isValid(id)) {
       await CommitteeMember.findByIdAndDelete(id);
     }
+    await CommitteeMember.deleteMany({ id });
   } catch {}
   mockMembers = mockMembers.filter((m) => m.id !== id && (m as any)._id !== id);
 
@@ -600,8 +601,8 @@ export const deleteMember = async (req: AuthRequest, res: Response) => {
 // EVENTS
 export const getEvents = async (req: Request, res: Response) => {
   try {
-    const events = await Event.find().sort({ date: 1 });
-    if (events && events.length > 0) {
+    if (mongoose.connection.readyState === 1) {
+      const events = await Event.find().sort({ date: 1 });
       return res.json({ success: true, data: events });
     }
   } catch {}
@@ -670,6 +671,7 @@ export const deleteEvent = async (req: AuthRequest, res: Response) => {
     if (mongoose.Types.ObjectId.isValid(id)) {
       await Event.findByIdAndDelete(id);
     }
+    await Event.deleteMany({ id });
   } catch {}
   mockEvents = mockEvents.filter((e) => e.id !== id && (e as any)._id !== id);
 
@@ -682,8 +684,8 @@ export const deleteEvent = async (req: AuthRequest, res: Response) => {
 // ANNOUNCEMENTS
 export const getAnnouncements = async (req: Request, res: Response) => {
   try {
-    const annList = await Announcement.find({ published: true }).sort({ publishDate: -1 });
-    if (annList && annList.length > 0) {
+    if (mongoose.connection.readyState === 1) {
+      const annList = await Announcement.find({ published: true }).sort({ publishDate: -1 });
       return res.json({ success: true, data: annList });
     }
   } catch {}
@@ -774,6 +776,7 @@ export const deleteAnnouncement = async (req: AuthRequest, res: Response) => {
     if (mongoose.Types.ObjectId.isValid(id)) {
       await Announcement.findByIdAndDelete(id);
     }
+    await Announcement.deleteMany({ id });
   } catch {}
   mockAnnouncements = mockAnnouncements.filter((a) => a.id !== id && (a as any)._id !== id);
 
@@ -786,16 +789,19 @@ export const deleteAnnouncement = async (req: AuthRequest, res: Response) => {
 // GALLERY
 export const getGallery = async (req: Request, res: Response) => {
   try {
-    const gallery = await Gallery.find({ published: true }).sort({ createdAt: -1 });
-    if (gallery && gallery.length > 0) {
+    if (mongoose.connection.readyState === 1) {
+      const gallery = await Gallery.find().sort({ createdAt: -1 });
       return res.json({ success: true, data: gallery });
     }
-  } catch {}
+  } catch (err) {
+    console.error('getGallery error:', err);
+  }
   res.json({ success: true, data: mockGallery });
 };
 
 export const createGalleryItem = async (req: AuthRequest, res: Response) => {
-  const mediaUrl = req.body.mediaUrl || req.body.imageUrl || req.body.url || '/assets/bannerimage.png';
+  const mediaUrl = req.body.mediaUrl || req.body.url || req.body.imageUrl || '/assets/bannerimage.png';
+  const imageUrl = req.body.imageUrl || req.body.thumbnailUrl || mediaUrl;
   let createdId = `gal_${Date.now()}`;
   const newItem = {
     id: createdId,
@@ -803,22 +809,27 @@ export const createGalleryItem = async (req: AuthRequest, res: Response) => {
     category: req.body.category || 'Puja',
     mediaType: req.body.mediaType || 'IMAGE',
     mediaUrl: mediaUrl,
-    imageUrl: mediaUrl,
+    imageUrl: imageUrl,
     url: mediaUrl,
     embedUrl: req.body.embedUrl || mediaUrl,
+    thumbnailUrl: imageUrl,
     caption: req.body.caption || req.body.title || '',
     albumName: req.body.albumName || 'Ganesh Utsav 2026',
     published: true,
   };
 
+  let savedItem: any = newItem;
+
   try {
     const dbItem = await Gallery.create(newItem);
     if (dbItem && dbItem._id) {
       createdId = dbItem._id.toString();
-      newItem.id = createdId;
+      savedItem = dbItem.toObject();
+      savedItem.id = createdId;
     }
-    mockGallery.unshift(dbItem.toObject() as any);
-  } catch {
+    mockGallery.unshift(savedItem);
+  } catch (err: any) {
+    console.error('Gallery.create error:', err);
     mockGallery.unshift(newItem);
   }
 
@@ -834,7 +845,7 @@ export const createGalleryItem = async (req: AuthRequest, res: Response) => {
     );
   }
 
-  res.status(201).json({ success: true, message: 'Media added to gallery', data: newItem });
+  res.status(201).json({ success: true, message: 'Media added to gallery', data: savedItem });
 };
 
 export const deleteGalleryItem = async (req: AuthRequest, res: Response) => {
@@ -850,6 +861,46 @@ export const deleteGalleryItem = async (req: AuthRequest, res: Response) => {
     await logAudit(req.user.id, req.user.name, req.user.role, 'GALLERY_DELETED', 'Gallery', id, `Deleted gallery item ${id}`);
   }
   res.json({ success: true, message: 'Media item deleted successfully' });
+};
+
+// INSTAGRAM / MEDIA THUMBNAIL PROXY
+export const getProxyThumbnail = async (req: Request, res: Response) => {
+  const { shortcode, url } = req.query;
+  try {
+    let targetShortcode = shortcode as string;
+    if (!targetShortcode && url) {
+      const match = (url as string).match(/\/(?:reel|reels|p|tv|share\/reel)\/([A-Za-z0-9_-]+)/);
+      if (match) targetShortcode = match[1];
+    }
+
+    if (!targetShortcode) {
+      return res.status(400).send('Shortcode or URL required');
+    }
+
+    const igUrl = `https://www.instagram.com/p/${targetShortcode}/media/?size=l`;
+    const response = await fetch(igUrl, {
+      redirect: 'follow',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+      },
+    });
+
+    if (!response.ok) {
+      return res.status(response.status).send('Failed to fetch Instagram thumbnail');
+    }
+
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache 24 hours
+
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    return res.send(buffer);
+  } catch (err: any) {
+    console.error('getProxyThumbnail error:', err);
+    return res.status(500).send('Error fetching thumbnail');
+  }
 };
 
 // VOLUNTEERS

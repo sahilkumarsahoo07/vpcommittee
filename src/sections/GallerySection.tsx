@@ -3,7 +3,7 @@ import { Play, ChevronLeft, ChevronRight, X, Film } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../data/translations';
 import { publicAPI } from '../services/api';
-import { processMediaUrl } from '../utils/mediaHelper';
+import { processMediaUrl, extractInstagramShortcode } from '../utils/mediaHelper';
 import { MediaModal } from '../components/MediaModal';
 import { InstagramIcon, YoutubeIcon, GoogleDriveIcon } from '../components/SocialIcons';
 
@@ -188,14 +188,23 @@ export const GallerySection: React.FC = () => {
         const res = await publicAPI.getGallery();
         if (res.success && Array.isArray(res.data)) {
           const mapped: GalleryItem[] = res.data.map((item: any) => {
-            const rawUrl = item.mediaUrl || item.imageUrl || item.url || '/assets/bannerimage.png';
+            const rawUrl = item.mediaUrl || item.imageUrl || item.url || '';
             const processed = processMediaUrl(rawUrl);
+            const mediaType = item.mediaType || processed.mediaType;
+            const isReel = mediaType === 'REEL';
+            const shortcode = isReel ? extractInstagramShortcode(rawUrl) : null;
+            const thumbUrl = isReel
+              ? (shortcode ? `/api/media/proxy-thumbnail?shortcode=${shortcode}` : processed.thumbnailUrl)
+              : (item.imageUrl && !item.imageUrl.includes('bannerimage') && !item.imageUrl.includes('cultural-night')
+                ? item.imageUrl
+                : (processed.thumbnailUrl || rawUrl || '/assets/bannerimage.png'));
+
             return {
               id: item._id || item.id,
               title: item.title || 'Festival Media',
               category: item.category || 'Puja',
-              mediaType: item.mediaType || processed.mediaType,
-              imageUrl: processed.thumbnailUrl || rawUrl,
+              mediaType: mediaType,
+              imageUrl: thumbUrl,
               mediaUrl: rawUrl,
               embedUrl: item.embedUrl || processed.embedUrl,
               caption: item.caption || item.description || '',
@@ -303,51 +312,82 @@ export const GallerySection: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {paginatedItems.map((item) => (
-              <div
-                key={item.id}
-                onClick={() => setSelectedMedia(item)}
-                className="group relative rounded-3xl overflow-hidden border border-[#D4A72C]/30 shadow-md hover:shadow-2xl hover:border-[#D4A72C] transition-all cursor-pointer aspect-[4/3] bg-[#32070B]"
-              >
-                <img
-                  src={item.imageUrl}
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/assets/bannerimage.png';
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#32070B] via-black/20 to-transparent opacity-85 group-hover:opacity-95 transition-opacity" />
+            {paginatedItems.map((item) => {
+              const isReel = item.mediaType === 'REEL';
+              const isYoutube = item.mediaType === 'YOUTUBE';
+              const isGdrive = item.mediaType === 'GDRIVE';
+              const isVideo = item.mediaType === 'VIDEO';
+              const isPhoto = item.mediaType === 'IMAGE';
 
-                {/* Play Icon Overlay for Videos/Reels */}
-                {item.mediaType !== 'IMAGE' && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-14 h-14 rounded-full bg-[#E87516]/90 border-2 border-[#F4B942] text-white flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                      {item.mediaType === 'REEL' ? (
-                        <InstagramIcon className="w-7 h-7 text-pink-200" />
-                      ) : item.mediaType === 'YOUTUBE' ? (
-                        <YoutubeIcon className="w-7 h-7 text-red-400" />
-                      ) : (
-                        <Play className="w-7 h-7 fill-white ml-0.5" />
-                      )}
+              const shortcode = isReel ? extractInstagramShortcode(item.mediaUrl || '') : null;
+
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => setSelectedMedia(item)}
+                  className="group relative rounded-3xl overflow-hidden border-2 border-[#D4A72C]/40 hover:border-[#F4B942] bg-[#120103] shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer aspect-[4/5] min-h-[380px] sm:min-h-[440px] flex items-center justify-center"
+                >
+                  {/* Media Content */}
+                  {isReel ? (
+                    <div className="w-full h-full relative overflow-hidden bg-black flex items-center justify-center pointer-events-none">
+                      <iframe
+                        src={item.embedUrl || `https://www.instagram.com/p/${shortcode}/embed/`}
+                        title={item.title}
+                        className="w-full h-[620px] -mt-10 border-0 pointer-events-none opacity-95 group-hover:opacity-100 transition-opacity scale-100"
+                        scrolling="no"
+                      />
                     </div>
-                  </div>
-                )}
-
-                <div className="absolute bottom-0 left-0 right-0 p-5 space-y-1.5 text-left">
-                  <span className={`inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#F4B942] bg-[#5A0F16]/90 px-2.5 py-0.5 rounded-full border border-[#D4A72C]/40 ${fontClass}`}>
-                    {item.mediaType === 'REEL' && <InstagramIcon className="w-3 h-3 text-pink-300" />}
-                    {item.mediaType === 'YOUTUBE' && <YoutubeIcon className="w-3 h-3 text-red-400" />}
-                    {item.mediaType === 'GDRIVE' && <GoogleDriveIcon className="w-3 h-3 text-blue-300" />}
-                    <span>{item.category}</span>
-                  </span>
-                  <h4 className={`text-base font-extrabold text-[#FFF7E8] leading-snug ${fontClass}`}>{item.title}</h4>
-                  {item.caption && (
-                    <p className={`text-xs text-[#FFF7E8]/80 line-clamp-1 ${fontClass}`}>{item.caption}</p>
+                  ) : (
+                    <img
+                      src={item.imageUrl || '/assets/bannerimage.png'}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/assets/bannerimage.png';
+                      }}
+                    />
                   )}
+
+                  {/* Gradient Scrim */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#100103] via-black/30 to-black/20 group-hover:via-black/10 transition-colors pointer-events-none" />
+
+                  {/* Top Floating Badges */}
+                  <div className="absolute top-3.5 inset-x-3.5 flex items-center justify-between z-10 pointer-events-none">
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-[#F4B942] bg-[#3A060B]/90 border border-[#F4B942]/50 backdrop-blur-md shadow-md">
+                      {item.category}
+                    </span>
+
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold text-white/90 bg-black/60 border border-white/20 backdrop-blur-md shadow-md flex items-center gap-1.5">
+                      {isReel && <InstagramIcon className="w-3 h-3 text-pink-400" />}
+                      {isYoutube && <YoutubeIcon className="w-3 h-3 text-red-400" />}
+                      {isGdrive && <GoogleDriveIcon className="w-3 h-3 text-blue-400" />}
+                      {isVideo && <Film className="w-3 h-3 text-[#F4B942]" />}
+                      {isPhoto && <Film className="w-3 h-3 text-emerald-400" />}
+                      <span>{isReel ? 'Instagram' : isYoutube ? 'YouTube' : isPhoto ? 'Photo' : 'Video'}</span>
+                    </span>
+                  </div>
+
+                  {/* Sleek Hover-Only Play Button for Videos/Reels */}
+                  {!isPhoto && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-300">
+                      <div className="w-14 h-14 rounded-full bg-black/75 backdrop-blur-md border-2 border-[#F4B942] text-[#F4B942] flex items-center justify-center shadow-2xl transform scale-90 group-hover:scale-100 transition-transform">
+                        <Play className="w-6 h-6 fill-[#F4B942] ml-0.5" />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Bottom Information */}
+                  <div className="absolute bottom-0 inset-x-0 p-4 sm:p-5 space-y-1 text-left z-10 pointer-events-none">
+                    <h4 className={`text-base font-extrabold text-[#FFF7E8] group-hover:text-[#F4B942] transition-colors leading-snug drop-shadow line-clamp-1 ${fontClass}`}>
+                      {item.title}
+                    </h4>
+                    {item.caption && (
+                      <p className={`text-xs text-[#FFF7E8]/70 line-clamp-1 font-medium ${fontClass}`}>{item.caption}</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

@@ -2,10 +2,14 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IGallery extends Document {
   title: string;
-  category: 'Puja' | 'Cultural' | 'Visarjan' | 'Decorations' | 'Volunteers' | 'General';
-  mediaType: 'IMAGE' | 'VIDEO';
+  category: string;
+  mediaType: string;
   url: string;
+  mediaUrl?: string;
+  imageUrl?: string;
+  embedUrl?: string;
   thumbnailUrl?: string;
+  caption?: string;
   description?: string;
   albumName?: string;
   displayOrder: number;
@@ -20,16 +24,18 @@ const GallerySchema: Schema = new Schema(
     title: { type: String, required: true, trim: true },
     category: {
       type: String,
-      enum: ['Puja', 'Cultural', 'Visarjan', 'Decorations', 'Volunteers', 'General'],
       default: 'Puja',
     },
     mediaType: {
       type: String,
-      enum: ['IMAGE', 'VIDEO'],
       default: 'IMAGE',
     },
     url: { type: String, required: true },
+    mediaUrl: { type: String },
+    imageUrl: { type: String },
+    embedUrl: { type: String },
     thumbnailUrl: { type: String },
+    caption: { type: String },
     description: { type: String },
     albumName: { type: String, default: 'Ganesh Utsav 2026' },
     displayOrder: { type: Number, default: 0 },
@@ -40,3 +46,4 @@ const GallerySchema: Schema = new Schema(
 );
 
 export const Gallery = mongoose.model<IGallery>('Gallery', GallerySchema);
+

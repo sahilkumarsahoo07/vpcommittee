@@ -14,7 +14,8 @@ export interface ProcessedMedia {
 
 export function extractInstagramShortcode(url: string): string | null {
   if (!url) return null;
-  const match = url.match(/(?:p|reel|reels|tv)\/([A-Za-z0-9_-]+)/i);
+  const clean = url.trim();
+  const match = clean.match(/(?:p|reel|reels|tv|share\/reel|share\/p)\/([A-Za-z0-9_-]+)/i);
   return match ? match[1] : null;
 }
 
@@ -22,9 +23,9 @@ export function processMediaUrl(url: string): ProcessedMedia {
   if (!url || !url.trim()) {
     return {
       mediaType: 'IMAGE',
-      rawUrl: '/assets/bannerimage.png',
-      embedUrl: '/assets/bannerimage.png',
-      thumbnailUrl: '/assets/bannerimage.png',
+      rawUrl: '',
+      embedUrl: '',
+      thumbnailUrl: '',
     };
   }
 
@@ -35,13 +36,20 @@ export function processMediaUrl(url: string): ProcessedMedia {
     const shortcode = extractInstagramShortcode(cleanUrl);
     const embedUrl = shortcode
       ? `https://www.instagram.com/p/${shortcode}/embed/`
+      : cleanUrl.includes('/embed')
+      ? cleanUrl
       : 'https://www.instagram.com/p/C-0XpTxy_2A/embed/';
+
+    // Dynamic direct Instagram media thumbnail resolution via proxy
+    const thumbnailUrl = shortcode
+      ? `/api/media/proxy-thumbnail?shortcode=${shortcode}`
+      : '';
 
     return {
       mediaType: 'REEL',
       rawUrl: cleanUrl,
       embedUrl,
-      thumbnailUrl: '/assets/cultural-night.png',
+      thumbnailUrl,
     };
   }
 
@@ -57,7 +65,7 @@ export function processMediaUrl(url: string): ProcessedMedia {
     }
 
     const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0` : cleanUrl;
-    const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : '/assets/maha-aarti.png';
+    const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : '';
 
     return {
       mediaType: 'YOUTUBE',

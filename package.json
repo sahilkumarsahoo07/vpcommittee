@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "server": "tsx backend/src/server.ts",
+    "server": "tsx watch backend/src/server.ts",
     "seed": "tsx backend/src/seed.ts",
     "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
     "build": "tsc -b && vite build",
