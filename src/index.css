@@ -1,0 +1,176 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --maroon: #5A0F16;
+    --burgundy: #32070B;
+    --gold: #D4A72C;
+    --gold-bright: #F4B942;
+    --saffron: #E87516;
+    --cream: #FFF7E8;
+    --warm-white: #FFFDF7;
+    --dark-brown: #2A1710;
+  }
+
+  body {
+    background-color: #32070B;
+    color: #FFF7E8;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #2A1710;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #D4A72C, #E87516);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #F4B942;
+  }
+}
+
+/* Custom Typography Utilities */
+.font-cinzel {
+  font-family: 'Cinzel', serif;
+}
+.font-cormorant {
+  font-family: 'Cormorant Garamond', serif;
+}
+.font-devanagari {
+  font-family: 'Noto Serif Devanagari', 'Yatra One', serif;
+}
+.font-rozha {
+  font-family: 'Rozha One', 'Noto Serif Devanagari', serif;
+}
+
+/* Gold Gradient Text */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #FFF7E8 0%, #F4B942 35%, #D4A72C 70%, #E87516 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gold-shine {
+  background: linear-gradient(90deg, #D4A72C 0%, #FFF7E8 25%, #F4B942 50%, #FFF7E8 75%, #D4A72C 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 4s linear infinite;
+}
+
+@keyframes shine {
+  to {
+    background-position: 200% center;
+  }
+}
+
+/* Glassmorphism & Gold Borders */
+.gold-card {
+  background: linear-gradient(145deg, rgba(90, 15, 22, 0.75), rgba(50, 7, 11, 0.95));
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 167, 44, 0.3);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(212, 167, 44, 0.1);
+}
+
+.gold-card:hover {
+  border-color: rgba(244, 185, 66, 0.6);
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.7), 0 0 25px rgba(244, 185, 66, 0.25);
+}
+
+.gold-border-glow {
+  position: relative;
+}
+.gold-border-glow::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(244, 185, 66, 0.6), rgba(212, 167, 44, 0.1), rgba(232, 117, 22, 0.5));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Devotional Diya Flicker Animation */
+@keyframes flameFlicker {
+  0%, 100% {
+    transform: scale(1) rotate(-1deg);
+    opacity: 0.95;
+    filter: drop-shadow(0 0 8px #F4B942);
+  }
+  25% {
+    transform: scale(1.05) rotate(1deg);
+    opacity: 1;
+    filter: drop-shadow(0 0 12px #E87516);
+  }
+  50% {
+    transform: scale(0.96) rotate(-2deg);
+    opacity: 0.88;
+    filter: drop-shadow(0 0 6px #F4B942);
+  }
+  75% {
+    transform: scale(1.08) rotate(1.5deg);
+    opacity: 0.98;
+    filter: drop-shadow(0 0 14px #F4B942);
+  }
+}
+
+.animate-flame {
+  animation: flameFlicker 2.5s ease-in-out infinite;
+}
+
+/* Mandala Slow Spin */
+@keyframes mandalaSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-mandala-slow {
+  animation: mandalaSpin 60s linear infinite;
+}
+
+.animate-mandala-reverse {
+  animation: mandalaSpin 80s linear infinite reverse;
+}
+
+/* Floating Animation */
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+}
+
+.animate-float {
+  animation: floatGentle 4s ease-in-out infinite;
+}
+
+/* Subtle Pulsing Light Effect */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.08);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 6s ease-in-out infinite;
+}
