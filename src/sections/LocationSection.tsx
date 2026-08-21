@@ -28,7 +28,7 @@ export const LocationSection: React.FC = () => {
                     Vighnaharta Main Pandal
                   </h4>
                   <p className="text-sm text-[#2A1710]/90 font-medium">
-                    123, Ganesh Nagar, Central Avenue, Your City, State - 000001
+                    At:- Kadua, Post:- Bhagirathipur, Kamakhyanagar, Dhenkanal, Odisha
                   </p>
                 </div>
               </div>
@@ -43,7 +43,7 @@ export const LocationSection: React.FC = () => {
 
             <div>
               <a
-                href="https://maps.google.com"
+                href="https://maps.google.com/?q=Vighnaharta+puja+committee+Kadua+Kamakhyanagar+Dhenkanal"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#5A0F16] hover:bg-[#32070B] border border-[#D4A72C] text-[#FFF7E8] hover:text-[#F4B942] font-bold text-sm uppercase tracking-wider shadow-xl hover:scale-105 transition-all group"

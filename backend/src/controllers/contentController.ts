@@ -279,9 +279,9 @@ let mockWebsiteSettings = {
   countdownDate: '2026-09-07T00:00:00.000Z',
   upiId: 'vighnaharta@upi',
   qrCodeUrl: '/assets/bannerimage.png',
-  contactAddress: 'Main Mandap Grounds, Sector 4, City Center',
-  contactPhone: '+91 98765 43210',
-  contactEmail: 'info@vighnahartapujacommittee.org',
+  contactAddress: 'At:- Kadua, Post:- Bhagirathipur, Kamakhyanagar, Dhenkanal, Odisha',
+  contactPhone: '+91 83277 04042',
+  contactEmail: 'sahilkumarsahoo001@gmail.com',
   socialLinks: {
     instagram: 'https://instagram.com',
     facebook: 'https://facebook.com',
@@ -293,6 +293,18 @@ let mockWebsiteSettings = {
   annualDevotees: '50K',
   communityActivities: 25,
   activeVolunteers: 100,
+  rolePermissions: {
+    ADMIN: {
+      FINANCE: true,
+      CMS: true,
+      SYSTEM: false,
+    },
+    COMMITTEE_MEMBER: {
+      FINANCE: false,
+      CMS: true,
+      SYSTEM: false,
+    },
+  },
 };
 
 // WEBSITE SETTINGS

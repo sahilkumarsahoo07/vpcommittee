@@ -147,7 +147,7 @@ export const LocationCommunitySection: React.FC = () => {
             </div>
 
             <a
-              href="https://maps.google.com"
+              href="https://maps.google.com/?q=Vighnaharta+puja+committee+Kadua+Kamakhyanagar+Dhenkanal"
               target="_blank"
               rel="noopener noreferrer"
               className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#5A0F16] hover:bg-[#32070B] border border-[#D4A72C] text-[#FFF7E8] font-bold text-sm uppercase tracking-wider shadow-md hover:scale-105 transition-all group ${fontClass}`}

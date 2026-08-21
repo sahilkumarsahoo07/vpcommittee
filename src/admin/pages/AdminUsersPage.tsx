@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth, type UserRole } from '../../context/AuthContext';
-import { userAPI } from '../../services/api';
+import { userAPI, adminAPI, publicAPI } from '../../services/api';
 import { ConfirmDeleteModal } from '../components/ConfirmDeleteModal';
 import {
   Users,
@@ -45,6 +45,16 @@ export const AdminUsersPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState<string>('ALL');
 
+  // Role Permissions Matrix State for SuperAdmin
+  const [rolePermissions, setRolePermissions] = useState<{
+    ADMIN: { FINANCE: boolean; CMS: boolean; SYSTEM: boolean };
+    COMMITTEE_MEMBER: { FINANCE: boolean; CMS: boolean; SYSTEM: boolean };
+  }>({
+    ADMIN: { FINANCE: true, CMS: true, SYSTEM: false },
+    COMMITTEE_MEMBER: { FINANCE: false, CMS: true, SYSTEM: false },
+  });
+  const [savingPermissions, setSavingPermissions] = useState(false);
+
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -80,9 +90,53 @@ export const AdminUsersPage: React.FC = () => {
     }
   };
 
+  const fetchRolePermissions = async () => {
+    try {
+      const res = await publicAPI.getSettings();
+      if (res?.success && res?.data?.rolePermissions) {
+        setRolePermissions(res.data.rolePermissions);
+      }
+    } catch {}
+  };
+
   useEffect(() => {
     fetchUsers();
+    fetchRolePermissions();
   }, []);
+
+  const handleTogglePermission = (
+    roleKey: 'ADMIN' | 'COMMITTEE_MEMBER',
+    moduleKey: 'FINANCE' | 'CMS' | 'SYSTEM',
+    value: boolean
+  ) => {
+    setRolePermissions((prev) => ({
+      ...prev,
+      [roleKey]: {
+        ...prev[roleKey],
+        [moduleKey]: value,
+      },
+    }));
+  };
+
+  const handleSavePermissions = async () => {
+    setSavingPermissions(true);
+    try {
+      const res = await adminAPI.updateSettings({ rolePermissions });
+      if (res.success) {
+        setNotification({
+          type: 'success',
+          message: 'Role Access Permissions saved successfully! Access policies updated.',
+        });
+      }
+    } catch (err: any) {
+      setNotification({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to update role permissions.',
+      });
+    } finally {
+      setSavingPermissions(false);
+    }
+  };
 
   const handleGeneratePassword = () => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$';
@@ -297,6 +351,175 @@ export const AdminUsersPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* SUPERADMIN GRANULAR ROLE PERMISSION CONTROL PANEL */}
+      {isSuperAdmin && (
+        <div className="bg-[#1F0407] border-2 border-[#D4A72C]/50 p-6 rounded-3xl space-y-5 text-[#FFF7E8] shadow-xl relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#D4A72C]/30 pb-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-[#F4B942] text-xs font-bold uppercase tracking-wider">
+                <ShieldCheck className="w-4 h-4 text-[#F4B942]" />
+                <span>SuperAdmin Policy Manager</span>
+              </div>
+              <h2 className="font-cinzel text-xl font-bold text-[#F4B942]">
+                Role-Based Access Control (RBAC) Permissions Matrix
+              </h2>
+              <p className="text-xs text-[#FFF7E8]/70">
+                Control which functional areas (Finance, Operations & CMS, System Settings) each user role can access. SuperAdmins retain full control.
+              </p>
+            </div>
+
+            <button
+              onClick={handleSavePermissions}
+              disabled={savingPermissions}
+              className="px-5 py-2.5 bg-gradient-to-r from-[#D4A72C] to-[#E87516] hover:from-[#F4B942] hover:to-[#E87516] text-[#1F0407] font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 shrink-0 self-start sm:self-auto disabled:opacity-50"
+            >
+              {savingPermissions ? (
+                <div className="w-4 h-4 border-2 border-[#1F0407] border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>Save Permission Matrix</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* ADMIN ROLE PERMISSIONS */}
+            <div className="bg-[#120204] border border-[#D4A72C]/30 p-5 rounded-2xl space-y-4">
+              <div className="flex items-center justify-between border-b border-[#D4A72C]/20 pb-3">
+                <span className="font-bold text-orange-400 text-sm uppercase tracking-wider flex items-center gap-2">
+                  <Users className="w-4 h-4 text-orange-400" />
+                  <span>Admin Role Permissions</span>
+                </span>
+                <span className="text-[10px] bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded-full font-bold uppercase border border-orange-500/40">
+                  Role: ADMIN
+                </span>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                {/* Finance */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-[#1F0407] border border-[#D4A72C]/20">
+                  <div>
+                    <div className="font-bold text-[#F4B942]">Finance & Accounting</div>
+                    <div className="text-[11px] text-[#FFF7E8]/60">Donations, Expenses, Budget & Reports</div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={rolePermissions.ADMIN.FINANCE}
+                      onChange={(e) => handleTogglePermission('ADMIN', 'FINANCE', e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#E87516]"></div>
+                  </label>
+                </div>
+
+                {/* CMS */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-[#1F0407] border border-[#D4A72C]/20">
+                  <div>
+                    <div className="font-bold text-[#F4B942]">Operations & CMS</div>
+                    <div className="text-[11px] text-[#FFF7E8]/60">Leadership, Events, Gallery, Announcements & Volunteers</div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={rolePermissions.ADMIN.CMS}
+                      onChange={(e) => handleTogglePermission('ADMIN', 'CMS', e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#E87516]"></div>
+                  </label>
+                </div>
+
+                {/* System */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-[#1F0407] border border-[#D4A72C]/20">
+                  <div>
+                    <div className="font-bold text-[#F4B942]">System Account Management</div>
+                    <div className="text-[11px] text-[#FFF7E8]/60">User account creation & CMS settings</div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={rolePermissions.ADMIN.SYSTEM}
+                      onChange={(e) => handleTogglePermission('ADMIN', 'SYSTEM', e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#E87516]"></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* COMMITTEE MEMBER ROLE PERMISSIONS */}
+            <div className="bg-[#120204] border border-[#D4A72C]/30 p-5 rounded-2xl space-y-4">
+              <div className="flex items-center justify-between border-b border-[#D4A72C]/20 pb-3">
+                <span className="font-bold text-emerald-400 text-sm uppercase tracking-wider flex items-center gap-2">
+                  <Users className="w-4 h-4 text-emerald-400" />
+                  <span>Committee Member Permissions</span>
+                </span>
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold uppercase border border-emerald-500/40">
+                  Role: COMMITTEE_MEMBER
+                </span>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                {/* Finance */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-[#1F0407] border border-[#D4A72C]/20">
+                  <div>
+                    <div className="font-bold text-[#F4B942]">Finance & Accounting</div>
+                    <div className="text-[11px] text-[#FFF7E8]/60">Donations, Expenses, Budget & Reports</div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={rolePermissions.COMMITTEE_MEMBER.FINANCE}
+                      onChange={(e) => handleTogglePermission('COMMITTEE_MEMBER', 'FINANCE', e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#E87516]"></div>
+                  </label>
+                </div>
+
+                {/* CMS */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-[#1F0407] border border-[#D4A72C]/20">
+                  <div>
+                    <div className="font-bold text-[#F4B942]">Operations & CMS</div>
+                    <div className="text-[11px] text-[#FFF7E8]/60">Leadership, Events, Gallery, Announcements & Volunteers</div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={rolePermissions.COMMITTEE_MEMBER.CMS}
+                      onChange={(e) => handleTogglePermission('COMMITTEE_MEMBER', 'CMS', e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#E87516]"></div>
+                  </label>
+                </div>
+
+                {/* System */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-[#1F0407] border border-[#D4A72C]/20">
+                  <div>
+                    <div className="font-bold text-[#F4B942]">System Account Management</div>
+                    <div className="text-[11px] text-[#FFF7E8]/60">User account creation & CMS settings</div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={rolePermissions.COMMITTEE_MEMBER.SYSTEM}
+                      onChange={(e) => handleTogglePermission('COMMITTEE_MEMBER', 'SYSTEM', e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#E87516]"></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Distinction Guide Banner */}
       <div className="bg-[#1F0407] border border-[#D4A72C]/40 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-[#FFF7E8]/90 shadow-md">

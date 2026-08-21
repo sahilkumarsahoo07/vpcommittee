@@ -75,11 +75,11 @@ export const Footer: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-[#F4B942] flex-shrink-0" />
-                <span className="font-medium">+91 98765 43210</span>
+                <a href="tel:+918327704042" className="font-medium hover:text-[#F4B942] transition-colors">+91 83277 04042</a>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#F4B942] flex-shrink-0" />
-                <span className="font-medium">contact@vighnahartapuja.org</span>
+                <a href="mailto:sahilkumarsahoo001@gmail.com" className="font-medium hover:text-[#F4B942] transition-colors">sahilkumarsahoo001@gmail.com</a>
               </div>
             </div>
           </div>
@@ -107,8 +107,16 @@ export const Footer: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-1.5">
-            <span className={fontClass}>{t.footer.madeWith}</span>
-            <Heart className="w-3.5 h-3.5 text-red-500 fill-current" />
+            <a
+              href="https://instagram.com/sahil_kumar_016"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 font-bold text-[#F4B942] hover:text-[#E87516] transition-colors group"
+            >
+              <span>{t.footer.madeWith}</span>
+              <span className="text-[11px] text-[#FFF7E8]/60 font-medium group-hover:underline">(@sahil_kumar_016)</span>
+              <Heart className="w-3.5 h-3.5 text-red-500 fill-current inline-block ml-0.5" />
+            </a>
           </div>
         </div>
       </div>

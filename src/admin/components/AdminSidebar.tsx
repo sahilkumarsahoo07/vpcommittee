@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { publicAPI } from '../../services/api';
 import {
   LayoutDashboard,
   DollarSign,
@@ -28,30 +29,54 @@ interface AdminSidebarProps {
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onCloseMobile }) => {
   const { user } = useAuth();
   const role = user?.role || 'COMMITTEE_MEMBER';
+  const isSuperAdmin = role === 'SUPERADMIN';
+
+  const [rolePermissions, setRolePermissions] = useState<{
+    ADMIN: { FINANCE: boolean; CMS: boolean; SYSTEM: boolean };
+    COMMITTEE_MEMBER: { FINANCE: boolean; CMS: boolean; SYSTEM: boolean };
+  }>({
+    ADMIN: { FINANCE: true, CMS: true, SYSTEM: false },
+    COMMITTEE_MEMBER: { FINANCE: false, CMS: true, SYSTEM: false },
+  });
+
+  useEffect(() => {
+    publicAPI
+      .getSettings()
+      .then((res) => {
+        if (res?.success && res?.data?.rolePermissions) {
+          setRolePermissions(res.data.rolePermissions);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const currentRolePerms =
+    rolePermissions[role as 'ADMIN' | 'COMMITTEE_MEMBER'] || { FINANCE: false, CMS: false, SYSTEM: false };
 
   // Permission checks
-  const canAccessFinance = role === 'SUPERADMIN' || role === 'ADMIN';
-  const canAccessAuditLogs = role === 'SUPERADMIN';
-  const canAccessSystemSettings = role === 'SUPERADMIN' || role === 'ADMIN';
+  const canAccessFinance = isSuperAdmin || currentRolePerms.FINANCE;
+  const canAccessCMS = isSuperAdmin || currentRolePerms.CMS;
+  const canAccessSystemSettings = isSuperAdmin || currentRolePerms.SYSTEM;
+  const canAccessAuditLogs = isSuperAdmin;
 
   const navItems = [
     { label: 'Overview Dashboard', path: '/admin', icon: LayoutDashboard, category: 'MAIN' },
-    
-    // FINANCE SECTION (RESTRICTED TO ADMIN & SUPERADMIN)
+
+    // FINANCE SECTION
     { label: 'Donation Management', path: '/admin/donations', icon: DollarSign, category: 'FINANCE', restricted: !canAccessFinance },
     { label: 'Expense Tracker', path: '/admin/expenses', icon: Receipt, category: 'FINANCE', restricted: !canAccessFinance },
     { label: 'Budget vs Actual', path: '/admin/budget', icon: PieChart, category: 'FINANCE', restricted: !canAccessFinance },
     { label: 'Financial Reports', path: '/admin/reports', icon: FileSpreadsheet, category: 'FINANCE', restricted: !canAccessFinance },
 
-    // OPERATIONAL CONTENT CMS (OPEN TO ALL COMMITTEE MEMBERS)
-    { label: 'Committee Executive Leadership', path: '/admin/members', icon: Users, category: 'CMS' },
-    { label: 'Festival Schedule', path: '/admin/events', icon: Calendar, category: 'CMS' },
-    { label: 'Gallery & Media', path: '/admin/gallery', icon: Image, category: 'CMS' },
-    { label: 'Announcements', path: '/admin/announcements', icon: Bell, category: 'CMS' },
-    { label: 'Volunteer Roster', path: '/admin/volunteers', icon: HeartHandshake, category: 'CMS' },
-    { label: 'Newsletter Subscribers', path: '/admin/subscribers', icon: Mail, category: 'CMS' },
+    // OPERATIONAL CONTENT CMS
+    { label: 'Committee Executive Leadership', path: '/admin/members', icon: Users, category: 'CMS', restricted: !canAccessCMS },
+    { label: 'Festival Schedule', path: '/admin/events', icon: Calendar, category: 'CMS', restricted: !canAccessCMS },
+    { label: 'Gallery & Media', path: '/admin/gallery', icon: Image, category: 'CMS', restricted: !canAccessCMS },
+    { label: 'Announcements', path: '/admin/announcements', icon: Bell, category: 'CMS', restricted: !canAccessCMS },
+    { label: 'Volunteer Roster', path: '/admin/volunteers', icon: HeartHandshake, category: 'CMS', restricted: !canAccessCMS },
+    { label: 'Newsletter Subscribers', path: '/admin/subscribers', icon: Mail, category: 'CMS', restricted: !canAccessCMS },
 
-    // SYSTEM & AUDIT (RESTRICTED)
+    // SYSTEM & AUDIT
     { label: 'Account & Role Manager', path: '/admin/users', icon: UserPlus, category: 'SYSTEM', restricted: !canAccessSystemSettings },
     { label: 'Export Center (PDF/Excel)', path: '/admin/exports', icon: FileText, category: 'SYSTEM', restricted: !canAccessFinance },
     { label: 'Website CMS Settings', path: '/admin/settings', icon: Settings, category: 'SYSTEM', restricted: !canAccessSystemSettings },

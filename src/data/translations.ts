@@ -10,6 +10,7 @@ export interface TranslationSchema {
     donate: string;
     contact: string;
     joinUs: string;
+    adminLogin: string;
   };
   // Hero
   hero: {
@@ -196,6 +197,7 @@ export const translations: Record<Language, TranslationSchema> = {
       donate: 'दान करें',
       contact: 'संपर्क करें',
       joinUs: 'हमारे साथ जुड़ें',
+      adminLogin: 'एडमिन लॉगिन',
     },
     hero: {
       shloka: '॥ श्री गणेशाय नमः ॥',
@@ -269,7 +271,7 @@ export const translations: Record<Language, TranslationSchema> = {
     location: {
       tag: 'हमारा पंडाल खोजें',
       pandalTitle: 'विघ्नहर्ता मुख्य पूजा पंडाल',
-      address: '१२३, गणेश नगर, सेंट्रल एवेन्यू, आपका शहर, राज्य - ०००००१',
+      address: 'At:- Kadua, Post:- Bhagirathipur, Kamakhyanagar, Dhenkanal, Odisha',
       landmark: 'लैंडमार्क: शिव मंदिर के पास • पार्किंग की उचित व्यवस्था',
       directionsBtn: 'दिशा-निर्देश प्राप्त करें',
       communityTitle: 'हमारा समुदाय',
@@ -322,9 +324,9 @@ export const translations: Record<Language, TranslationSchema> = {
       quickLinksTitle: 'त्वरित लिंक',
       contactTitle: 'संपर्क करें',
       scanDonateTitle: 'दान के लिए स्कैन करें',
-      address: '१२३, गणेश नगर, आपका शहर, राज्य - ०००००१',
+      address: 'At:- Kadua, Post:- Bhagirathipur, Kamakhyanagar, Dhenkanal, Odisha',
       rights: '© २०२६ विघ्नहर्ता पूजा समिति। सर्वाधिकार सुरक्षित।',
-      madeWith: 'समर्पित समुदाय द्वारा बनाया गया',
+      madeWith: 'Made by Sahil Kumar Sahoo',
     },
     donationModal: {
       title: 'विघ्नहर्ता का सहयोग करें',
@@ -387,6 +389,7 @@ export const translations: Record<Language, TranslationSchema> = {
       donate: 'ଦାନ କରନ୍ତୁ',
       contact: 'ସମ୍ପର୍କ କରନ୍ତୁ',
       joinUs: 'ଆମ ସହ ଯୋଡ଼ିହୁଅନ୍ତୁ',
+      adminLogin: 'ଅଡମିନ୍ ଲଗଇନ୍',
     },
     hero: {
       shloka: '॥ ଶ୍ରୀ ଗଣେଶାୟ ନମଃ ॥',
@@ -460,7 +463,7 @@ export const translations: Record<Language, TranslationSchema> = {
     location: {
       tag: 'ଆମର ମଣ୍ଡପ ଖୋଜନ୍ତୁ',
       pandalTitle: 'ବିଘ୍ନହର୍ତ୍ତା ମୁଖ୍ୟ ପୂଜା ମଣ୍ଡପ',
-      address: '୧୨୩, ଗଣେଶ ନଗର, ସେଣ୍ଟ୍ରାଲ୍ ଆଭେନ୍ୟୁ, ଆପଣଙ୍କ ସହର, ରାଜ୍ୟ - ୦୦୦୦୦୧',
+      address: 'At:- Kadua, Post:- Bhagirathipur, Kamakhyanagar, Dhenkanal, Odisha',
       landmark: 'ସ୍ଥଳचिହ୍ନ: ଶିବ ମନ୍ଦିର ନିକଟରେ • ପାର୍କିଂ ସୁବିଧା ଅଛି',
       directionsBtn: 'ରାସ୍ତା ଦେଖନ୍ତୁ',
       communityTitle: 'ଆମ ସମାଜ',
@@ -513,9 +516,9 @@ export const translations: Record<Language, TranslationSchema> = {
       quickLinksTitle: 'ଲିଙ୍କ୍‌ସ',
       contactTitle: 'ସମ୍ପର୍କ କରନ୍ତୁ',
       scanDonateTitle: 'ଦାନ ପାଇଁ ସ୍କାନ୍ କରନ୍ତୁ',
-      address: '୧୨୩, ଗଣେଶ ନଗର, ଆପଣଙ୍କ ସହର, ରାଜ୍ୟ - ୦୦୦୦୦୧',
+      address: 'At:- Kadua, Post:- Bhagirathipur, Kamakhyanagar, Dhenkanal, Odisha',
       rights: '© ୨୦୨୬ ବିଘ୍ନହର୍ତ୍ତା ପୂଜା କମିଟି। ସମସ୍ତ ଅଧିକାର ସୁରକ୍ଷିତ।',
-      madeWith: 'ଶ୍ରଦ୍ଧାଳୁ ସମାଜ ଦ୍ୱାରା ନିର୍ମିତ',
+      madeWith: 'Made by Sahil Kumar Sahoo',
     },
     donationModal: {
       title: 'ବିଘ୍ନହର୍ତ୍ତାଙ୍କୁ ସହଯୋଗ କରନ୍ତୁ',
@@ -578,6 +581,7 @@ export const translations: Record<Language, TranslationSchema> = {
       donate: 'Donate',
       contact: 'Contact',
       joinUs: 'Join Us',
+      adminLogin: 'Admin Login',
     },
     hero: {
       shloka: '॥ Shri Ganeshaya Namah ॥',
@@ -651,7 +655,7 @@ export const translations: Record<Language, TranslationSchema> = {
     location: {
       tag: 'FIND OUR PANDAL',
       pandalTitle: 'Vighnaharta Main Pandal',
-      address: '123, Ganesh Nagar, Central Avenue, Your City, State - 000001',
+      address: 'At:- Kadua, Post:- Bhagirathipur, Kamakhyanagar, Dhenkanal, Odisha',
       landmark: 'Landmark: Near Shiv Temple • Parking Available',
       directionsBtn: 'Get Directions',
       communityTitle: 'Our Community',
@@ -704,9 +708,9 @@ export const translations: Record<Language, TranslationSchema> = {
       quickLinksTitle: 'Quick Links',
       contactTitle: 'Contact Us',
       scanDonateTitle: 'Scan to Donate',
-      address: '123, Ganesh Nagar, Your City, State - 000001',
+      address: 'At:- Kadua, Post:- Bhagirathipur, Kamakhyanagar, Dhenkanal, Odisha',
       rights: '© 2026 Vighnaharta Puja Committee. All Rights Reserved.',
-      madeWith: 'Made with love by the community',
+      madeWith: 'Made by Sahil Kumar Sahoo',
     },
     donationModal: {
       title: 'SUPPORT VIGHNAHARTA',

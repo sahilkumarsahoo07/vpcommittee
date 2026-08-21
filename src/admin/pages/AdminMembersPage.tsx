@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Phone, Mail, Trash2, Edit2, Search, Camera, Image as ImageIcon } from 'lucide-react';
+import { Plus, Phone, Mail, Trash2, Edit2, Search, Camera } from 'lucide-react';
 import { InstagramIcon } from '../../components/SocialIcons';
 import { publicAPI, adminAPI } from '../../services/api';
 import { ConfirmDeleteModal } from '../components/ConfirmDeleteModal';

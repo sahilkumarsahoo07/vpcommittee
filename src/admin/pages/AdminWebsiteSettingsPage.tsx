@@ -11,10 +11,12 @@ export const AdminWebsiteSettingsPage: React.FC = () => {
     'Join us in celebrating devotion, unity, and divine blessings at our annual Ganesh Mahotsav.'
   );
   const [upiId, setUpiId] = useState('vighnaharta@upi');
-  const [contactPhone, setContactPhone] = useState('+91 98765 43210');
-  const [contactEmail, setContactEmail] = useState('info@vighnahartapujacommittee.org');
-  const [contactAddress, setContactAddress] = useState('Main Mandap Grounds, Sector 4, City Center');
+  const [contactPhone, setContactPhone] = useState('+91 83277 04042');
+  const [contactEmail, setContactEmail] = useState('sahilkumarsahoo001@gmail.com');
+  const [contactAddress, setContactAddress] = useState('At:- Kadua, Post:- Bhagirathipur, Kamakhyanagar, Dhenkanal, Odisha');
   const [instagramHandle, setInstagramHandle] = useState('vighnaharta_puja');
+  const [countdownDate, setCountdownDate] = useState<string>('2026-08-25T08:00');
+  const [festivalYear, setFestivalYear] = useState<number>(2026);
   const [yearsOfCelebration, setYearsOfCelebration] = useState<number>(12);
   const [annualDevotees, setAnnualDevotees] = useState<string>('50K');
   const [communityActivities, setCommunityActivities] = useState<number>(25);
@@ -37,6 +39,19 @@ export const AdminWebsiteSettingsPage: React.FC = () => {
         if (s.contactEmail) setContactEmail(s.contactEmail);
         if (s.contactAddress) setContactAddress(s.contactAddress);
         if (s.instagramHandle) setInstagramHandle(s.instagramHandle);
+        if (s.countdownDate) {
+          try {
+            const d = new Date(s.countdownDate);
+            if (!isNaN(d.getTime())) {
+              setCountdownDate(d.toISOString().slice(0, 16));
+            } else {
+              setCountdownDate(String(s.countdownDate));
+            }
+          } catch {
+            setCountdownDate(String(s.countdownDate));
+          }
+        }
+        if (s.festivalYear) setFestivalYear(Number(s.festivalYear));
         if (s.yearsOfCelebration !== undefined) setYearsOfCelebration(Number(s.yearsOfCelebration));
         if (s.annualDevotees) setAnnualDevotees(s.annualDevotees);
         if (s.communityActivities !== undefined) setCommunityActivities(Number(s.communityActivities));
@@ -66,6 +81,8 @@ export const AdminWebsiteSettingsPage: React.FC = () => {
         contactEmail,
         contactAddress,
         instagramHandle: instagramHandle.trim().replace(/^@/, ''),
+        countdownDate,
+        festivalYear,
         yearsOfCelebration,
         annualDevotees,
         communityActivities,
@@ -170,6 +187,48 @@ export const AdminWebsiteSettingsPage: React.FC = () => {
                 onChange={(e) => setHeroDescription(e.target.value)}
                 className="w-full bg-[#FFF7E8] border border-[#D4A72C]/50 rounded-xl py-2 px-3 text-xs font-medium text-[#32070B]"
               />
+            </div>
+          </div>
+
+          {/* MAHOTSAV COUNTDOWN TARGET DATE SETTINGS */}
+          <div className="space-y-4 bg-[#FFF7E8] p-5 rounded-2xl border border-[#D4A72C]/50">
+            <h3 className="font-cinzel text-base font-black text-[#32070B] uppercase border-b border-[#D4A72C]/30 pb-2 flex items-center gap-2">
+              <span>⏰ Mahotsav Countdown Target Date & Time Settings</span>
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold text-[#32070B] block mb-1">
+                  Target Date & Time for Mahotsav Countdown
+                </label>
+                <input
+                  type="datetime-local"
+                  value={countdownDate}
+                  onChange={(e) => setCountdownDate(e.target.value)}
+                  className="w-full bg-[#FFFFFF] border border-[#D4A72C] rounded-xl py-2 px-3 text-xs font-bold text-[#32070B] focus:ring-2 focus:ring-[#D4A72C]"
+                  required
+                />
+                <p className="text-[11px] text-[#2A1710]/70 mt-1 font-medium">
+                  The live website countdown timer calculates days, hours, and seconds remaining until this target date.
+                </p>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-[#32070B] block mb-1">
+                  Festival Mahotsav Year
+                </label>
+                <input
+                  type="number"
+                  value={festivalYear}
+                  onChange={(e) => setFestivalYear(Number(e.target.value))}
+                  placeholder="2026"
+                  className="w-full bg-[#FFFFFF] border border-[#D4A72C] rounded-xl py-2 px-3 text-xs font-bold text-[#32070B]"
+                  required
+                />
+                <p className="text-[11px] text-[#2A1710]/70 mt-1 font-medium">
+                  Reflects the festival year title (e.g. Ganesh Utsav 2026).
+                </p>
+              </div>
             </div>
           </div>
 

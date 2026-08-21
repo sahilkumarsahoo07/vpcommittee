@@ -1,5 +1,18 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export interface IRolePermissions {
+  ADMIN: {
+    FINANCE: boolean;
+    CMS: boolean;
+    SYSTEM: boolean;
+  };
+  COMMITTEE_MEMBER: {
+    FINANCE: boolean;
+    CMS: boolean;
+    SYSTEM: boolean;
+  };
+}
+
 export interface IWebsiteSettings extends Document {
   heroTitle: string;
   heroSubtitle: string;
@@ -22,6 +35,7 @@ export interface IWebsiteSettings extends Document {
   annualDevotees: string;
   communityActivities: number;
   activeVolunteers: number;
+  rolePermissions?: IRolePermissions;
   updatedAt: Date;
 }
 
@@ -37,9 +51,9 @@ const WebsiteSettingsSchema: Schema = new Schema(
     countdownDate: { type: Date, default: new Date('2026-09-07T00:00:00Z') },
     upiId: { type: String, default: 'vighnaharta@upi' },
     qrCodeUrl: { type: String, default: '/assets/bannerimage.png' },
-    contactAddress: { type: String, default: 'Main Mandap Grounds, Sector 4, City Center' },
-    contactPhone: { type: String, default: '+91 98765 43210' },
-    contactEmail: { type: String, default: 'info@vighnahartapujacommittee.org' },
+    contactAddress: { type: String, default: 'At:- Kadua, Post:- Bhagirathipur, Kamakhyanagar, Dhenkanal, Odisha' },
+    contactPhone: { type: String, default: '+91 83277 04042' },
+    contactEmail: { type: String, default: 'sahilkumarsahoo001@gmail.com' },
     socialLinks: {
       instagram: { type: String, default: 'https://instagram.com' },
       facebook: { type: String, default: 'https://facebook.com' },
@@ -51,6 +65,18 @@ const WebsiteSettingsSchema: Schema = new Schema(
     annualDevotees: { type: String, default: '50K' },
     communityActivities: { type: Number, default: 25 },
     activeVolunteers: { type: Number, default: 100 },
+    rolePermissions: {
+      ADMIN: {
+        FINANCE: { type: Boolean, default: true },
+        CMS: { type: Boolean, default: true },
+        SYSTEM: { type: Boolean, default: false },
+      },
+      COMMITTEE_MEMBER: {
+        FINANCE: { type: Boolean, default: false },
+        CMS: { type: Boolean, default: true },
+        SYSTEM: { type: Boolean, default: false },
+      },
+    },
   },
   { timestamps: true }
 );
