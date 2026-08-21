@@ -16,12 +16,16 @@ const options: swaggerJSDoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:5000/api',
-        description: 'Development Server (Localhost)',
+        url: '/api',
+        description: 'Current Host Server (Auto-detected)',
       },
       {
-        url: 'http://127.0.0.1:5000/api',
-        description: 'Development Server (IPv4 Direct)',
+        url: 'https://vpcommittee-backend.onrender.com/api',
+        description: 'Render Production Cloud Server',
+      },
+      {
+        url: 'http://localhost:5000/api',
+        description: 'Localhost Development Server',
       },
     ],
     components: {
