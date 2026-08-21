@@ -127,46 +127,44 @@ export const AdminLoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#1C0407] via-[#2A060A] to-[#120204] text-[#FFF7E8] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#150204] text-[#FFF7E8] flex items-center justify-center p-4 relative overflow-hidden">
       {/* Golden Lotus Background Watermark */}
       <img
         src="/assets/3rdbgimage.png"
         alt="Lotus Watermark"
-        className="absolute left-0 bottom-0 w-80 sm:w-[500px] pointer-events-none opacity-20 object-contain"
+        className="absolute left-0 bottom-0 w-80 sm:w-[500px] pointer-events-none opacity-15 object-contain"
       />
       <img
         src="/assets/3rdbgimage.png"
         alt="Lotus Watermark"
-        className="absolute right-0 top-0 w-80 sm:w-[500px] pointer-events-none opacity-20 object-contain scale-x-[-1] scale-y-[-1]"
+        className="absolute right-0 top-0 w-80 sm:w-[500px] pointer-events-none opacity-15 object-contain scale-x-[-1] scale-y-[-1]"
       />
 
-      <div className="w-full max-w-md bg-[#250508] border-2 border-[#D4A72C]/50 rounded-3xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative z-10 space-y-6">
+      <div className="w-full max-w-md bg-[#1C0306] border border-[#D4A72C]/40 rounded-[28px] p-7 sm:p-9 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative z-10 space-y-5">
         {/* Header Branding */}
-        <div className="text-center space-y-2">
-          <div className="w-16 h-16 rounded-full bg-[#3D0A11] border-2 border-[#F4B942] flex items-center justify-center mx-auto text-[#F4B942] shadow-lg">
-            <ShieldCheck className="w-8 h-8" />
+        <div className="text-center space-y-1.5">
+          <div className="w-14 h-14 rounded-full border border-[#F4B942]/60 flex items-center justify-center mx-auto text-[#F4B942] bg-[#2A050A] shadow-md mb-2">
+            <ShieldCheck className="w-7 h-7" />
           </div>
-          <h2 className="font-cinzel text-2xl font-black text-[#F4B942] uppercase tracking-wider">
+          <h2 className="font-cinzel text-xl sm:text-2xl font-bold text-[#F4B942] uppercase tracking-wider">
             Vighnaharta Portal
           </h2>
-          <p className="text-xs text-[#FFF7E8]/70 font-semibold uppercase tracking-widest">
+          <p className="text-[10px] text-[#FFF7E8]/70 font-bold uppercase tracking-widest">
             Secure Committee Admin Authentication
           </p>
         </div>
 
-
-
         {/* Error Alert */}
         {errorMsg && (
-          <div className="p-3 bg-red-950/80 border border-red-500 text-red-200 text-xs font-bold rounded-xl text-center shadow">
+          <div className="p-3 bg-red-950/80 border border-red-500/50 text-red-200 text-xs font-bold rounded-xl text-center shadow">
             {errorMsg}
           </div>
         )}
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4 pt-2">
+        <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4 pt-1">
           <div>
-            <label className="text-xs font-bold text-[#FFF7E8]/80 uppercase tracking-wider block mb-1">
+            <label className="text-[10px] font-extrabold text-[#FFF7E8]/90 uppercase tracking-widest block mb-1.5">
               Email Address
             </label>
             <div className="relative">
@@ -177,15 +175,15 @@ export const AdminLoginPage: React.FC = () => {
                 required
                 autoComplete="off"
                 placeholder="Enter your email address"
-                className="w-full bg-[#170204] border border-[#D4A72C]/40 rounded-xl py-2.5 pl-3.5 pr-10 text-xs text-[#FFF7E8] focus:border-[#F4B942] focus:outline-none"
+                className="w-full bg-[#120204] border border-[#D4A72C]/40 rounded-full py-3 px-5 pr-12 text-xs text-[#FFF7E8] focus:border-[#F4B942] focus:outline-none placeholder-[#FFF7E8]/30"
               />
-              <User className="w-4 h-4 text-[#D4A72C] absolute right-3 top-3" />
+              <User className="w-4 h-4 text-[#F4B942] absolute right-4 top-3.5" />
             </div>
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-bold text-[#FFF7E8]/80 uppercase tracking-wider block">
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-[10px] font-extrabold text-[#FFF7E8]/90 uppercase tracking-widest block">
                 Password
               </label>
               <button
@@ -197,7 +195,7 @@ export const AdminLoginPage: React.FC = () => {
                   setForgotSuccess(null);
                   setShowForgotModal(true);
                 }}
-                className="text-[11px] text-[#F4B942] hover:underline font-semibold"
+                className="text-xs text-[#F4B942] hover:underline font-semibold"
               >
                 Forgot Password?
               </button>
@@ -210,12 +208,12 @@ export const AdminLoginPage: React.FC = () => {
                 required
                 autoComplete="new-password"
                 placeholder="Enter your password"
-                className="w-full bg-[#170204] border border-[#D4A72C]/40 rounded-xl py-2.5 pl-3.5 pr-10 text-xs text-[#FFF7E8] focus:border-[#F4B942] focus:outline-none"
+                className="w-full bg-[#120204] border border-[#D4A72C]/40 rounded-full py-3 px-5 pr-12 text-xs text-[#FFF7E8] focus:border-[#F4B942] focus:outline-none placeholder-[#FFF7E8]/30"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 text-[#D4A72C] hover:text-[#F4B942] transition-colors p-0.5"
+                className="absolute right-4 top-3.5 text-[#F4B942] hover:text-[#FFF7E8] transition-colors"
                 title={showPassword ? 'Hide Password' : 'Show Password'}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -226,9 +224,9 @@ export const AdminLoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F4B942] via-[#D4A72C] to-[#E87516] text-[#32070B] font-black uppercase text-xs tracking-widest shadow-lg hover:brightness-110 transition-all flex items-center justify-center gap-2 mt-6"
+            className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#F4B942] via-[#E87516] to-[#F4B942] text-[#120204] font-extrabold uppercase text-xs tracking-widest shadow-lg hover:brightness-110 transition-all flex items-center justify-center gap-2 mt-6"
           >
-            <KeyRound className="w-4 h-4" />
+            <KeyRound className="w-4 h-4 text-[#120204]" />
             <span>{loading ? 'Authenticating...' : 'Sign In To Dashboard'}</span>
           </button>
         </form>
