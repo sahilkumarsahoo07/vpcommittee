@@ -1,136 +1,134 @@
 import React from 'react';
-import { Sparkles, Heart, ChevronDown } from 'lucide-react';
-import { GarlandDivider } from '../components/DevotionalIcons';
+import { Heart, Sparkles } from 'lucide-react';
+import { DiyaIcon } from '../components/DevotionalIcons';
+import { useLanguage } from '../context/LanguageContext';
+import { translations } from '../data/translations';
 
 interface HeroSectionProps {
   onOpenDonate: () => void;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDonate }) => {
+  const { language } = useLanguage();
+  const t = translations[language];
+
+  const fontClass = language === 'hi' ? 'font-devanagari' : language === 'or' ? 'font-odia' : 'font-cinzel';
+
   return (
-    <section id="hero" className="relative min-h-[92vh] md:min-h-screen pt-28 pb-20 md:pb-28 overflow-hidden flex flex-col justify-between bg-gradient-to-b from-[#2A1710] via-[#32070B] to-[#5A0F16]">
-      {/* Background Decorative Gold Light Rays & Flares */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* Glow Spheres */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#F4B942]/10 rounded-full blur-3xl animate-pulse-glow" />
-        <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-[#E87516]/15 rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: '2s' }} />
-        {/* Subtle Arch Texture */}
-        <div className="absolute inset-0 bg-[radial-gradient(#D4A72C_1px,transparent_1px)] [background-size:32px_32px] opacity-10" />
+    <section id="hero" className="relative min-h-[92svh] md:min-h-[100svh] overflow-hidden bg-[#260508]">
+      {/* Background Banner Image with Dual Vignette & Ambient Glow */}
+      <div className="absolute inset-0">
+        <img
+          src="/assets/bannerimage.png"
+          alt="Lord Ganesha - Vighnaharta Puja Committee"
+          className="hero-banner-img w-full h-full object-cover"
+        />
       </div>
 
-      {/* Main Hero Grid Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 my-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          
-          {/* Left Column: Devotional Titles & Action Buttons */}
-          <div className="lg:col-span-7 text-left space-y-6">
-            
-            {/* Top Devanagari Blessing Tagline */}
-            <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-[#5A0F16]/80 border border-[#D4A72C]/40 backdrop-blur-md">
-              <span className="w-2 h-2 rounded-full bg-[#F4B942] animate-ping" />
-              <span className="font-devanagari text-[#F4B942] font-bold tracking-wider text-base md:text-lg">
-                ॥ श्री गणेशाय नमः ॥
-              </span>
-            </div>
-
-            {/* Main Header Title */}
-            <div className="space-y-2">
-              <h1 className="font-cinzel text-3xl sm:text-5xl md:text-6xl font-black tracking-wider text-gold-shine leading-tight uppercase">
-                VIGHNAHARTA
-              </h1>
-              <h2 className="font-cinzel text-2xl sm:text-4xl md:text-5xl font-bold tracking-widest text-[#FFF7E8] leading-tight uppercase">
-                PUJA COMMITTEE
-              </h2>
-            </div>
-
-            {/* Devanagari Callout: Ganpati Bappa Morya */}
-            <div className="py-2">
-              <div className="inline-block relative">
-                <span className="font-devanagari text-3xl sm:text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#F4B942] via-[#E87516] to-[#FFF7E8] drop-shadow-md">
-                  गणपती बप्पा मोरया!
-                </span>
-                <div className="h-[2px] w-full bg-gradient-to-r from-[#F4B942] via-[#E87516] to-transparent mt-1" />
-              </div>
-            </div>
-
-            {/* Tagline */}
-            <p className="font-cormorant italic text-xl md:text-2xl text-[#FFF7E8]/90 tracking-wide font-medium">
-              Celebrating Faith, Unity & Tradition
-            </p>
-
-            {/* Action Buttons */}
-            <div className="pt-4 flex flex-wrap items-center gap-4">
-              <a
-                href="#events"
-                className="px-8 py-3.5 rounded-xl font-bold text-sm md:text-base uppercase tracking-wider bg-gradient-to-r from-[#F4B942] via-[#D4A72C] to-[#E87516] text-[#32070B] shadow-xl hover:shadow-[#F4B942]/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 group"
-              >
-                <span>Explore Celebration</span>
-                <Sparkles className="w-4 h-4 text-[#32070B] group-hover:rotate-45 transition-transform" />
-              </a>
-
-              <button
-                onClick={onOpenDonate}
-                className="px-8 py-3.5 rounded-xl font-bold text-sm md:text-base uppercase tracking-wider bg-[#32070B]/80 hover:bg-[#5A0F16] border-2 border-[#D4A72C] text-[#FFF7E8] hover:border-[#F4B942] hover:scale-105 active:scale-95 transition-all flex items-center gap-2 backdrop-blur-md group"
-              >
-                <Heart className="w-4 h-4 text-[#F4B942] group-hover:scale-125 transition-transform fill-current" />
-                <span>Donate Now</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Right Column: Seated Lord Ganesha Idol Display */}
-          <div className="lg:col-span-5 relative flex justify-center items-center">
-            {/* Glowing Golden Aura Disk Background */}
-            <div className="absolute w-[280px] sm:w-[380px] md:w-[450px] h-[280px] sm:h-[380px] md:h-[450px] rounded-full bg-gradient-to-tr from-[#E87516]/40 via-[#F4B942]/30 to-[#5A0F16]/20 blur-2xl animate-pulse-glow pointer-events-none" />
-            
-            {/* Main Lord Ganesha Artwork Container */}
-            <div className="relative z-10 group">
-              <div className="relative rounded-3xl overflow-hidden p-2 border-2 border-[#D4A72C]/40 bg-gradient-to-b from-[#5A0F16]/60 to-[#2A1710]/90 backdrop-blur-md shadow-2xl">
-                <img
-                  src="/assets/main-ganesha.png"
-                  alt="Lord Ganesha Idol - Vighnaharta Puja Committee"
-                  className="w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[460px] h-auto object-contain rounded-2xl group-hover:scale-102 transition-transform duration-700 filter drop-shadow-2xl"
-                />
-              </div>
-
-              {/* Decorative Marigold & Om Floating Badges */}
-              <div className="absolute -top-4 -right-4 w-12 h-12 rounded-full bg-[#D4A72C] border-2 border-[#FFF7E8] flex items-center justify-center text-[#32070B] font-bold text-xs shadow-lg animate-float">
-                ॐ
-              </div>
-              <div className="absolute -bottom-4 -left-4 px-4 py-1.5 rounded-full bg-[#5A0F16] border border-[#F4B942] text-[#F4B942] text-xs font-devanagari font-bold shadow-lg">
-                ॥ ॐ गं गणपतये नमः ॥
-              </div>
-            </div>
-          </div>
-
+      {/* Decorative Side Diyas with Flame Animations */}
+      <div className="hidden lg:flex absolute left-8 top-1/2 -translate-y-1/2 z-20 flex-col items-center gap-12 pointer-events-none opacity-85">
+        <div className="diya-glow-bg animate-float">
+          <DiyaIcon className="w-12 h-12 text-[#F4B942]" />
+        </div>
+        <div className="w-[1px] h-32 bg-gradient-to-b from-[#F4B942]/60 via-[#D4A72C]/30 to-transparent" />
+        <div className="diya-glow-bg animate-float" style={{ animationDelay: '1.5s' }}>
+          <DiyaIcon className="w-10 h-10 text-[#F4B942]" />
         </div>
       </div>
 
-      {/* Decorative Bottom Marigold Garland */}
-      <div className="relative z-10 max-w-4xl mx-auto w-full px-4 my-4 opacity-80">
-        <GarlandDivider />
+      <div className="hidden lg:flex absolute right-8 top-1/2 -translate-y-1/2 z-20 flex-col items-center gap-12 pointer-events-none opacity-85">
+        <div className="diya-glow-bg animate-float" style={{ animationDelay: '0.8s' }}>
+          <DiyaIcon className="w-12 h-12 text-[#F4B942]" />
+        </div>
+        <div className="w-[1px] h-32 bg-gradient-to-b from-[#F4B942]/60 via-[#D4A72C]/30 to-transparent" />
+        <div className="diya-glow-bg animate-float" style={{ animationDelay: '2.2s' }}>
+          <DiyaIcon className="w-10 h-10 text-[#F4B942]" />
+        </div>
       </div>
 
-      {/* Smooth Curved Cream Divider Transition (Matching Reference Image) */}
-      <div className="relative w-full leading-none z-20 -mb-1 bg-[#FFF7E8]">
+      {/* Hero Main Content Box */}
+      <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 pt-32 md:pt-36 pb-36 md:pb-44 min-h-[92svh] md:min-h-[100svh] flex items-center">
+        <div className="w-full max-w-2xl text-left space-y-6">
+          {/* Royal Shloka Pill Badge */}
+          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#5A0F16]/90 via-[#32070B] to-[#5A0F16]/90 border border-[#F4B942]/60 shadow-[0_0_20px_rgba(244,185,66,0.25)] backdrop-blur-md">
+            <Sparkles className="w-4 h-4 text-[#F4B942] animate-pulse" />
+            <span className={`text-[#F4B942] font-bold text-sm sm:text-base tracking-widest ${fontClass}`}>
+              {t.hero.shloka}
+            </span>
+            <Sparkles className="w-4 h-4 text-[#F4B942] animate-pulse" />
+          </div>
+
+          {/* Main Title */}
+          <h1 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-[0.04em] text-[#FFF7E8] leading-[1.15] uppercase hero-title-glow drop-shadow-2xl ${language === 'hi' || language === 'or' ? fontClass : 'font-cinzel'}`}>
+            {t.hero.titleLine1}
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFF7E8] via-[#F4B942] to-[#D4A72C]">
+              {t.hero.titleLine2}
+            </span>
+          </h1>
+
+          {/* Slogan */}
+          <p className={`text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#F4B942] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] ${fontClass}`}>
+            {t.hero.slogan}
+          </p>
+
+          {/* Subtitle */}
+          <p className={`italic text-lg sm:text-xl md:text-2xl text-[#FFF7E8]/90 tracking-wide font-medium max-w-xl leading-relaxed ${language === 'en' ? 'font-cormorant' : fontClass}`}>
+            {t.hero.subtitle}
+          </p>
+
+          {/* Luxury CTA Action Buttons */}
+          <div className="flex flex-wrap items-center gap-4 pt-3">
+            <a
+              href="#events"
+              className={`btn-gold-premium px-8 py-4 rounded-xl font-extrabold text-sm uppercase tracking-[0.12em] text-[#32070B] hover:scale-105 active:scale-95 transition-all flex items-center gap-2 ${fontClass}`}
+            >
+              <span>{t.hero.exploreBtn}</span>
+              <span className="text-lg">❖</span>
+            </a>
+
+            <button
+              onClick={onOpenDonate}
+              className={`btn-outline-premium px-8 py-4 rounded-xl font-extrabold text-sm uppercase tracking-[0.12em] bg-[#32070B]/85 backdrop-blur-md border-2 border-[#F4B942] text-[#FFF7E8] hover:border-[#FFF7E8] hover:bg-[#5A0F16] hover:scale-105 active:scale-95 transition-all flex items-center gap-2.5 shadow-xl ${fontClass}`}
+            >
+              <Heart className="w-4 h-4 text-[#F4B942] fill-[#F4B942] animate-pulse" />
+              {t.hero.donateBtn}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Royal Temple Arch Garland Wave Divider */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 leading-none">
         <svg
-          viewBox="0 0 1440 120"
+          viewBox="0 0 1440 140"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-12 md:h-20 text-[#FFF7E8] block"
+          className="w-full h-[85px] sm:h-[110px] md:h-[135px] block"
+          preserveAspectRatio="none"
         >
+          {/* Main Cream Section Background Fill */}
           <path
-            d="M0,32 C320,96 720,120 1440,32 L1440,120 L0,120 Z"
-            fill="currentColor"
+            d="M 0,35 C 220,105 380,105 560,45 C 760,-15 1040,105 1440,35 L 1440,140 L 0,140 Z"
+            fill="#FFF7E8"
+          />
+          {/* Outer Deep Royal Brown Wave Border */}
+          <path
+            d="M 0,35 C 220,105 380,105 560,45 C 760,-15 1040,105 1440,35"
+            stroke="#7B400B"
+            strokeWidth="9"
+            strokeLinecap="round"
+            fill="none"
+          />
+          {/* Glowing Inner Gold Foil Line */}
+          <path
+            d="M 0,35 C 220,105 380,105 560,45 C 760,-15 1040,105 1440,35"
+            stroke="#F4B942"
+            strokeWidth="2.5"
+            strokeOpacity="0.9"
+            fill="none"
           />
         </svg>
-        <a
-          href="#countdown"
-          className="absolute -top-4 left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-[#D4A72C] text-[#32070B] flex items-center justify-center shadow-lg border-2 border-[#FFF7E8] hover:scale-110 transition-transform cursor-pointer"
-          aria-label="Scroll to Countdown"
-        >
-          <ChevronDown className="w-5 h-5 animate-bounce" />
-        </a>
       </div>
     </section>
   );

@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { LanguageProvider } from './context/LanguageContext';
+import { AuthProvider } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './sections/HeroSection';
 import { CountdownTimer } from './components/CountdownTimer';
@@ -6,17 +9,36 @@ import { AboutSection } from './sections/AboutSection';
 import { FestivalTimeline } from './sections/FestivalTimeline';
 import { FeatureCards } from './components/FeatureCards';
 import { ActionRowSection } from './sections/ActionRowSection';
+import { LocationCommunitySection } from './sections/LocationCommunitySection';
 import { AnnouncementsSection } from './sections/AnnouncementsSection';
-import { CommunityStats } from './sections/CommunityStats';
-import { LocationSection } from './sections/LocationSection';
 import { GallerySection } from './sections/GallerySection';
-import { FinalCTA } from './sections/FinalCTA';
 import { Footer } from './components/Footer';
-import { DevotionalInteraction } from './components/DevotionalInteraction';
 import { DonationModal } from './components/DonationModal';
 import { VolunteerModal } from './components/VolunteerModal';
+import { DevotionalInteraction } from './components/DevotionalInteraction';
+import { AnnouncementPopup } from './components/AnnouncementPopup';
 
-export function App() {
+// Admin Imports
+import { AdminLayout } from './admin/AdminLayout';
+import { AdminLoginPage } from './admin/pages/AdminLoginPage';
+import { AdminDashboardHome } from './admin/pages/AdminDashboardHome';
+import { AdminDonationsPage } from './admin/pages/AdminDonationsPage';
+import { AdminDonorProfilesPage } from './admin/pages/AdminDonorProfilesPage';
+import { AdminExpensesPage } from './admin/pages/AdminExpensesPage';
+import { AdminBudgetPage } from './admin/pages/AdminBudgetPage';
+import { AdminFinancialReportsPage } from './admin/pages/AdminFinancialReportsPage';
+import { AdminMembersPage } from './admin/pages/AdminMembersPage';
+import { AdminEventsPage } from './admin/pages/AdminEventsPage';
+import { AdminGalleryPage } from './admin/pages/AdminGalleryPage';
+import { AdminAnnouncementsPage } from './admin/pages/AdminAnnouncementsPage';
+import { AdminVolunteersPage } from './admin/pages/AdminVolunteersPage';
+import { AdminSubscribersPage } from './admin/pages/AdminSubscribersPage';
+import { AdminWebsiteSettingsPage } from './admin/pages/AdminWebsiteSettingsPage';
+import { AdminAuditLogsPage } from './admin/pages/AdminAuditLogsPage';
+import { AdminExportCenterPage } from './admin/pages/AdminExportCenterPage';
+import { AdminUsersPage } from './admin/pages/AdminUsersPage';
+
+export function PublicWebsite() {
   const [isDonateOpen, setIsDonateOpen] = useState(false);
   const [isVolunteerOpen, setIsVolunteerOpen] = useState(false);
   const [presetDonateAmount, setPresetDonateAmount] = useState<number>(1001);
@@ -32,62 +54,32 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-[#32070B] text-[#FFF7E8] font-sans antialiased relative selection:bg-[#D4A72C] selection:text-[#32070B]">
-      {/* 1. Global Navigation */}
-      <Navbar
-        onOpenDonate={() => handleOpenDonate()}
-        onOpenVolunteer={handleOpenVolunteer}
-      />
+      <Navbar onOpenVolunteer={handleOpenVolunteer} />
 
-      {/* Main Content Area */}
       <main>
-        {/* 2. Cinematic Devotional Hero Section */}
         <HeroSection onOpenDonate={() => handleOpenDonate()} />
-
-        {/* 3. Ganesh Utsav 2026 Real Countdown Timer */}
         <CountdownTimer />
-
-        {/* 4. About Section - Our Story & Circular Frame Ganesha */}
         <AboutSection />
-
-        {/* 5. Festival Schedule Vertical Timeline & 🔴 LIVE MAHA AARTI Card */}
         <FestivalTimeline />
-
-        {/* 6. Four Feature Action Cards Bar */}
         <FeatureCards
           onOpenDonate={() => handleOpenDonate()}
           onOpenVolunteer={handleOpenVolunteer}
         />
-
-        {/* 7. Action Row: Support Vighnaharta, Stay Connected, Be Part of Celebration */}
         <ActionRowSection
           onOpenDonate={(amt) => handleOpenDonate(amt)}
           onOpenVolunteer={handleOpenVolunteer}
         />
-
-        {/* 8. Location Section (Find Our Pandal) & Community Statistics */}
-        <LocationSection />
-        <CommunityStats />
-
-        {/* 9. Latest Announcements & Updates Feed */}
+        <LocationCommunitySection />
         <AnnouncementsSection />
-
-        {/* 10. Gallery - Moments of Bhakti with Lightbox */}
         <GallerySection />
-
-        {/* 11. Devotional Final CTA */}
-        <FinalCTA
-          onOpenDonate={() => handleOpenDonate()}
-          onOpenVolunteer={handleOpenVolunteer}
-        />
       </main>
 
-      {/* 12. Full Devotional Footer */}
       <Footer />
 
-      {/* 13. Interactive Devotional Blessing Floating Button */}
       <DevotionalInteraction />
 
-      {/* 14. Interactive Modals */}
+      <AnnouncementPopup />
+
       <DonationModal
         isOpen={isDonateOpen}
         onClose={() => setIsDonateOpen(false)}
@@ -98,6 +90,44 @@ export function App() {
         onClose={() => setIsVolunteerOpen(false)}
       />
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <AuthProvider>
+      <LanguageProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public Website Route */}
+            <Route path="/" element={<PublicWebsite />} />
+
+            {/* Admin Login Route */}
+            <Route path="/admin/login" element={<AdminLoginPage />} />
+
+            {/* Protected Admin Dashboard Routes */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboardHome />} />
+              <Route path="donations" element={<AdminDonationsPage />} />
+              <Route path="donor-profiles" element={<AdminDonorProfilesPage />} />
+              <Route path="expenses" element={<AdminExpensesPage />} />
+              <Route path="budget" element={<AdminBudgetPage />} />
+              <Route path="reports" element={<AdminFinancialReportsPage />} />
+              <Route path="members" element={<AdminMembersPage />} />
+              <Route path="events" element={<AdminEventsPage />} />
+              <Route path="gallery" element={<AdminGalleryPage />} />
+              <Route path="announcements" element={<AdminAnnouncementsPage />} />
+              <Route path="volunteers" element={<AdminVolunteersPage />} />
+              <Route path="subscribers" element={<AdminSubscribersPage />} />
+              <Route path="settings" element={<AdminWebsiteSettingsPage />} />
+              <Route path="audit" element={<AdminAuditLogsPage />} />
+              <Route path="exports" element={<AdminExportCenterPage />} />
+              <Route path="users" element={<AdminUsersPage />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </LanguageProvider>
+    </AuthProvider>
   );
 }
 
