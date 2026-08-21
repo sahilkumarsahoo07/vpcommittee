@@ -10,7 +10,6 @@ export const AdminLoginPage: React.FC = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [selectedRolePreset, setSelectedRolePreset] = useState<'SUPERADMIN' | 'ADMIN' | 'COMMITTEE_MEMBER' | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -27,20 +26,7 @@ export const AdminLoginPage: React.FC = () => {
   const [forgotError, setForgotError] = useState<string | null>(null);
   const [forgotSuccess, setForgotSuccess] = useState<string | null>(null);
 
-  const handleQuickRoleSelect = (selectedRole: 'SUPERADMIN' | 'ADMIN' | 'COMMITTEE_MEMBER') => {
-    setErrorMsg(null);
-    setSelectedRolePreset(selectedRole);
-    if (selectedRole === 'SUPERADMIN') {
-      setEmail('sksahoo.dev@gmail.com');
-      setPassword('123456');
-    } else if (selectedRole === 'ADMIN') {
-      setEmail('admin@vighnaharta.org');
-      setPassword('Admin@2026');
-    } else {
-      setEmail('member@vighnaharta.org');
-      setPassword('Member@2026');
-    }
-  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,47 +154,7 @@ export const AdminLoginPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Quick Role Fill Buttons */}
-        <div className="space-y-2">
-          <label className="text-[11px] font-black uppercase tracking-widest text-[#E87516] block text-center">
-            ✦ Select Role Preset ✦
-          </label>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => handleQuickRoleSelect('SUPERADMIN')}
-              className={`py-2 px-2 rounded-xl border text-[11px] font-bold transition-all text-center shadow ${
-                selectedRolePreset === 'SUPERADMIN'
-                  ? 'bg-[#5A0F16] border-[#F4B942] text-[#F4B942]'
-                  : 'bg-[#1A0306] border-[#D4A72C]/40 text-[#FFF7E8]/80 hover:bg-[#250508]'
-              }`}
-            >
-              Superadmin
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickRoleSelect('ADMIN')}
-              className={`py-2 px-2 rounded-xl border text-[11px] font-bold transition-all text-center shadow ${
-                selectedRolePreset === 'ADMIN'
-                  ? 'bg-[#5A0F16] border-[#F4B942] text-[#F4B942]'
-                  : 'bg-[#1A0306] border-[#D4A72C]/40 text-[#FFF7E8]/80 hover:bg-[#250508]'
-              }`}
-            >
-              Admin
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickRoleSelect('COMMITTEE_MEMBER')}
-              className={`py-2 px-2 rounded-xl border text-[11px] font-bold transition-all text-center shadow ${
-                selectedRolePreset === 'COMMITTEE_MEMBER'
-                  ? 'bg-[#5A0F16] border-[#F4B942] text-[#F4B942]'
-                  : 'bg-[#1A0306] border-[#D4A72C]/40 text-[#FFF7E8]/80 hover:bg-[#250508]'
-              }`}
-            >
-              Member
-            </button>
-          </div>
-        </div>
+
 
         {/* Error Alert */}
         {errorMsg && (
