@@ -202,10 +202,10 @@ export const AdminDonorProfilesPage: React.FC = () => {
             </div>
             <h1 className="font-cinzel text-2xl md:text-3xl font-black text-[#F4B942] uppercase tracking-wider flex items-center gap-2">
               <UserPlus className="w-7 h-7 text-[#F4B942]" />
-              <span>Donor & Contributor Profiles</span>
+              <span>Committee Member & Contributor Profiles</span>
             </h1>
             <p className="text-xs text-[#FFF7E8]/80 max-w-2xl mt-1">
-              Dedicated directory to manage record-keeping donor profiles, track contribution targets, and rapidly record money without granting website login access.
+              Directory of committee members, executive office bearers, and key contributors to track pledged contribution targets and donation receipts.
             </p>
           </div>
 

@@ -530,15 +530,26 @@ export const getMembers = async (req: Request, res: Response) => {
 };
 
 export const createMember = async (req: AuthRequest, res: Response) => {
+  const instagramId = req.body.instagramId || req.body.instagram || req.body.socialLinks?.instagram || '';
+  const memberData = {
+    ...req.body,
+    image: req.body.image || req.body.photoUrl || '',
+    instagramId,
+    socialLinks: {
+      ...(req.body.socialLinks || {}),
+      instagram: instagramId,
+    },
+  };
+
   const newMember = {
     id: `mem_${Date.now()}`,
-    ...req.body,
+    ...memberData,
     displayOrder: mockMembers.length + 1,
     isActive: true,
   };
 
   try {
-    const dbMember = await CommitteeMember.create(req.body);
+    const dbMember = await CommitteeMember.create(memberData);
     mockMembers.push(dbMember.toObject());
   } catch {
     mockMembers.push(newMember);
@@ -876,13 +887,24 @@ export const deleteVolunteer = async (req: AuthRequest, res: Response) => {
 
 export const updateMember = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
+  const instagramId = req.body.instagramId || req.body.instagram || req.body.socialLinks?.instagram || '';
+  const updateData = {
+    ...req.body,
+    image: req.body.image || req.body.photoUrl || '',
+    instagramId,
+    socialLinks: {
+      ...(req.body.socialLinks || {}),
+      instagram: instagramId,
+    },
+  };
+
   try {
     if (mongoose.Types.ObjectId.isValid(id)) {
-      await CommitteeMember.findByIdAndUpdate(id, req.body);
+      await CommitteeMember.findByIdAndUpdate(id, updateData, { new: true });
     }
   } catch {}
-  mockMembers = mockMembers.map((m) => (m.id === id || (m as any)._id === id ? { ...m, ...req.body } : m));
-  res.json({ success: true, message: 'Member updated successfully' });
+  mockMembers = mockMembers.map((m) => (m.id === id || (m as any)._id === id ? { ...m, ...updateData } : m));
+  res.json({ success: true, message: 'Member updated successfully', data: updateData });
 };
 
 export const updateGalleryItem = async (req: AuthRequest, res: Response) => {

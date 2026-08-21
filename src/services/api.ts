@@ -152,6 +152,11 @@ export const adminAPI = {
     const response = await apiClient.delete('/budget');
     return response.data;
   },
+  deleteBudgetCategory: async (categoryId: string) => {
+    const response = await apiClient.delete(`/budget/categories/${categoryId}`);
+    return response.data;
+  },
+
   updateSettings: async (settingsData: any) => {
     const response = await apiClient.put('/settings', settingsData);
     return response.data;

@@ -18,13 +18,29 @@ app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Rate Limiter
-const limiter = rateLimit({
+// Rate Limiter — skip in development to avoid 429 during testing
+const isDev = process.env.NODE_ENV !== 'production';
+
+const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 300,
-  message: { success: false, message: 'Too many requests from this IP, please try again later.' },
+  max: isDev ? 10000 : 500,
+  skip: () => isDev,
+  message: { success: false, message: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
-app.use('/api/', limiter);
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: isDev ? 10000 : 20,
+  skip: () => isDev,
+  message: { success: false, message: 'Too many login attempts, please try again in 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use('/api/', globalLimiter);
+app.use('/api/auth/login', authLimiter);
 
 // Serve uploads static folder
 app.use('/uploads', express.static(path.join(process.cwd(), 'public/uploads')));

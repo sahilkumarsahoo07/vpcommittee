@@ -14,6 +14,7 @@ import {
   getBudget,
   updateBudget,
   deleteBudget,
+  deleteBudgetCategory,
   exportFinancialPDF,
   exportDonorPDF,
   exportDonationsExcel,
@@ -129,6 +130,7 @@ router.delete('/expenses/:id', authenticateToken, authorizeRoles('SUPERADMIN', '
 router.get('/budget', authenticateToken, authorizeRoles('SUPERADMIN', 'ADMIN'), getBudget);
 router.put('/budget', authenticateToken, authorizeRoles('SUPERADMIN', 'ADMIN'), updateBudget);
 router.delete('/budget', authenticateToken, authorizeRoles('SUPERADMIN', 'ADMIN'), deleteBudget);
+router.delete('/budget/categories/:categoryId', authenticateToken, authorizeRoles('SUPERADMIN', 'ADMIN'), deleteBudgetCategory);
 
 // EXPORTS
 router.get('/exports/financial-pdf', authenticateToken, authorizeRoles('SUPERADMIN', 'ADMIN'), exportFinancialPDF);

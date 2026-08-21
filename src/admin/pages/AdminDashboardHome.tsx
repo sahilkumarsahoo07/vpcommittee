@@ -24,6 +24,7 @@ export const AdminDashboardHome: React.FC = () => {
   const [donationCount, setDonationCount] = useState<number>(0);
   const [expenseCount, setExpenseCount] = useState<number>(0);
   const [memberCount, setMemberCount] = useState<number>(0);
+  const [budgetCategories, setBudgetCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -31,12 +32,17 @@ export const AdminDashboardHome: React.FC = () => {
       try {
         setLoading(true);
         if (isFinanceAllowed) {
-          const [summaryRes, donRes, expRes, memRes] = await Promise.allSettled([
+          const [summaryRes, donRes, expRes, memRes, budgetRes] = await Promise.allSettled([
             adminAPI.getFinancialSummary(),
             adminAPI.getDonations(),
             adminAPI.getExpenses(),
             publicAPI.getMembers(),
+            adminAPI.getBudget(),
           ]);
+
+          if (budgetRes.status === 'fulfilled' && budgetRes.value?.success && Array.isArray(budgetRes.value?.data?.categories)) {
+            setBudgetCategories(budgetRes.value.data.categories);
+          }
 
           if (summaryRes.status === 'fulfilled' && summaryRes.value.success) {
             setTotalDonations(summaryRes.value.data.totalDonations || 0);
@@ -226,27 +232,30 @@ export const AdminDashboardHome: React.FC = () => {
           </div>
 
           <div className="space-y-3">
-            {[
-              { category: 'Pandal & Iron Framework', allocated: 150000, spent: 120000 },
-              { category: 'Eco Idol Crafting & Sculpting', allocated: 100000, spent: 65000 },
-              { category: 'Illumination & LED Lighting Grid', allocated: 60000, spent: 45000 },
-              { category: 'Sound System & Cultural Stage', allocated: 40000, spent: 30000 },
-            ].map((item, idx) => {
-              const pct = Math.round((item.spent / item.allocated) * 100);
-              return (
-                <div key={idx} className="space-y-1 bg-[#170204] p-3 rounded-xl border border-[#D4A72C]/20">
-                  <div className="flex justify-between text-xs font-bold">
-                    <span className="text-[#FFF7E8]">{item.category}</span>
-                    <span className="text-[#F4B942]">
-                      ₹{item.spent.toLocaleString('en-IN')} / ₹{item.allocated.toLocaleString('en-IN')} ({pct}%)
-                    </span>
+            {budgetCategories.length === 0 ? (
+              <div className="text-center py-4 text-xs font-semibold text-[#FFF7E8]/60">
+                No budget categories allocated yet.
+              </div>
+            ) : (
+              budgetCategories.map((item, idx) => {
+                const allocated = item.allocated || item.allocatedAmount || 0;
+                const spent = item.spent || 0;
+                const pct = allocated > 0 ? Math.round((spent / allocated) * 100) : 0;
+                return (
+                  <div key={idx} className="space-y-1 bg-[#170204] p-3 rounded-xl border border-[#D4A72C]/20">
+                    <div className="flex justify-between text-xs font-bold">
+                      <span className="text-[#FFF7E8]">{item.category}</span>
+                      <span className="text-[#F4B942]">
+                        ₹{spent.toLocaleString('en-IN')} / ₹{allocated.toLocaleString('en-IN')} ({pct}%)
+                      </span>
+                    </div>
+                    <div className="w-full bg-[#240407] rounded-full h-2 border border-[#D4A72C]/30 overflow-hidden">
+                      <div className="bg-[#E87516] h-full" style={{ width: `${pct}%` }} />
+                    </div>
                   </div>
-                  <div className="w-full bg-[#240407] rounded-full h-2 border border-[#D4A72C]/30 overflow-hidden">
-                    <div className="bg-[#E87516] h-full" style={{ width: `${pct}%` }} />
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
       )}

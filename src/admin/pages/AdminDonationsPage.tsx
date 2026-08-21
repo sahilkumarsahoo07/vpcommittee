@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, Plus, CheckCircle, Edit2, Trash2, FileText, FileSpreadsheet, User, Calendar, Download, Loader2, History, CheckCircle2, AlertCircle } from 'lucide-react';
 import { adminAPI } from '../../services/api';
 import { ConfirmDeleteModal } from '../components/ConfirmDeleteModal';
+import { Pagination } from '../components/Pagination';
 
 interface DonationItem {
   id: string;
@@ -77,9 +78,14 @@ export const AdminDonationsPage: React.FC = () => {
   const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [downloadingExcel, setDownloadingExcel] = useState(false);
 
-  // Calendar Month Filter State ('' = Overall Current Year, 'YYYY-MM' = Specific Month, 'ALL' = All Time)
   const [selectedMonth, setSelectedMonth] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Pagination states
+  const [receiptsPage, setReceiptsPage] = useState(1);
+  const [receiptsPerPage, setReceiptsPerPage] = useState(10);
+  const [donorsPage, setDonorsPage] = useState(1);
+  const [donorsPerPage, setDonorsPerPage] = useState(5);
 
   // Donor Pledged Target State (Stored per donor name)
   const [donorPledges, setDonorPledges] = useState<Record<string, number>>({});
@@ -90,6 +96,7 @@ export const AdminDonationsPage: React.FC = () => {
   const [newPledgeVal, setNewPledgeVal] = useState<string>('');
 
   const [memberNames, setMemberNames] = useState<string[]>([]);
+  const [committeeMembersList, setCommitteeMembersList] = useState<any[]>([]);
 
   const loadDonations = async () => {
     try {
@@ -100,6 +107,7 @@ export const AdminDonationsPage: React.FC = () => {
       ]);
 
       if (membersRes?.success && Array.isArray(membersRes.data)) {
+        setCommitteeMembersList(membersRes.data);
         const names = membersRes.data.map((m: any) => m.name || m.donorName).filter(Boolean);
         setMemberNames(names);
       }
@@ -203,6 +211,24 @@ export const AdminDonationsPage: React.FC = () => {
 
   const donorSummariesList = Object.values(donorMap).sort((a, b) => b.totalPaid - a.totalPaid);
 
+  useEffect(() => {
+    setReceiptsPage(1);
+    setDonorsPage(1);
+  }, [searchTerm, selectedMonth]);
+
+  // Paginated data calculations
+  const totalDonorsPages = Math.ceil(donorSummariesList.length / donorsPerPage);
+  const paginatedDonors = donorSummariesList.slice(
+    (donorsPage - 1) * donorsPerPage,
+    donorsPage * donorsPerPage
+  );
+
+  const totalReceiptsPages = Math.ceil(filteredDonations.length / receiptsPerPage);
+  const paginatedReceipts = filteredDonations.slice(
+    (receiptsPage - 1) * receiptsPerPage,
+    receiptsPage * receiptsPerPage
+  );
+
   // Metrics
   const totalCollection = monthFilteredDonations.reduce((sum, d) => sum + d.amount, 0);
   const totalReceipts = monthFilteredDonations.length;
@@ -276,15 +302,15 @@ export const AdminDonationsPage: React.FC = () => {
           donations.map((d) =>
             d.id === editItem.id
               ? {
-                  ...d,
-                  donorName: newDonorName,
-                  amount: Number(newAmount),
-                  category: newCategory,
-                  paymentMethod: newPaymentMethod,
-                  date: formatDateHelper(newDate).display,
-                  rawDate: newDate,
-                  phone: newPhone,
-                }
+                ...d,
+                donorName: newDonorName,
+                amount: Number(newAmount),
+                category: newCategory,
+                paymentMethod: newPaymentMethod,
+                date: formatDateHelper(newDate).display,
+                rawDate: newDate,
+                phone: newPhone,
+              }
               : d
           )
         );
@@ -483,33 +509,30 @@ export const AdminDonationsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setSelectedMonth('')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
-                !selectedMonth
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${!selectedMonth
                   ? 'bg-[#5A0F16] text-[#F4B942] border-[#F4B942]'
                   : 'bg-[#FFF7E8] text-[#32070B] border-[#D4A72C]/50 hover:bg-[#F4B942]/20'
-              }`}
+                }`}
             >
               Overall {getCurrentYear()}
             </button>
             <button
               type="button"
               onClick={() => setSelectedMonth(getCurrentYearMonth())}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
-                selectedMonth === getCurrentYearMonth()
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${selectedMonth === getCurrentYearMonth()
                   ? 'bg-[#5A0F16] text-[#F4B942] border-[#F4B942]'
                   : 'bg-[#FFF7E8] text-[#32070B] border-[#D4A72C]/50 hover:bg-[#F4B942]/20'
-              }`}
+                }`}
             >
               This Month
             </button>
             <button
               type="button"
               onClick={() => setSelectedMonth('ALL')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
-                selectedMonth === 'ALL'
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${selectedMonth === 'ALL'
                   ? 'bg-[#5A0F16] text-[#F4B942] border-[#F4B942]'
                   : 'bg-[#FFF7E8] text-[#32070B] border-[#D4A72C]/50 hover:bg-[#F4B942]/20'
-              }`}
+                }`}
             >
               All Time
             </button>
@@ -566,7 +589,7 @@ export const AdminDonationsPage: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                donorSummariesList.map((donor) => (
+                paginatedDonors.map((donor) => (
                   <tr key={donor.donorName} className="hover:bg-[#170204]/60 transition-colors">
                     <td className="py-3 px-3 font-bold text-[#FFF7E8]">
                       <div className="flex items-center gap-2">
@@ -664,6 +687,16 @@ export const AdminDonationsPage: React.FC = () => {
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          currentPage={donorsPage}
+          totalPages={totalDonorsPages}
+          totalItems={donorSummariesList.length}
+          itemsPerPage={donorsPerPage}
+          onPageChange={setDonorsPage}
+          onItemsPerPageChange={setDonorsPerPage}
+          isDark={true}
+        />
       </div>
 
       {/* ALL DONATION RECEIPTS TABLE */}
@@ -705,7 +738,7 @@ export const AdminDonationsPage: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredDonations.map((item) => (
+                paginatedReceipts.map((item) => (
                   <tr key={item.id} className="hover:bg-[#FFF7E8]/80 transition-colors">
                     <td className="py-3 px-4 font-bold text-[#5A0F16]">{item.receiptNumber}</td>
                     <td className="py-3 px-4 font-bold text-[#2A1710]">
@@ -774,6 +807,16 @@ export const AdminDonationsPage: React.FC = () => {
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          currentPage={receiptsPage}
+          totalPages={totalReceiptsPages}
+          totalItems={filteredDonations.length}
+          itemsPerPage={receiptsPerPage}
+          onPageChange={setReceiptsPage}
+          onItemsPerPageChange={setReceiptsPerPage}
+          isDark={false}
+        />
       </div>
 
 
@@ -875,22 +918,29 @@ export const AdminDonationsPage: React.FC = () => {
                 </label>
                 <select
                   onChange={(e) => {
-                    if (e.target.value) setNewDonorName(e.target.value);
+                    const selectedName = e.target.value;
+                    if (selectedName) {
+                      setNewDonorName(selectedName);
+                      const matchedMember = committeeMembersList.find((m) => m.name === selectedName);
+                      if (matchedMember && matchedMember.phone) {
+                        setNewPhone(matchedMember.phone);
+                      }
+                    }
                   }}
                   value={newDonorName}
                   className="w-full bg-[#170204] border border-[#D4A72C]/40 rounded-xl py-2 px-3 text-xs text-[#F4B942] mb-2 focus:outline-none focus:border-[#F4B942]"
                 >
-                  <option value="">-- Select Member or Past Donor --</option>
-                  {Array.from(
-                    new Set([
-                      ...memberNames,
-                      ...donations.map((d) => d.donorName),
-                    ])
-                  )
-                    .filter(Boolean)
+                  <option value="">-- Select Committee Member or Past Donor --</option>
+                  {committeeMembersList.map((m, i) => (
+                    <option key={`mem-${i}`} value={m.name}>
+                      👑 {m.name} ({m.designation || m.roleType || 'Committee Member'})
+                    </option>
+                  ))}
+                  {Array.from(new Set(donations.map((d) => d.donorName)))
+                    .filter((name) => name && !committeeMembersList.some((m) => m.name === name))
                     .map((name, i) => (
-                      <option key={i} value={name}>
-                        👤 {name}
+                      <option key={`donor-${i}`} value={name}>
+                        👤 {name} (Contributor)
                       </option>
                     ))}
                 </select>

@@ -142,19 +142,10 @@ let mockExpenses = [
   },
 ];
 
-let mockBudget = {
+let mockBudget: any = {
   festivalYear: 2026,
-  totalAllocatedBudget: 500000,
-  categories: [
-    { category: 'Pandal', allocatedAmount: 150000 },
-    { category: 'Decoration', allocatedAmount: 100000 },
-    { category: 'Food', allocatedAmount: 80000 },
-    { category: 'Lighting', allocatedAmount: 60000 },
-    { category: 'Music', allocatedAmount: 40000 },
-    { category: 'Prasad', allocatedAmount: 30000 },
-    { category: 'Security', allocatedAmount: 20000 },
-    { category: 'Other', allocatedAmount: 20000 },
-  ],
+  totalAllocatedBudget: 0,
+  categories: [],
 };
 
 // GET Financial Overview & Metrics
@@ -399,6 +390,7 @@ export const getBudget = async (req: AuthRequest, res: Response) => {
       const remaining = Math.max(0, c.allocatedAmount - spent);
       const percentageUsed = Math.round((spent / c.allocatedAmount) * 100);
       return {
+        _id: c._id?.toString() || c._id || String(c.category),
         category: c.category,
         allocated: c.allocatedAmount,
         spent,
@@ -431,7 +423,7 @@ export const exportFinancialPDF = async (req: AuthRequest, res: Response) => {
       const dbExpenses = await Expense.find().lean();
       if (dbDonations.length > 0) donationsList = dbDonations as any;
       if (dbExpenses.length > 0) expensesList = dbExpenses as any;
-    } catch {}
+    } catch { }
 
     // Date range filter
     let dateRangeLabel = 'Overall All Dates Audit';
@@ -496,7 +488,7 @@ export const exportDonorPDF = async (req: AuthRequest, res: Response) => {
     }
 
     const searchName = String(donorName).trim().toLowerCase();
-    
+
     // Combine MongoDB donations and mockDonations to ensure complete coverage
     let allDonations: any[] = [...mockDonations];
     try {
@@ -504,7 +496,7 @@ export const exportDonorPDF = async (req: AuthRequest, res: Response) => {
       if (dbDonations && dbDonations.length > 0) {
         allDonations = [...(dbDonations as any[]), ...mockDonations];
       }
-    } catch {}
+    } catch { }
 
     // Deduplicate by receipt number or ID
     const seenMap = new Map();
@@ -566,7 +558,7 @@ export const exportDonationsExcel = async (req: AuthRequest, res: Response) => {
     try {
       const dbDonations = await Donation.find().sort({ createdAt: -1 }).lean();
       if (dbDonations.length > 0) donationsList = dbDonations as any;
-    } catch {}
+    } catch { }
 
     if (month && month !== 'ALL') {
       const mStr = String(month).trim();
@@ -591,7 +583,7 @@ export const updateDonation = async (req: AuthRequest, res: Response) => {
     if (mongoose.Types.ObjectId.isValid(id)) {
       await Donation.findByIdAndUpdate(id, req.body);
     }
-  } catch {}
+  } catch { }
   mockDonations = mockDonations.map((d) => (d.id === id || (d as any)._id === id ? { ...d, ...req.body } : d));
   res.json({ success: true, message: 'Donation updated successfully' });
 };
@@ -602,7 +594,7 @@ export const deleteDonation = async (req: AuthRequest, res: Response) => {
     if (mongoose.Types.ObjectId.isValid(id)) {
       await Donation.findByIdAndDelete(id);
     }
-  } catch {}
+  } catch { }
   mockDonations = mockDonations.filter((d) => d.id !== id && (d as any)._id !== id);
   res.json({ success: true, message: 'Donation deleted successfully' });
 };
@@ -613,7 +605,7 @@ export const updateExpense = async (req: AuthRequest, res: Response) => {
     if (mongoose.Types.ObjectId.isValid(id)) {
       await Expense.findByIdAndUpdate(id, req.body);
     }
-  } catch {}
+  } catch { }
   mockExpenses = mockExpenses.map((e) => (e.id === id || (e as any)._id === id ? { ...e, ...req.body } : e));
   res.json({ success: true, message: 'Expense updated successfully' });
 };
@@ -624,7 +616,7 @@ export const deleteExpense = async (req: AuthRequest, res: Response) => {
     if (mongoose.Types.ObjectId.isValid(id)) {
       await Expense.findByIdAndDelete(id);
     }
-  } catch {}
+  } catch { }
   mockExpenses = mockExpenses.filter((e) => e.id !== id && (e as any)._id !== id);
   res.json({ success: true, message: 'Expense deleted successfully' });
 };
@@ -653,7 +645,7 @@ export const updateBudget = async (req: AuthRequest, res: Response) => {
           categories: categories || mockBudget.categories,
         });
       }
-    } catch {}
+    } catch { }
 
     if (req.user) {
       await logAudit(
@@ -682,8 +674,8 @@ export const deleteBudget = async (req: AuthRequest, res: Response) => {
       categories: [],
     };
     try {
-      await Budget.deleteOne({ festivalYear: 2026 });
-    } catch {}
+      await Budget.deleteMany({});
+    } catch { }
 
     if (req.user) {
       await logAudit(
@@ -702,4 +694,58 @@ export const deleteBudget = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// DELETE Single Budget Category by _id OR category name
+export const deleteBudgetCategory = async (req: AuthRequest, res: Response) => {
+  try {
+    const { categoryId } = req.params;
+
+    // Match by _id OR category name — handles both ObjectId strings and plain names
+    const matches = (c: any) =>
+      String(c._id) === categoryId || c.category === categoryId;
+
+    // Remove from in-memory mock
+    const before = mockBudget.categories.length;
+    mockBudget.categories = mockBudget.categories.filter((c: any) => !matches(c));
+    mockBudget.totalAllocatedBudget = mockBudget.categories.reduce(
+      (sum: number, c: any) => sum + (c.allocatedAmount || 0), 0
+    );
+
+    // Remove from MongoDB subdocument
+    try {
+      const budgetDoc = await Budget.findOne({ festivalYear: 2026 });
+      if (budgetDoc) {
+        budgetDoc.categories = budgetDoc.categories.filter(
+          (c: any) => c._id?.toString() !== categoryId && c.category !== categoryId
+        );
+        budgetDoc.totalAllocatedBudget = budgetDoc.categories.reduce(
+          (sum, c) => sum + (c.allocatedAmount || 0), 0
+        );
+        await budgetDoc.save();
+      }
+    } catch {}
+
+    if (req.user) {
+      await logAudit(
+        req.user.id,
+        req.user.name,
+        req.user.role,
+        'BUDGET_CATEGORY_DELETED',
+        'Budget',
+        categoryId,
+        `Deleted budget category: ${categoryId}`
+      );
+    }
+
+    const deleted = before !== mockBudget.categories.length;
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: 'Budget category not found' });
+    }
+
+    res.json({ success: true, message: 'Budget category deleted successfully' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 

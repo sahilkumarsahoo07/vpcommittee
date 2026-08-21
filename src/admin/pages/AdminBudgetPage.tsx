@@ -5,21 +5,15 @@ import { adminAPI } from '../../services/api';
 import { ConfirmDeleteModal } from '../components/ConfirmDeleteModal';
 
 interface CategoryItem {
+  id: string;
   category: string;
   allocated: number;
   spent: number;
 }
 
 export const AdminBudgetPage: React.FC = () => {
-  const [categories, setCategories] = useState<CategoryItem[]>([
-    { category: 'Pandal & Structural Steel Frame', allocated: 150000, spent: 120000 },
-    { category: 'Eco-Friendly Ganesha Idol & Sculpting', allocated: 100000, spent: 65000 },
-    { category: 'Illumination, LED Gates & Generator', allocated: 60000, spent: 45000 },
-    { category: 'Sound System, Stage & Cultural Artists', allocated: 40000, spent: 30000 },
-    { category: 'Maha Prasad Feast & Anna Daan', allocated: 80000, spent: 0 },
-    { category: 'Security, CCTV & Police Clearances', allocated: 20000, spent: 0 },
-    { category: 'Emergency Reserve Fund', allocated: 50000, spent: 0 },
-  ]);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
+
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editCategory, setEditCategory] = useState<CategoryItem | null>(null);
@@ -46,17 +40,17 @@ export const AdminBudgetPage: React.FC = () => {
           const autoSpentFromExpenses = categoryExpenses.reduce((sum: number, e: any) => sum + (Number(e.amount) || 0), 0);
           
           return {
+            id: c._id || c.id || String(c.category),
             category: c.category,
             allocated: Number(c.allocated || c.allocatedAmount || 0),
             spent: Number(c.spent || c.spentAmount) || autoSpentFromExpenses,
           };
         });
-        if (mapped.length > 0) {
-          setCategories(mapped);
-        }
+        // Always set — even an empty array means all categories were deleted
+        setCategories(mapped);
       }
     } catch {
-      // Keep defaults
+      // API failed — keep current state
     } finally {
       setLoading(false);
     }
@@ -97,14 +91,16 @@ export const AdminBudgetPage: React.FC = () => {
     let updatedList = [...categories];
     if (editCategory) {
       const remaining = updatedList.filter((c) => c.category !== editCategory.category);
-      const updatedItem = {
+      const updatedItem: CategoryItem = {
+        id: editCategory.id,
         category: categoryName,
         allocated: parsedAllocated,
         spent: parsedSpent,
       };
       updatedList = [updatedItem, ...remaining];
     } else {
-      const newItem = {
+      const newItem: CategoryItem = {
+        id: `temp_${Date.now()}`,
         category: categoryName,
         allocated: parsedAllocated,
         spent: parsedSpent,
@@ -131,32 +127,39 @@ export const AdminBudgetPage: React.FC = () => {
   };
 
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [showResetModal, setShowResetModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDeleteCategoryClick = (catName: string) => {
-    setDeleteTarget(catName);
+  const handleDeleteCategoryClick = (catId: string) => {
+    setDeleteTarget(catId);
   };
 
   const handleConfirmDeleteCategory = async () => {
     if (!deleteTarget) return;
     setIsDeleting(true);
-    const updatedList = categories.filter((c) => c.category !== deleteTarget);
-    setCategories(updatedList);
-
+    // Optimistically remove from UI
+    setCategories((prev) => prev.filter((c) => c.id !== deleteTarget));
     try {
-      const payload = {
-        totalAllocatedBudget: updatedList.reduce((sum, c) => sum + c.allocated, 0),
-        categories: updatedList.map((c) => ({
-          category: c.category,
-          allocatedAmount: c.allocated,
-        })),
-      };
-      await adminAPI.updateBudget(payload);
+      await adminAPI.deleteBudgetCategory(deleteTarget);
     } catch {
-      // Silent error fallback
+      // If API fails, re-fetch to restore
+      fetchBudget();
     } finally {
       setIsDeleting(false);
       setDeleteTarget(null);
+    }
+  };
+
+  const handleConfirmResetAll = async () => {
+    setIsDeleting(true);
+    setCategories([]);
+    try {
+      await adminAPI.deleteBudget();
+    } catch {
+      fetchBudget();
+    } finally {
+      setIsDeleting(false);
+      setShowResetModal(false);
     }
   };
 
@@ -174,6 +177,15 @@ export const AdminBudgetPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          {categories.length > 0 && (
+            <button
+              onClick={() => setShowResetModal(true)}
+              className="px-3 py-2.5 rounded-xl bg-red-100 text-red-700 border border-red-300 font-bold text-xs uppercase tracking-wider hover:bg-red-200 transition-all flex items-center gap-1.5 shadow-sm"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Clear All</span>
+            </button>
+          )}
           <button
             onClick={handleOpenAdd}
             className="px-4 py-2.5 rounded-xl bg-[#5A0F16] text-[#F4B942] border border-[#F4B942] font-black text-xs uppercase tracking-wider hover:bg-[#32070B] transition-all flex items-center gap-2 shadow"
@@ -253,7 +265,7 @@ export const AdminBudgetPage: React.FC = () => {
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
-                          onClick={() => handleDeleteCategoryClick(cat.category)}
+                          onClick={() => handleDeleteCategoryClick(cat.id)}
                           className="p-1 rounded bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
                           title="Delete Category (DELETE)"
                         >
@@ -361,6 +373,18 @@ export const AdminBudgetPage: React.FC = () => {
         isLoading={isDeleting}
         onConfirm={handleConfirmDeleteCategory}
         onClose={() => setDeleteTarget(null)}
+      />
+
+      {/* Clear All Categories Modal */}
+      <ConfirmDeleteModal
+        isOpen={showResetModal}
+        title="Clear All Budget Categories"
+        itemTitle="All Budget Heads"
+        message="Are you sure you want to delete ALL budget allocation categories? This will wipe all category data from the database."
+        confirmText="Yes, Clear All Data"
+        isLoading={isDeleting}
+        onConfirm={handleConfirmResetAll}
+        onClose={() => setShowResetModal(false)}
       />
     </div>
   );

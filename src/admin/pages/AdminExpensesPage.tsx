@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Trash2 } from 'lucide-react';
 import { adminAPI } from '../../services/api';
-
 import { ConfirmDeleteModal } from '../components/ConfirmDeleteModal';
+import { Pagination } from '../components/Pagination';
 
 interface ExpenseItem {
   id: string;
@@ -22,6 +22,10 @@ export const AdminExpensesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editItem, setEditItem] = useState<ExpenseItem | null>(null);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const [expenseName, setExpenseName] = useState('');
   const [amount, setAmount] = useState('');
@@ -57,11 +61,21 @@ export const AdminExpensesPage: React.FC = () => {
     fetchExpenses();
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   const filtered = expenses.filter(
     (e) =>
       e.expenseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       e.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
       e.vendor.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const paginatedExpenses = filtered.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
   const handleOpenAdd = () => {
@@ -214,53 +228,73 @@ export const AdminExpensesPage: React.FC = () => {
         {loading ? (
           <div className="text-center py-12 text-[#32070B] font-cinzel font-bold text-sm">Loading expenses from database...</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-[#2A1710]">
-            <thead className="bg-[#32070B] text-[#F4B942] font-cinzel uppercase">
-              <tr>
-                <th className="py-3 px-4 rounded-l-xl">Inv #</th>
-                <th className="py-3 px-4">Expense Description</th>
-                <th className="py-3 px-4">Category</th>
-                <th className="py-3 px-4">Vendor</th>
-                <th className="py-3 px-4">Date</th>
-                <th className="py-3 px-4 text-right">Amount (₹)</th>
-                <th className="py-3 px-4 text-center rounded-r-xl">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#D4A72C]/20 font-medium">
-              {filtered.map((item) => (
-                <tr key={item.id} className="hover:bg-[#FFF7E8]/80 transition-colors">
-                  <td className="py-3 px-4 font-bold text-[#5A0F16]">{item.invoiceNumber}</td>
-                  <td className="py-3 px-4 font-bold">{item.expenseName}</td>
-                  <td className="py-3 px-4 font-semibold text-[#E87516]">{item.category}</td>
-                  <td className="py-3 px-4 text-gray-700">{item.vendor}</td>
-                  <td className="py-3 px-4 text-gray-600">{item.date}</td>
-                  <td className="py-3 px-4 text-right font-black text-[#32070B]">
-                    ₹{item.amount.toLocaleString('en-IN')}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <button
-                        onClick={() => handleOpenEdit(item)}
-                        className="p-1.5 rounded-lg bg-[#5A0F16] text-[#F4B942] hover:bg-[#32070B] transition-colors"
-                        title="Edit Expense"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(item)}
-                        className="p-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
-                        title="Delete Expense"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs text-[#2A1710]">
+                <thead className="bg-[#32070B] text-[#F4B942] font-cinzel uppercase">
+                  <tr>
+                    <th className="py-3 px-4 rounded-l-xl">Inv #</th>
+                    <th className="py-3 px-4">Expense Description</th>
+                    <th className="py-3 px-4">Category</th>
+                    <th className="py-3 px-4">Vendor</th>
+                    <th className="py-3 px-4">Date</th>
+                    <th className="py-3 px-4 text-right">Amount (₹)</th>
+                    <th className="py-3 px-4 text-center rounded-r-xl">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#D4A72C]/20 font-medium">
+                  {filtered.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-8 text-center text-[#2A1710]/60">
+                        No expense records found matching your search.
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedExpenses.map((item) => (
+                      <tr key={item.id} className="hover:bg-[#FFF7E8]/80 transition-colors">
+                        <td className="py-3 px-4 font-bold text-[#5A0F16]">{item.invoiceNumber}</td>
+                        <td className="py-3 px-4 font-bold">{item.expenseName}</td>
+                        <td className="py-3 px-4 font-semibold text-[#E87516]">{item.category}</td>
+                        <td className="py-3 px-4 text-gray-700">{item.vendor}</td>
+                        <td className="py-3 px-4 text-gray-600">{item.date}</td>
+                        <td className="py-3 px-4 text-right font-black text-[#32070B]">
+                          ₹{item.amount.toLocaleString('en-IN')}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => handleOpenEdit(item)}
+                              className="p-1.5 rounded-lg bg-[#5A0F16] text-[#F4B942] hover:bg-[#32070B] transition-colors"
+                              title="Edit Expense"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteClick(item)}
+                              className="p-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+                              title="Delete Expense"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filtered.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+              onItemsPerPageChange={setItemsPerPage}
+              isDark={false}
+            />
+          </>
         )}
       </div>
 
