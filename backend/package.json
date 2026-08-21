@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "build": "echo Backend build ready",
     "server": "tsx src/server.ts",
     "start": "tsx src/server.ts",
     "seed": "tsx src/seed.ts"
