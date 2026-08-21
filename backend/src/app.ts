@@ -9,6 +9,9 @@ import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
 
+// Trust reverse proxy (required for Render / Heroku / Netlify backend deployments)
+app.set('trust proxy', 1);
+
 // Security Middlewares
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: '*', credentials: true }));
