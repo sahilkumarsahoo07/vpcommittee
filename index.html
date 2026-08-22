@@ -63,38 +63,64 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      (function() {
-        function removeNetlifyBadge() {
+      /* ── Netlify Badge / Drawer Killer ── */
+      (function () {
+        // 1. Override customElements.define so Netlify's web-components never register
+        var _define = customElements.define.bind(customElements);
+        customElements.define = function (name, ctor, opts) {
+          if (name && (name.includes('netlify') || name.includes('nl-'))) return;
+          return _define(name, ctor, opts);
+        };
+
+        // 2. Block fetch/XHR to Netlify badge endpoints
+        var _fetch = window.fetch;
+        window.fetch = function () {
+          var url = arguments[0];
+          if (typeof url === 'string' && url.includes('netlify')) return Promise.resolve(new Response('', { status: 200 }));
+          return _fetch.apply(this, arguments);
+        };
+
+        // 3. DOM removal function (targets both regular DOM and shadow hosts)
+        function killNetlify() {
           var selectors = [
-            '#nl-badge', '.nl-badge', '#nl-card', '.nl-card', '[aria-controls="nl-card"]',
-            'iframe[data-netlify-drawer]', 'iframe[src*="netlify"]', 'iframe[id*="netlify"]',
-            'netlify-drawer', 'netlify-drawer-root', 'netlify-cdp-drawer',
-            '[data-netlify-drawer]', '[data-netlify-badge]', '[data-netlify-preview]', '[data-netlify-feedback]',
+            '#nl-badge', '.nl-badge', '#nl-card', '.nl-card',
+            '[aria-controls="nl-card"]', '[data-netlify-drawer]', '[data-netlify-badge]',
+            '[data-netlify-preview]', '[data-netlify-feedback]', '[data-netlify-create-badge]',
             '#netlify-badge-container', '.netlify-badge',
-            'button[aria-label*="Netlify"]', 'button[aria-label*="netlify"]', 'button[aria-label*="Powered by Netlify"]',
+            'iframe[src*="netlify"]', 'iframe[id*="netlify"]', 'iframe[data-netlify-drawer]',
+            'netlify-drawer', 'netlify-drawer-root', 'netlify-cdp-drawer', 'netlify-attribution',
+            'button[aria-label*="Netlify"]', 'button[aria-label*="netlify"]',
             'a[aria-label*="Powered by Netlify"]'
           ];
-          selectors.forEach(function(sel) {
-            document.querySelectorAll(sel).forEach(function(el) {
-              el.remove();
-            });
+          selectors.forEach(function (sel) {
+            try { document.querySelectorAll(sel).forEach(function (el) { el.remove(); }); } catch (_) {}
           });
-          // Also check any fixed element containing "Powered by Netlify"
-          document.querySelectorAll('a, button, div').forEach(function(el) {
-            if (el.textContent && el.textContent.trim().toLowerCase().includes('powered by netlify')) {
-              el.remove();
-            }
+          // Text-based sweep for any element containing "Powered by Netlify"
+          document.querySelectorAll('body *').forEach(function (el) {
+            try {
+              if (el.children.length === 0 && el.textContent && el.textContent.trim().toLowerCase().includes('powered by netlify')) {
+                var p = el;
+                while (p && p !== document.body) { p = p.parentElement; }
+                if (el.closest && el.closest('[id*="nl"], [class*="nl-"], [id*="netlify"], [class*="netlify"]')) {
+                  el.closest('[id*="nl"], [class*="nl-"], [id*="netlify"], [class*="netlify"]').remove();
+                }
+              }
+            } catch (_) {}
           });
         }
-        removeNetlifyBadge();
+
+        // 4. MutationObserver — fires on every DOM change
         if (typeof MutationObserver !== 'undefined') {
-          var observer = new MutationObserver(function() {
-            removeNetlifyBadge();
-          });
-          observer.observe(document.documentElement, { childList: true, subtree: true });
+          new MutationObserver(killNetlify).observe(document.documentElement, { childList: true, subtree: true });
         }
-        window.addEventListener('DOMContentLoaded', removeNetlifyBadge);
-        window.addEventListener('load', removeNetlifyBadge);
+
+        // 5. rAF loop for first 10 seconds as extra safety net
+        var rafCount = 0;
+        function rafKill() { killNetlify(); if (++rafCount < 300) requestAnimationFrame(rafKill); }
+        requestAnimationFrame(rafKill);
+
+        window.addEventListener('DOMContentLoaded', killNetlify);
+        window.addEventListener('load', killNetlify);
       })();
     </script>
   </body>
