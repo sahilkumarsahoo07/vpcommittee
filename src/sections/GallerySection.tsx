@@ -42,19 +42,16 @@ export const GallerySection: React.FC = () => {
           const mapped: GalleryItem[] = res.data.map((item: any) => {
             const rawUrl = item.mediaUrl || item.imageUrl || item.url || '';
             const processed = processMediaUrl(rawUrl);
+            // Honour backend mediaType first, fall back to URL-detected type
             const mediaType = item.mediaType || processed.mediaType;
-            const isReel = mediaType === 'REEL';
+            const isInstagram = mediaType === 'REEL' || mediaType === 'INSTAGRAM_POST';
             const isYoutube = mediaType === 'YOUTUBE';
-            const shortcode = isReel ? extractInstagramShortcode(rawUrl) : null;
 
-            // For YouTube: use reliable youtube thumbnail
-            // For Instagram reels: use proxy (with full URL), fallback = empty so onError triggers embed
-            // For images: use the stored imageUrl directly
             const thumbUrl = isYoutube
-              ? processed.thumbnailUrl  // https://img.youtube.com/vi/ID/hqdefault.jpg — always works
-              : isReel
-              ? processed.thumbnailUrl  // full backend URL now
-              : item.imageUrl && !item.imageUrl.includes('bannerimage') && !item.imageUrl.includes('cultural-night')
+              ? processed.thumbnailUrl
+              : isInstagram
+              ? processed.thumbnailUrl
+              : item.imageUrl && !item.imageUrl.includes('bannerimage')
               ? item.imageUrl
               : (processed.thumbnailUrl || rawUrl || '');
 
@@ -185,13 +182,16 @@ export const GallerySection: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {paginatedItems.map((item) => {
               const isReel = item.mediaType === 'REEL';
+              const isInstagramPost = item.mediaType === 'INSTAGRAM_POST';
+              const isInstagram = isReel || isInstagramPost;  // any Instagram content
               const isYoutube = item.mediaType === 'YOUTUBE';
               const isGdrive = item.mediaType === 'GDRIVE';
               const isVideo = item.mediaType === 'VIDEO';
               const isPhoto = item.mediaType === 'IMAGE';
+              const isPlayable = isReel || isYoutube || isGdrive || isVideo; // only actual video types get play btn
               const isPlaying = playingItemId === item.id;
 
-              const shortcode = isReel ? extractInstagramShortcode(item.mediaUrl || '') : null;
+              const shortcode = isInstagram ? extractInstagramShortcode(item.mediaUrl || '') : null;
 
               return (
                 <div
@@ -202,164 +202,117 @@ export const GallerySection: React.FC = () => {
                       : 'border-[#D4A72C]/40 hover:border-[#F4B942] cursor-pointer'
                   }`}
                 >
-                  {/* Active Inline Instant Video Player */}
                   {isPlaying ? (
+                    /* ── PLAYING STATE (YouTube / GDrive / direct Video) ─── */
                     <div className="w-full h-full relative bg-black flex items-center justify-center">
-                      {isReel ? (
-                        <iframe
-                          src={item.embedUrl || `https://www.instagram.com/p/${shortcode}/embed/`}
-                          title={item.title}
-                          className="w-full h-full border-0 bg-black"
-                          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                          allowFullScreen
-                          scrolling="no"
-                        />
-                      ) : isYoutube ? (
-                        <iframe
-                          src={item.embedUrl}
-                          title={item.title}
+                      {isYoutube ? (
+                        <iframe src={item.embedUrl} title={item.title}
                           className="w-full h-full border-0 bg-black"
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        />
+                          allowFullScreen />
                       ) : isGdrive ? (
-                        <iframe
-                          src={item.embedUrl}
-                          title={item.title}
+                        <iframe src={item.embedUrl} title={item.title}
                           className="w-full h-full border-0 bg-black"
-                          allowFullScreen
-                        />
+                          allowFullScreen />
                       ) : isVideo ? (
-                        <video
-                          src={item.mediaUrl}
-                          controls
-                          autoPlay
-                          playsInline
-                          className="w-full h-full object-contain bg-black"
-                        />
+                        <video src={item.mediaUrl} controls autoPlay playsInline
+                          className="w-full h-full object-contain bg-black" />
                       ) : null}
 
-                      {/* In-Player Overlay Controls: Fullscreen & Stop/Close */}
+                      {/* Controls */}
                       <div className="absolute top-3 right-3 flex items-center gap-2 z-30">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedMedia(item);
-                          }}
+                        <button onClick={(e) => { e.stopPropagation(); setSelectedMedia(item); }}
                           className="p-2 rounded-xl bg-black/80 hover:bg-[#5A0F16] text-[#F4B942] border border-[#F4B942]/40 backdrop-blur-md shadow-lg transition-all"
-                          title="Open Fullscreen Player"
-                        >
+                          title="Fullscreen">
                           <Maximize2 className="w-4 h-4" />
                         </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPlayingItemId(null);
-                          }}
+                        <button onClick={(e) => { e.stopPropagation(); setPlayingItemId(null); }}
                           className="p-2 rounded-xl bg-red-950/90 hover:bg-red-900 text-white border border-red-500/40 backdrop-blur-md shadow-lg transition-all"
-                          title="Close Video"
-                        >
+                          title="Close">
                           <X className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
-                  ) : (
-                    /* Default Card Preview State */
-                    <div
-                      onClick={() => !isReel && handleCardClick(item)}
-                      className="w-full h-full relative flex items-center justify-center cursor-pointer"
-                    >
-                      {/* ── INSTAGRAM REELS: Clean styled preview card ── */}
-                      {isReel ? (
-                        <div
-                          className="w-full h-full relative overflow-hidden flex items-center justify-center cursor-pointer"
-                          onClick={() => handleCardClick(item)}
+
+                  ) : isInstagram ? (
+                    /* ── INSTAGRAM (REEL / POST) ─────────────────────────────
+                       Always show the interactive embed directly.
+                       The Instagram header (View profile btn) is hidden by
+                       pushing the iframe 62px up inside overflow:hidden.
+                       pointerEvents:auto → single click plays the video natively.
+                    ─────────────────────────────────────────────────────────── */
+                    <div className="w-full h-full relative overflow-hidden">
+                      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+                        <iframe
+                          src={item.embedUrl || `https://www.instagram.com/p/${shortcode}/embed/captioned/`}
+                          title={item.title}
                           style={{
-                            background: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 40%, #fcb045 100%)',
+                            position: 'absolute',
+                            top: '-62px',
+                            left: 0,
+                            width: '100%',
+                            height: 'calc(100% + 62px)',
+                            border: 'none',
+                            background: '#000',
+                            pointerEvents: 'auto',
                           }}
-                        >
-                          {/* Background pattern */}
-                          <div className="absolute inset-0 opacity-20"
-                            style={{
-                              backgroundImage: 'radial-gradient(circle at 20% 80%, #fff 1px, transparent 1px), radial-gradient(circle at 80% 20%, #fff 1px, transparent 1px)',
-                              backgroundSize: '30px 30px',
-                            }}
-                          />
+                          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                          allowFullScreen
+                          scrolling="no"
+                        />
+                      </div>
 
-                          {/* Center content */}
-                          <div className="relative z-10 flex flex-col items-center gap-4 text-white text-center px-6">
-                            <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-2xl">
-                              <InstagramIcon className="w-10 h-10 text-white" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-bold text-white/90 uppercase tracking-widest">Instagram Reel</p>
-                              <p className={`text-base font-extrabold text-white mt-1 line-clamp-2 ${fontClass}`}>{item.title}</p>
-                            </div>
-                            {/* Play button */}
-                            <button
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); setPlayingItemId(item.id); }}
-                              className="mt-1 w-12 h-12 rounded-full bg-white/25 backdrop-blur-sm border border-white/40 flex items-center justify-center hover:bg-white/40 hover:scale-110 transition-all duration-300 shadow-xl"
-                              title="Play Reel"
-                            >
-                              <Play className="w-5 h-5 fill-white text-white ml-0.5" />
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <>
-                          {/* Media Image / Background (YouTube, Photos, Videos) */}
-                          <img
-                            src={item.imageUrl || '/assets/bannerimage.png'}
-                            alt={item.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/assets/bannerimage.png';
-                            }}
-                          />
+                      {/* Category badge — pointer-events:none so clicks reach the iframe */}
+                      <div className="absolute top-3.5 left-3.5 z-20 pointer-events-none">
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-[#F4B942] bg-[#3A060B]/90 border border-[#F4B942]/50 backdrop-blur-md shadow-md">
+                          {item.category}
+                        </span>
+                      </div>
 
-                          {/* Gradient Scrim */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#100103] via-black/30 to-black/20 group-hover:via-black/10 transition-colors pointer-events-none" />
-                        </>
-                      )}
+                      {/* Bottom title — pointer-events:none so clicks reach the iframe */}
+                      <div className="absolute bottom-0 inset-x-0 p-4 z-20 pointer-events-none bg-gradient-to-t from-black/70 via-black/20 to-transparent">
+                        <h4 className={`text-sm font-extrabold text-[#FFF7E8] leading-snug drop-shadow line-clamp-1 ${fontClass}`}>
+                          {item.title}
+                        </h4>
+                        {item.caption && (
+                          <p className={`text-xs text-[#FFF7E8]/70 line-clamp-1 font-medium ${fontClass}`}>{item.caption}</p>
+                        )}
+                      </div>
+                    </div>
 
-                      {/* Top Floating Badges */}
+                  ) : (
+                    /* ── NON-INSTAGRAM PREVIEW ───────────────────────────────
+                       Clean thumbnail with NO play button.
+                       One click on the card starts playback immediately.
+                    ─────────────────────────────────────────────────────────── */
+                    <div
+                      className="w-full h-full relative flex items-center justify-center cursor-pointer"
+                      onClick={() => isPlayable ? setPlayingItemId(item.id) : setSelectedMedia(item)}
+                    >
+                      <img
+                        src={item.imageUrl || '/assets/bannerimage.png'}
+                        alt={item.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/assets/bannerimage.png'; }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#100103] via-black/30 to-black/10 pointer-events-none" />
+
+                      {/* Top badges */}
                       <div className="absolute top-3.5 inset-x-3.5 flex items-center justify-between z-20 pointer-events-none">
                         <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-[#F4B942] bg-[#3A060B]/90 border border-[#F4B942]/50 backdrop-blur-md shadow-md">
                           {item.category}
                         </span>
-
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold text-white/90 bg-black/60 border border-white/20 backdrop-blur-md shadow-md flex items-center gap-1.5">
-                          {isReel && <InstagramIcon className="w-3 h-3 text-pink-400" />}
-                          {isYoutube && <YoutubeIcon className="w-3 h-3 text-red-400" />}
-                          {isGdrive && <GoogleDriveIcon className="w-3 h-3 text-blue-400" />}
-                          {isVideo && <Film className="w-3 h-3 text-[#F4B942]" />}
-                          {isPhoto && <Film className="w-3 h-3 text-emerald-400" />}
-                          <span>{isReel ? 'Instagram' : isYoutube ? 'YouTube' : isPhoto ? 'Photo' : 'Video'}</span>
-                        </span>
+                        {(isYoutube || isGdrive || isVideo) && (
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold text-white/90 bg-black/60 border border-white/20 backdrop-blur-md shadow-md flex items-center gap-1.5">
+                            {isYoutube && <YoutubeIcon className="w-3 h-3 text-red-400" />}
+                            {isGdrive && <GoogleDriveIcon className="w-3 h-3 text-blue-400" />}
+                            {isVideo && <Film className="w-3 h-3 text-[#F4B942]" />}
+                            <span>{isYoutube ? 'YouTube' : isGdrive ? 'Drive' : 'Video'}</span>
+                          </span>
+                        )}
                       </div>
 
-                      {/* Instant Play Button for non-Reel Videos / YouTube */}
-                      {!isPhoto && !isReel && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-auto">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setPlayingItemId(item.id);
-                            }}
-                            className="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-[#D4A72C] via-[#F4B942] to-[#FFF7E8] text-[#32070B] flex items-center justify-center shadow-2xl hover:scale-115 active:scale-95 transition-all duration-300 border-2 border-white/80 ring-4 ring-[#F4B942]/40 group-hover:shadow-[0_0_30px_rgba(244,185,66,0.8)]"
-                            title="Click to Play Instantly"
-                          >
-                            <Play className="w-8 h-8 fill-current ml-1" />
-                          </button>
-                          <span className="mt-3 text-[11px] font-black text-[#FFF7E8] bg-black/80 px-3.5 py-1 rounded-full border border-[#F4B942]/50 backdrop-blur-md shadow-lg tracking-wider uppercase opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all">
-                            Play Instantly
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Bottom Information */}
+                      {/* Bottom info */}
                       <div className="absolute bottom-0 inset-x-0 p-4 sm:p-5 space-y-1 text-left z-20 pointer-events-none">
                         <h4 className={`text-base font-extrabold text-[#FFF7E8] group-hover:text-[#F4B942] transition-colors leading-snug drop-shadow line-clamp-1 ${fontClass}`}>
                           {item.title}

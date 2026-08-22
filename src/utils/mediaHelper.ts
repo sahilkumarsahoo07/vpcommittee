@@ -3,7 +3,7 @@
  * into embeddable URLs that play directly inside the website.
  */
 
-export type MediaType = 'IMAGE' | 'REEL' | 'YOUTUBE' | 'GDRIVE' | 'VIDEO';
+export type MediaType = 'IMAGE' | 'REEL' | 'INSTAGRAM_POST' | 'YOUTUBE' | 'GDRIVE' | 'VIDEO';
 
 export interface ProcessedMedia {
   mediaType: MediaType;
@@ -35,19 +35,22 @@ export function processMediaUrl(url: string): ProcessedMedia {
   // 1. INSTAGRAM REELS & POSTS
   if (cleanUrl.includes('instagram.com') || cleanUrl.includes('instagr.am')) {
     const shortcode = extractInstagramShortcode(cleanUrl);
+
+    // Detect if it's a Reel (video) or a regular Post (image/video)
+    const isReel = /\/reel\/|\/(tv|reels)\//i.test(cleanUrl);
+
     const embedUrl = shortcode
-      ? `https://www.instagram.com/p/${shortcode}/embed/`
+      ? `https://www.instagram.com/p/${shortcode}/embed/captioned/`
       : cleanUrl.includes('/embed')
       ? cleanUrl
-      : 'https://www.instagram.com/p/C-0XpTxy_2A/embed/';
+      : '';
 
-    // Use full backend URL so it works on Netlify (not a relative /api path)
     const thumbnailUrl = shortcode
       ? `${API_BASE}/api/media/proxy-thumbnail?shortcode=${shortcode}`
       : '';
 
     return {
-      mediaType: 'REEL',
+      mediaType: isReel ? 'REEL' : 'INSTAGRAM_POST',
       rawUrl: cleanUrl,
       embedUrl,
       thumbnailUrl,
