@@ -39,13 +39,47 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(() => {
-    const savedUser = localStorage.getItem('vighnaharta_user');
-    return savedUser ? JSON.parse(savedUser) : null;
+    try {
+      const savedUser = localStorage.getItem('vighnaharta_user') || sessionStorage.getItem('vighnaharta_user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
   });
 
   const [token, setToken] = useState<string | null>(() => {
-    return localStorage.getItem('vighnaharta_token') || null;
+    try {
+      return localStorage.getItem('vighnaharta_token') || sessionStorage.getItem('vighnaharta_token') || null;
+    } catch {
+      return null;
+    }
   });
+
+  const saveToStorage = (key: string, value: string) => {
+    try {
+      localStorage.setItem(key, value);
+    } catch (err) {
+      console.warn(`[Storage Warning] Failed to write to localStorage for key: ${key}. Attempting storage cleanup.`, err);
+      try {
+        // Clear full/corrupted localStorage and retry
+        localStorage.clear();
+        localStorage.setItem(key, value);
+      } catch (fallbackErr) {
+        // Fallback to sessionStorage if localStorage is completely blocked
+        console.warn(`[Storage Warning] Falling back to sessionStorage.`, fallbackErr);
+        sessionStorage.setItem(key, value);
+      }
+    }
+  };
+
+  const removeFromStorage = (key: string) => {
+    try {
+      localStorage.removeItem(key);
+    } catch {}
+    try {
+      sessionStorage.removeItem(key);
+    } catch {}
+  };
 
   const login = (
     email: string,
@@ -72,15 +106,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     setUser(newUser);
     setToken(userToken);
-    localStorage.setItem('vighnaharta_user', JSON.stringify(newUser));
-    localStorage.setItem('vighnaharta_token', userToken);
+    saveToStorage('vighnaharta_user', JSON.stringify(newUser));
+    saveToStorage('vighnaharta_token', userToken);
   };
 
   const updateUser = (updatedData: Partial<UserProfile>) => {
     if (user) {
       const updated = { ...user, ...updatedData };
       setUser(updated);
-      localStorage.setItem('vighnaharta_user', JSON.stringify(updated));
+      saveToStorage('vighnaharta_user', JSON.stringify(updated));
     }
   };
 
@@ -88,15 +122,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (user) {
       const updatedUser = { ...user, mustChangePassword: false };
       setUser(updatedUser);
-      localStorage.setItem('vighnaharta_user', JSON.stringify(updatedUser));
+      saveToStorage('vighnaharta_user', JSON.stringify(updatedUser));
     }
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('vighnaharta_user');
-    localStorage.removeItem('vighnaharta_token');
+    removeFromStorage('vighnaharta_user');
+    removeFromStorage('vighnaharta_token');
   };
 
   return (

@@ -60,13 +60,10 @@ export const login = async (req: Request, res: Response) => {
 
     const token = jwt.sign(
       {
-        id: user._id || user.id,
+        id: String(user._id || user.id),
         email: user.email,
         name: user.name,
         role: user.role,
-        phone: user.phone || '',
-        address: user.address || '',
-        profilePhoto: user.profilePhoto || '',
         permissions: user.permissions || [],
         mustChangePassword: user.mustChangePassword ?? false,
       },
