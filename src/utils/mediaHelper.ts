@@ -30,6 +30,7 @@ export function processMediaUrl(url: string): ProcessedMedia {
   }
 
   const cleanUrl = url.trim();
+  const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api$/, '');
 
   // 1. INSTAGRAM REELS & POSTS
   if (cleanUrl.includes('instagram.com') || cleanUrl.includes('instagr.am')) {
@@ -40,9 +41,9 @@ export function processMediaUrl(url: string): ProcessedMedia {
       ? cleanUrl
       : 'https://www.instagram.com/p/C-0XpTxy_2A/embed/';
 
-    // Dynamic direct Instagram media thumbnail resolution via proxy
+    // Use full backend URL so it works on Netlify (not a relative /api path)
     const thumbnailUrl = shortcode
-      ? `/api/media/proxy-thumbnail?shortcode=${shortcode}`
+      ? `${API_BASE}/api/media/proxy-thumbnail?shortcode=${shortcode}`
       : '';
 
     return {

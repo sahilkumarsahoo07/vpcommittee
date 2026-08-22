@@ -44,12 +44,19 @@ export const GallerySection: React.FC = () => {
             const processed = processMediaUrl(rawUrl);
             const mediaType = item.mediaType || processed.mediaType;
             const isReel = mediaType === 'REEL';
+            const isYoutube = mediaType === 'YOUTUBE';
             const shortcode = isReel ? extractInstagramShortcode(rawUrl) : null;
-            const thumbUrl = isReel
-              ? (shortcode ? `/api/media/proxy-thumbnail?shortcode=${shortcode}` : processed.thumbnailUrl)
-              : (item.imageUrl && !item.imageUrl.includes('bannerimage') && !item.imageUrl.includes('cultural-night')
-                ? item.imageUrl
-                : (processed.thumbnailUrl || rawUrl || '/assets/bannerimage.png'));
+
+            // For YouTube: use reliable youtube thumbnail
+            // For Instagram reels: use proxy (with full URL), fallback = empty so onError triggers embed
+            // For images: use the stored imageUrl directly
+            const thumbUrl = isYoutube
+              ? processed.thumbnailUrl  // https://img.youtube.com/vi/ID/hqdefault.jpg — always works
+              : isReel
+              ? processed.thumbnailUrl  // full backend URL now
+              : item.imageUrl && !item.imageUrl.includes('bannerimage') && !item.imageUrl.includes('cultural-night')
+              ? item.imageUrl
+              : (processed.thumbnailUrl || rawUrl || '');
 
             return {
               id: item._id || item.id,
@@ -268,7 +275,13 @@ export const GallerySection: React.FC = () => {
                         alt={item.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/assets/bannerimage.png';
+                          const img = e.target as HTMLImageElement;
+                          if (isReel) {
+                            // Proxy thumbnail failed (backend unreachable on Netlify) — auto-show embed player
+                            setPlayingItemId(item.id);
+                          } else {
+                            img.src = '/assets/bannerimage.png';
+                          }
                         }}
                       />
 
