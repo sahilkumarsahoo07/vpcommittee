@@ -266,30 +266,56 @@ export const GallerySection: React.FC = () => {
                   ) : (
                     /* Default Card Preview State */
                     <div
-                      onClick={() => handleCardClick(item)}
+                      onClick={() => !isReel && handleCardClick(item)}
                       className="w-full h-full relative flex items-center justify-center cursor-pointer"
                     >
-                      {/* Media Image / Background */}
-                      <img
-                        src={item.imageUrl || '/assets/bannerimage.png'}
-                        alt={item.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                        onError={(e) => {
-                          const img = e.target as HTMLImageElement;
-                          if (isReel) {
-                            // Proxy thumbnail failed (backend unreachable on Netlify) — auto-show embed player
-                            setPlayingItemId(item.id);
-                          } else {
-                            img.src = '/assets/bannerimage.png';
-                          }
-                        }}
-                      />
+                      {/* ── INSTAGRAM REELS: Show actual embed directly in the card ── */}
+                      {isReel ? (
+                        <div className="w-full h-full relative overflow-hidden">
+                          <iframe
+                            src={item.embedUrl || `https://www.instagram.com/p/${extractInstagramShortcode(item.mediaUrl || '')}/embed/`}
+                            title={item.title}
+                            className="w-full h-full border-0 bg-black"
+                            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                            allowFullScreen
+                            scrolling="no"
+                            style={{ pointerEvents: 'none' }}
+                          />
+                          {/* Invisible clickable overlay to open fullscreen on click */}
+                          <div
+                            className="absolute inset-0 z-10 flex flex-col items-center justify-center"
+                            onClick={() => handleCardClick(item)}
+                          >
+                            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); setPlayingItemId(item.id); }}
+                              className="relative z-20 w-14 h-14 rounded-full bg-gradient-to-tr from-[#D4A72C] via-[#F4B942] to-[#FFF7E8] text-[#32070B] flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 border-2 border-white/80 ring-4 ring-[#F4B942]/40 opacity-0 group-hover:opacity-100"
+                              title="Play Full Screen"
+                            >
+                              <Play className="w-6 h-6 fill-current ml-0.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Media Image / Background (YouTube, Photos, Videos) */}
+                          <img
+                            src={item.imageUrl || '/assets/bannerimage.png'}
+                            alt={item.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/assets/bannerimage.png';
+                            }}
+                          />
 
-                      {/* Gradient Scrim */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#100103] via-black/30 to-black/20 group-hover:via-black/10 transition-colors pointer-events-none" />
+                          {/* Gradient Scrim */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#100103] via-black/30 to-black/20 group-hover:via-black/10 transition-colors pointer-events-none" />
+                        </>
+                      )}
 
                       {/* Top Floating Badges */}
-                      <div className="absolute top-3.5 inset-x-3.5 flex items-center justify-between z-10 pointer-events-none">
+                      <div className="absolute top-3.5 inset-x-3.5 flex items-center justify-between z-20 pointer-events-none">
                         <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-[#F4B942] bg-[#3A060B]/90 border border-[#F4B942]/50 backdrop-blur-md shadow-md">
                           {item.category}
                         </span>
@@ -304,8 +330,8 @@ export const GallerySection: React.FC = () => {
                         </span>
                       </div>
 
-                      {/* Instant Play Button for Videos / Reels / YouTube */}
-                      {!isPhoto && (
+                      {/* Instant Play Button for non-Reel Videos / YouTube */}
+                      {!isPhoto && !isReel && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-auto">
                           <button
                             type="button"
@@ -325,7 +351,7 @@ export const GallerySection: React.FC = () => {
                       )}
 
                       {/* Bottom Information */}
-                      <div className="absolute bottom-0 inset-x-0 p-4 sm:p-5 space-y-1 text-left z-10 pointer-events-none">
+                      <div className="absolute bottom-0 inset-x-0 p-4 sm:p-5 space-y-1 text-left z-20 pointer-events-none">
                         <h4 className={`text-base font-extrabold text-[#FFF7E8] group-hover:text-[#F4B942] transition-colors leading-snug drop-shadow line-clamp-1 ${fontClass}`}>
                           {item.title}
                         </h4>
