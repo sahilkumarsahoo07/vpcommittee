@@ -203,46 +203,6 @@ export const AdminBudgetPage: React.FC = () => {
     }
   };
 
-  // Auto-seed Standard Budget Heads
-  const handleAutoSeedPresets = async () => {
-    const defaultAllocations: Record<string, number> = {
-      'Pandal & Mandap': 150000,
-      'Idol & Sculpting': 75000,
-      'Illumination & Lighting': 50000,
-      'Sound & Music Setup': 35000,
-      'Maha Prasad & Food': 80000,
-      'Decoration & Flowers': 40000,
-      'Cultural Program & Stage': 30000,
-      'Marketing & Printing': 15000,
-      'Transportation & Logistics': 15000,
-      'Security & Cleaning': 10000,
-    };
-
-    const presetList: CategoryItem[] = Object.entries(defaultAllocations).map(([cat, alloc], idx) => ({
-      id: `preset_${idx}`,
-      category: cat,
-      allocated: alloc,
-      spent: 0,
-    }));
-
-    setCategories(presetList);
-
-    try {
-      const payload = {
-        totalAllocatedBudget: presetList.reduce((sum, c) => sum + c.allocated, 0),
-        categories: presetList.map((c) => ({
-          category: c.category,
-          allocatedAmount: c.allocated,
-          spent: 0,
-        })),
-      };
-      await adminAPI.updateBudget(payload);
-      await fetchBudgetAndExpenses();
-    } catch {
-      // Fallback
-    }
-  };
-
   // PDF Download Handler
   const handleDownloadPDF = async () => {
     try {
@@ -425,17 +385,10 @@ export const AdminBudgetPage: React.FC = () => {
             Loading budget data...
           </div>
         ) : categories.length === 0 ? (
-          <div className="text-center py-12 space-y-3">
+          <div className="text-center py-12 space-y-2">
             <div className="text-gray-500 text-xs font-semibold">
-              No budget heads allocated yet. You can create custom heads or auto-load standard festival heads.
+              No budget heads allocated yet. Click &quot;+ Allocate Budget Head&quot; above to add custom budget heads.
             </div>
-            <button
-              onClick={handleAutoSeedPresets}
-              className="px-4 py-2.5 rounded-xl bg-[#5A0F16] text-[#F4B942] border border-[#F4B942] text-xs font-bold uppercase tracking-wider hover:bg-[#32070B] transition-all inline-flex items-center gap-2 shadow"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>Auto-load Standard Festival Heads</span>
-            </button>
           </div>
         ) : activeView === 'cards' ? (
           /* Cards View */
