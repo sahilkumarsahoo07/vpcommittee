@@ -269,31 +269,40 @@ export const GallerySection: React.FC = () => {
                       onClick={() => !isReel && handleCardClick(item)}
                       className="w-full h-full relative flex items-center justify-center cursor-pointer"
                     >
-                      {/* ── INSTAGRAM REELS: Show actual embed directly in the card ── */}
+                      {/* ── INSTAGRAM REELS: Clean styled preview card ── */}
                       {isReel ? (
-                        <div className="w-full h-full relative overflow-hidden">
-                          <iframe
-                            src={item.embedUrl || `https://www.instagram.com/p/${extractInstagramShortcode(item.mediaUrl || '')}/embed/`}
-                            title={item.title}
-                            className="w-full h-full border-0 bg-black"
-                            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                            allowFullScreen
-                            scrolling="no"
-                            style={{ pointerEvents: 'none' }}
+                        <div
+                          className="w-full h-full relative overflow-hidden flex items-center justify-center cursor-pointer"
+                          onClick={() => handleCardClick(item)}
+                          style={{
+                            background: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 40%, #fcb045 100%)',
+                          }}
+                        >
+                          {/* Background pattern */}
+                          <div className="absolute inset-0 opacity-20"
+                            style={{
+                              backgroundImage: 'radial-gradient(circle at 20% 80%, #fff 1px, transparent 1px), radial-gradient(circle at 80% 20%, #fff 1px, transparent 1px)',
+                              backgroundSize: '30px 30px',
+                            }}
                           />
-                          {/* Invisible clickable overlay to open fullscreen on click */}
-                          <div
-                            className="absolute inset-0 z-10 flex flex-col items-center justify-center"
-                            onClick={() => handleCardClick(item)}
-                          >
-                            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
+
+                          {/* Center content */}
+                          <div className="relative z-10 flex flex-col items-center gap-4 text-white text-center px-6">
+                            <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-2xl">
+                              <InstagramIcon className="w-10 h-10 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-white/90 uppercase tracking-widest">Instagram Reel</p>
+                              <p className={`text-base font-extrabold text-white mt-1 line-clamp-2 ${fontClass}`}>{item.title}</p>
+                            </div>
+                            {/* Play button */}
                             <button
                               type="button"
                               onClick={(e) => { e.stopPropagation(); setPlayingItemId(item.id); }}
-                              className="relative z-20 w-14 h-14 rounded-full bg-gradient-to-tr from-[#D4A72C] via-[#F4B942] to-[#FFF7E8] text-[#32070B] flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 border-2 border-white/80 ring-4 ring-[#F4B942]/40 opacity-0 group-hover:opacity-100"
-                              title="Play Full Screen"
+                              className="mt-1 w-12 h-12 rounded-full bg-white/25 backdrop-blur-sm border border-white/40 flex items-center justify-center hover:bg-white/40 hover:scale-110 transition-all duration-300 shadow-xl"
+                              title="Play Reel"
                             >
-                              <Play className="w-6 h-6 fill-current ml-0.5" />
+                              <Play className="w-5 h-5 fill-white text-white ml-0.5" />
                             </button>
                           </div>
                         </div>
