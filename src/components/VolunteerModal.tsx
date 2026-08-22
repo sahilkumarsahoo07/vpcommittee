@@ -180,11 +180,11 @@ export const VolunteerModal: React.FC<VolunteerModalProps> = ({ isOpen, onClose 
                   {t.volunteerModal.msgLabel}
                 </label>
                 <textarea
-                  rows={2}
+                  rows={3}
                   placeholder={t.volunteerModal.msgPlaceholder}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className={`w-full px-3 py-2 rounded-lg border border-[#D4A72C]/40 bg-[#5A0F16]/40 text-[#FFF7E8] text-sm focus:outline-none focus:border-[#F4B942] resize-none ${fontClass}`}
+                  className={`w-full min-h-[75px] px-3 py-2 rounded-lg border border-[#D4A72C]/40 bg-[#5A0F16]/40 text-[#FFF7E8] text-sm focus:outline-none focus:border-[#F4B942] resize-y leading-relaxed ${fontClass}`}
                 />
               </div>
 

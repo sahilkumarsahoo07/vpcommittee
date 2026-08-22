@@ -204,77 +204,77 @@ export const AdminEventsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#D4A72C]/40 pb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-[#D4A72C]/40 pb-3">
         <div>
-          <h2 className="font-cinzel text-2xl font-black text-[#32070B] uppercase tracking-wider">
+          <h2 className="font-cinzel text-lg sm:text-2xl font-black text-[#32070B] uppercase tracking-wider">
             Ganesh Mahotsav Events & Schedule CMS
           </h2>
-          <p className="text-xs text-[#2A1710]/70 font-semibold">
+          <p className="text-[11px] sm:text-xs text-[#2A1710]/70 font-semibold">
             Schedule Ganesh Utsav rituals with interactive calendar picker and multi-language support (English, Hindi, Odia).
           </p>
         </div>
 
         <button
           onClick={handleOpenAdd}
-          className="px-4 py-2.5 rounded-xl bg-[#5A0F16] text-[#F4B942] border border-[#F4B942] font-black text-xs uppercase tracking-wider hover:bg-[#32070B] transition-all flex items-center gap-2 shadow"
+          className="px-3.5 py-2 rounded-xl bg-[#5A0F16] text-[#F4B942] border border-[#F4B942] font-black text-xs uppercase tracking-wider hover:bg-[#32070B] transition-all flex items-center gap-1.5 shadow"
         >
-          <Plus className="w-4 h-4" />
-          <span>Add New Event</span>
+          <Plus className="w-3.5 h-3.5" />
+          <span>Add Event</span>
         </button>
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-[#32070B] font-cinzel font-bold text-sm">Loading festival schedule from database...</div>
+        <div className="text-center py-12 text-[#32070B] font-cinzel font-bold text-xs">Loading festival schedule from database...</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
           {events.map((evt) => (
             <div
               key={evt.id}
-              className="bg-[#240407] text-[#FFF7E8] border-2 border-[#D4A72C]/40 rounded-3xl p-5 shadow-md space-y-3 relative"
+              className="bg-[#240407] text-[#FFF7E8] border-2 border-[#D4A72C]/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-sm space-y-2.5 relative"
             >
-              <div className="flex justify-between items-start">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-[#F4B942]" />
-                  <h4 className="font-cinzel font-black text-base text-[#F4B942] uppercase">{evt.title}</h4>
+              <div className="flex justify-between items-start gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Calendar className="w-3.5 h-3.5 text-[#F4B942] shrink-0" />
+                  <h4 className="font-cinzel font-black text-sm sm:text-base text-[#F4B942] uppercase truncate">{evt.title}</h4>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#D4A72C] text-[#32070B] text-[10px] font-black uppercase">
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="px-2 py-0.5 rounded-full bg-[#D4A72C] text-[#32070B] text-[9.5px] font-black uppercase">
                     {evt.status}
                   </span>
                   <button
                     onClick={() => handleOpenEdit(evt)}
-                    className="p-1.5 rounded-lg bg-[#5A0F16] text-[#F4B942] hover:bg-[#32070B] transition-colors ml-2"
+                    className="p-1.5 rounded-lg bg-[#5A0F16] text-[#F4B942] hover:bg-[#32070B] transition-colors"
                     title="Edit Event"
                   >
-                    <Edit2 className="w-3.5 h-3.5" />
+                    <Edit2 className="w-3 h-3" />
                   </button>
                   <button
                     onClick={() => handleDeleteClick(evt)}
                     className="p-1.5 rounded-lg bg-red-900/60 hover:bg-red-700 text-red-200 text-xs font-bold transition-colors"
                     title="Delete Event"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="w-3 h-3" />
                   </button>
                 </div>
               </div>
 
-              <p className="text-xs text-[#FFF7E8]/80 leading-relaxed font-medium">{evt.description}</p>
+              <p className="text-[11px] sm:text-xs text-[#FFF7E8]/80 leading-relaxed font-medium line-clamp-3">{evt.description}</p>
 
               {(evt.title_hi || evt.title_or) && (
-                <div className="bg-[#170204]/80 p-2.5 rounded-xl border border-[#D4A72C]/20 text-[11px] text-[#F4B942] space-y-1">
-                  {evt.title_hi && <div><strong className="text-[#E87516]">Hindi (हिंदी):</strong> {evt.title_hi}</div>}
-                  {evt.title_or && <div><strong className="text-[#E87516]">Odia (ଓଡ଼ିଆ):</strong> {evt.title_or}</div>}
+                <div className="bg-[#170204]/80 p-2 rounded-xl border border-[#D4A72C]/20 text-[10.5px] text-[#F4B942] space-y-0.5">
+                  {evt.title_hi && <div className="truncate"><strong className="text-[#E87516]">Hindi:</strong> {evt.title_hi}</div>}
+                  {evt.title_or && <div className="truncate"><strong className="text-[#E87516]">Odia:</strong> {evt.title_or}</div>}
                 </div>
               )}
 
-              <div className="text-xs space-y-1 border-t border-[#D4A72C]/30 pt-3">
-                <div className="flex items-center gap-2 text-[#F4B942]">
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span>Scheduled Date: {evt.date} ({evt.startTime} - {evt.endTime})</span>
+              <div className="text-[11px] space-y-1 border-t border-[#D4A72C]/30 pt-2.5">
+                <div className="flex items-center gap-1.5 text-[#F4B942] truncate">
+                  <Calendar className="w-3 h-3 shrink-0" />
+                  <span className="truncate">Date: {evt.date} ({evt.startTime} - {evt.endTime})</span>
                 </div>
-                <div className="flex items-center gap-2 text-[#FFF7E8]/70">
-                  <MapPin className="w-3.5 h-3.5 text-[#D4A72C]" />
-                  <span>{evt.location}</span>
+                <div className="flex items-center gap-1.5 text-[#FFF7E8]/70 truncate">
+                  <MapPin className="w-3 h-3 text-[#D4A72C] shrink-0" />
+                  <span className="truncate">{evt.location}</span>
                 </div>
               </div>
             </div>
@@ -348,14 +348,17 @@ export const AdminEventsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase text-[#FFF7E8]/80 block mb-1">English Description</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-bold uppercase text-[#FFF7E8]/80 block">English Description</label>
+                  <span className="text-[10px] text-[#F4B942]/80 font-mono font-bold">{description.length} chars</span>
+                </div>
                 <textarea
-                  rows={2}
+                  rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   onBlur={handleAutoFillTranslations}
-                  placeholder="Details of ritual..."
-                  className="w-full bg-[#170204] border border-[#D4A72C]/40 rounded-xl py-2 px-3 text-xs text-[#FFF7E8] resize-none"
+                  placeholder="Details of ritual, special guests, or schedule..."
+                  className="w-full min-h-[90px] bg-[#170204] border border-[#D4A72C]/40 focus:border-[#F4B942] rounded-xl py-2 px-3 text-xs text-[#FFF7E8] resize-y outline-none leading-relaxed"
                 />
               </div>
 
@@ -386,11 +389,11 @@ export const AdminEventsPage: React.FC = () => {
                     className="w-full bg-[#240407] border border-[#D4A72C]/40 rounded-xl py-1.5 px-3 text-xs text-[#FFF7E8]"
                   />
                   <textarea
-                    rows={2}
+                    rows={3}
                     value={descriptionHi}
                     onChange={(e) => setDescriptionHi(e.target.value)}
                     placeholder="हिंदी में विवरण..."
-                    className="w-full bg-[#240407] border border-[#D4A72C]/40 rounded-xl py-1.5 px-3 text-xs text-[#FFF7E8] resize-none"
+                    className="w-full min-h-[80px] bg-[#240407] border border-[#D4A72C]/40 focus:border-[#F4B942] rounded-xl py-2 px-3 text-xs text-[#FFF7E8] resize-y outline-none leading-relaxed"
                   />
                 </div>
 
@@ -404,11 +407,11 @@ export const AdminEventsPage: React.FC = () => {
                     className="w-full bg-[#240407] border border-[#D4A72C]/40 rounded-xl py-1.5 px-3 text-xs text-[#FFF7E8]"
                   />
                   <textarea
-                    rows={2}
+                    rows={3}
                     value={descriptionOr}
                     onChange={(e) => setDescriptionOr(e.target.value)}
                     placeholder="ଓଡ଼ିଆରେ ବିବରଣୀ..."
-                    className="w-full bg-[#240407] border border-[#D4A72C]/40 rounded-xl py-1.5 px-3 text-xs text-[#FFF7E8] resize-none"
+                    className="w-full min-h-[80px] bg-[#240407] border border-[#D4A72C]/40 focus:border-[#F4B942] rounded-xl py-2 px-3 text-xs text-[#FFF7E8] resize-y outline-none leading-relaxed"
                   />
                 </div>
               </div>

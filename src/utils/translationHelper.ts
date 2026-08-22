@@ -14,6 +14,77 @@ const HINDI_MAP: Record<string, string> = {
     'सभी पंजीकृत स्वयंसेवकों से अनुरोध है कि शाम 05:00 बजे सुरक्षा और भीड़ प्रबंधन की बैठक में भाग लें।',
   'Grand holy procession bringing Lord Ganesha idol to main mandap with dhols and devotional chanting.':
     'भव्य पवित्र शोभा यात्रा: भगवान श्री गणेश जी की प्रतिमा को ढोल-नगाड़ों एवं भक्ति जयकारों के साथ मुख्य मंडप में लाना।',
+
+  // Committee Leadership & Roles
+  'Official Organizers': 'आधिकारिक आयोजक',
+  'OFFICIAL ORGANIZERS': 'आधिकारिक आयोजक',
+  'Committee Executive Leadership': 'समिति कार्यकारिणी नेतृत्व',
+  'COMMITTEE EXECUTIVE LEADERSHIP': 'समिति कार्यकारिणी नेतृत्व',
+  'Our Leadership & Members': 'हमारा नेतृत्व एवं सदस्य',
+  'OUR LEADERSHIP & MEMBERS': 'हमारा नेतृत्व एवं सदस्य',
+  'Our Members': 'हमारे सदस्य',
+  'OUR MEMBERS': 'हमारे सदस्य',
+  'Founder': 'संस्थापक',
+  'FOUNDER': 'संस्थापक',
+  'President': 'अध्यक्ष',
+  'PRESIDENT': 'अध्यक्ष',
+  'Vice President': 'उपाध्यक्ष',
+  'VICE_PRESIDENT': 'उपाध्यक्ष',
+  'VICE PRESIDENT': 'उपाध्यक्ष',
+  'Secretary': 'महासचिव',
+  'SECRETARY': 'महासचिव',
+  'General Secretary': 'महासचिव',
+  'GENERAL SECRETARY': 'महासचिव',
+  'Joint Secretary': 'संयुक्त सचिव',
+  'JOINT_SECRETARY': 'संयुक्त सचिव',
+  'JOINT SECRETARY': 'संयुक्त सचिव',
+  'Treasurer': 'कोषाध्यक्ष',
+  'TREASURER': 'कोषाध्यक्ष',
+  'Treasurer / Financial Head': 'कोषाध्यक्ष / वित्त प्रमुख',
+  'TREASURER / FINANCIAL HEAD': 'कोषाध्यक्ष / वित्त प्रमुख',
+  'President & Founder': 'अध्यक्ष एवं संस्थापक',
+  'PRESIDENT & FOUNDER': 'अध्यक्ष एवं संस्थापक',
+  'Cultural Head': 'सांस्कृतिक प्रमुख',
+  'CULTURAL_HEAD': 'सांस्कृतिक प्रमुख',
+  'CULTURAL HEAD': 'सांस्कृतिक प्रमुख',
+  'Volunteer Lead': 'स्वयंसेवक प्रमुख',
+  'VOLUNTEER_LEAD': 'स्वयंसेवक प्रमुख',
+  'VOLUNTEER LEAD': 'स्वयंसेवक प्रमुख',
+  'Committee Member': 'समिति सदस्य',
+  'COMMITTEE_MEMBER': 'समिति सदस्य',
+  'COMMITTEE MEMBER': 'समिति सदस्य',
+  'Member': 'सदस्य',
+  'MEMBER': 'कार्यकारी सदस्य',
+  'Executive Member': 'कार्यकारी सदस्य',
+  'EXECUTIVE MEMBER': 'कार्यकारी सदस्य',
+  'Volunteer': 'स्वयंसेवक',
+  'VOLUNTEER': 'स्वयंसेवक',
+  'Active': 'सक्रिय',
+  'ACTIVE': 'सक्रिय',
+
+  // Volunteers Showcase
+  'Best Volunteers': 'सर्वश्रेष्ठ स्वयंसेवक',
+  'BEST VOLUNTEERS': 'सर्वश्रेष्ठ स्वयंसेवक',
+  'Seva Ratna & Recognition': 'सेवा रत्न एवं सम्मान',
+  'SEVA RATNA & RECOGNITION': 'सेवा रत्न एवं सम्मान',
+  'Honoring our devoted volunteers and community heroes who selflessly serve with unwavering dedication throughout Ganesh Utsav celebrations.':
+    'गणेश उत्सव के दौरान निष्ठा और समर्पण के साथ निस्वार्थ सेवा करने वाले हमारे समर्पित स्वयंसेवकों एवं समाज सेवकों का सम्मान।',
+  'Active Volunteer': 'सक्रिय स्वयंसेवक',
+  'View Profile': 'प्रोफ़ाइल देखें',
+  'Close Profile': 'बंद करें',
+  'About Volunteer & Seva': 'स्वयंसेवक एवं सेवा विवरण',
+  'Key Contributions & Achievements': 'प्रमुख योगदान एवं उपलब्धियां',
+  'Certified Festival Seva Volunteer': 'प्रमाणित उत्सव सेवा स्वयंसेवक',
+  'Recognized by Vighnaharta Puja Executive Committee': 'विघ्नहर्ता पूजा कार्यकारिणी समिति द्वारा सम्मानित',
+  'Community Service': 'सामुदायिक सेवा',
+  'Events & Pandal': 'उत्सव एवं मण्डप',
+  'Puja & Rituals': 'पूजा एवं अनुष्ठान',
+  'Maha Prasad Seva': 'महाप्रसाद सेवा',
+  'Crowd & Security': 'भीड़ एवं सुरक्षा',
+  'Media & Cultural': 'मीडिया एवं सांस्कृतिक',
+  'Senior Community Volunteer': 'वरिष्ठ सामुदायिक स्वयंसेवक',
+  'Cultural & Stage In-charge': 'सांस्कृतिक एवं मंच प्रभारी',
+  'Crowd & Queue Lead': 'भीड़ एवं कतार प्रमुख',
 };
 
 const ODIA_MAP: Record<string, string> = {
@@ -29,6 +100,77 @@ const ODIA_MAP: Record<string, string> = {
     'ସମସ୍ତ ପଞ୍ଜୀକୃତ ସ୍ୱେଚ୍ଛାସେବୀଙ୍କୁ ସନ୍ଧ୍ୟା ୦୫:୦୦ ଟାରେ ସୁରକ୍ଷା ଓ ଭିଡ଼ ନିୟନ୍ତ୍ରଣ ଆଲୋଚନାରେ ଯୋଗଦେବାକୁ ଅନୁରୋଧ।',
   'Grand holy procession bringing Lord Ganesha idol to main mandap with dhols and devotional chanting.':
     'ଭବ୍ୟ ପବିତ୍ର ଶୋଭାଯାତ୍ରା: ଢୋଲ-ମାଦଳ ଓ ଭକ୍ତି ଜୟଗାନ ସହିତ ଭଗବାନ ଶ୍ରୀ ଗଣେଶଙ୍କ ମୂର୍ତ୍ତିକୁ ମୁଖ୍ୟ ମଣ୍ଡପକୁ ବିରାଜମାନ କରାଇବା।',
+
+  // Committee Leadership & Roles
+  'Official Organizers': 'ଅଧିକୃତ ଆୟୋଜକ',
+  'OFFICIAL ORGANIZERS': 'ଅଧିକୃତ ଆୟୋଜକ',
+  'Committee Executive Leadership': 'କମିଟି କାର୍ଯ୍ୟକାରିଣୀ ନେତୃତ୍ୱ',
+  'COMMITTEE EXECUTIVE LEADERSHIP': 'କମିଟି କାର୍ଯ୍ୟକାରିଣୀ ନେତୃତ୍ୱ',
+  'Our Leadership & Members': 'ଆମ ନେତୃତ୍ୱ ଓ ସଦସ୍ୟ',
+  'OUR LEADERSHIP & MEMBERS': 'ଆମ ନେତୃତ୍ୱ ଓ ସଦସ୍ୟ',
+  'Our Members': 'ଆମ ସଦସ୍ୟ',
+  'OUR MEMBERS': 'ଆମ ସଦସ୍ୟ',
+  'Founder': 'ପ୍ରତିଷ୍ଠାତା',
+  'FOUNDER': 'ପ୍ରତିଷ୍ଠାତା',
+  'President': 'ସଭାପତି',
+  'PRESIDENT': 'ସଭାପତି',
+  'Vice President': 'ଉପସଭାପତି',
+  'VICE_PRESIDENT': 'ଉପସଭାପତି',
+  'VICE PRESIDENT': 'ଉପସଭାପତି',
+  'Secretary': 'ସାଧାରଣ ସମ୍ପାଦକ',
+  'SECRETARY': 'ସାଧାରଣ ସମ୍ପାଦକ',
+  'General Secretary': 'ସାଧାରଣ ସମ୍ପାଦକ',
+  'GENERAL SECRETARY': 'ସାଧାରଣ ସମ୍ପାଦକ',
+  'Joint Secretary': 'ଯୁଗ୍ମ ସମ୍ପାଦକ',
+  'JOINT_SECRETARY': 'ଯୁଗ୍ମ ସମ୍ପାଦକ',
+  'JOINT SECRETARY': 'ଯୁଗ୍ମ ସମ୍ପାଦକ',
+  'Treasurer': 'କୋଷାଧ୍ୟକ୍ଷ',
+  'TREASURER': 'କୋଷାଧ୍ୟକ୍ଷ',
+  'Treasurer / Financial Head': 'କୋଷାଧ୍ୟକ୍ଷ / ଆର୍ଥିକ ମୁଖ୍ୟ',
+  'TREASURER / FINANCIAL HEAD': 'କୋଷାଧ୍ୟକ୍ଷ / ଆର୍ଥିକ ମୁଖ୍ୟ',
+  'President & Founder': 'ସଭାପତି ଓ ପ୍ରତିଷ୍ଠାତା',
+  'PRESIDENT & FOUNDER': 'ସଭାପତି ଓ ପ୍ରତିଷ୍ଠାତା',
+  'Cultural Head': 'ସାଂସ୍କୃତିକ ପ୍ରମୁଖ',
+  'CULTURAL_HEAD': 'ସାଂସ୍କୃତିକ ପ୍ରମୁଖ',
+  'CULTURAL HEAD': 'ସାଂସ୍କୃତିକ ପ୍ରମୁଖ',
+  'Volunteer Lead': 'ସ୍ୱେଚ୍ଛାସେବୀ ପ୍ରମୁଖ',
+  'VOLUNTEER_LEAD': 'ସ୍ୱେଚ୍ଛାସେବୀ ପ୍ରମୁଖ',
+  'VOLUNTEER LEAD': 'ସ୍ୱେଚ୍ଛାସେବୀ ପ୍ରମୁଖ',
+  'Committee Member': 'କମିଟି ସଦସ୍ୟ',
+  'COMMITTEE_MEMBER': 'କମିଟି ସଦସ୍ୟ',
+  'COMMITTEE MEMBER': 'କମିଟି ସଦସ୍ୟ',
+  'Member': 'ସଦସ୍ୟ',
+  'MEMBER': 'କାର୍ଯ୍ୟକାରୀ ସଦସ୍ୟ',
+  'Executive Member': 'କାର୍ଯ୍ୟକାରୀ ସଦସ୍ୟ',
+  'EXECUTIVE MEMBER': 'କାର୍ଯ୍ୟକାରୀ ସଦସ୍ୟ',
+  'Volunteer': 'ସ୍ୱେଚ୍ଛାସେବୀ',
+  'VOLUNTEER': 'ସ୍ୱେଚ୍ଛାସେବୀ',
+  'Active': 'ସକ୍ରିୟ',
+  'ACTIVE': 'ସକ୍ରିୟ',
+
+  // Volunteers Showcase
+  'Best Volunteers': 'ଶ୍ରେଷ୍ଠ ସ୍ୱେଚ୍ଛାସେବୀ',
+  'BEST VOLUNTEERS': 'ଶ୍ରେଷ୍ଠ ସ୍ୱେଚ୍ଛାସେବୀ',
+  'Seva Ratna & Recognition': 'ସେବା ରତ୍ନ ଓ ସମ୍ମାନ',
+  'SEVA RATNA & RECOGNITION': 'ସେବା ରତ୍ନ ଓ ସମ୍ମାନ',
+  'Honoring our devoted volunteers and community heroes who selflessly serve with unwavering dedication throughout Ganesh Utsav celebrations.':
+    'ଗଣେଶ ପୂଜା ସମୟରେ ନିସ୍ୱାର୍ଥପର ଭାବେ ନିଷ୍ଠା ଓ ଭକ୍ତିର ସହ ସେବା ପ୍ରଦାନ କରୁଥିବା ଆମର ସମର୍ପିତ ସ୍ୱେଚ୍ଛାସେବୀ ଓ ସମାଜ ସେବକମାନଙ୍କୁ ସମ୍ମାନ।',
+  'Active Volunteer': 'ସକ୍ରିୟ ସ୍ୱେଚ୍ଛାସେବୀ',
+  'View Profile': 'ପ୍ରୋଫାଇଲ୍ ଦେଖନ୍ତୁ',
+  'Close Profile': 'ବନ୍ଦ କରନ୍ତୁ',
+  'About Volunteer & Seva': 'ସ୍ୱେଚ୍ଛାସେବୀ ଓ ସେବା ବିବରଣୀ',
+  'Key Contributions & Achievements': 'ପ୍ରମୁଖ ଅବଦାନ ଓ ସଫଳତା',
+  'Certified Festival Seva Volunteer': 'ପ୍ରମାଣିତ ଉତ୍ସବ ସେବା ସ୍ୱେଚ୍ଛାସେବୀ',
+  'Recognized by Vighnaharta Puja Executive Committee': 'ବିଘ୍ନହର୍ତ୍ତା ପୂଜା କାର୍ଯ୍ୟକାରିଣୀ କମିଟି ଦ୍ୱାରା ସମ୍ମାନିତ',
+  'Community Service': 'ସାମାଜିକ ସେବା',
+  'Events & Pandal': 'ଉତ୍ସବ ଓ ମଣ୍ଡପ',
+  'Puja & Rituals': 'ପୂଜା ଓ ରୀତିନୀତି',
+  'Maha Prasad Seva': 'ମହାପ୍ରସାଦ ସେବା',
+  'Crowd & Security': 'ଶୃଙ୍ଖଳା ଓ ସୁରକ୍ଷା',
+  'Media & Cultural': 'ମିଡିଆ ଓ ସାଂସ୍କୃତିକ',
+  'Senior Community Volunteer': 'ବରିଷ୍ଠ ସାମାଜିକ ସ୍ୱେଚ୍ଛାସେବୀ',
+  'Cultural & Stage In-charge': 'ସାଂସ୍କୃତିକ ଓ ମଞ୍ଚ ପ୍ରଭାରୀ',
+  'Crowd & Queue Lead': 'ଶୃଙ୍ଖଳା ଓ ଧାଡ଼ି ପରିଚାଳକ',
 };
 
 // Word & phrase replacements for fallback dynamic translation
@@ -425,3 +567,63 @@ export function getLocalizedText(
 
   return rawDefault;
 }
+
+/**
+ * Universal text translator using dictionary maps and script fallback
+ */
+export function translateText(text: string, language: Language): string {
+  if (!text) return '';
+  if (language === 'en') return text;
+  if (language === 'hi') {
+    return HINDI_MAP[text.trim()] || autoTranslateToHindi(text);
+  }
+  if (language === 'or') {
+    return ODIA_MAP[text.trim()] || autoTranslateToOdia(text);
+  }
+  return text;
+}
+
+/**
+ * Role badge / title translator
+ */
+export function translateRole(role: string, language: Language): string {
+  if (!role) return '';
+  const clean = role.replace(/_/g, ' ').toUpperCase().trim();
+  if (language === 'en') {
+    return clean
+      .split(' ')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ');
+  }
+  return translateText(clean, language);
+}
+
+/**
+ * Converts English digits (0-9) to Odia (୦-୯) or Hindi (०-९) numerals
+ */
+export function toIndicDigits(input: string | number | undefined | null, language: Language): string {
+  if (input === undefined || input === null) return '';
+  const str = String(input);
+  if (language === 'en') return str;
+
+  const HINDI_DIGITS = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+  const ODIA_DIGITS = ['୦', '୧', '୨', '୩', '୪', '୫', '୬', '୭', '୮', '୯'];
+
+  const digits = language === 'hi' ? HINDI_DIGITS : ODIA_DIGITS;
+
+  return str.replace(/[0-9]/g, (digit) => digits[parseInt(digit, 10)]);
+}
+
+/**
+ * Extracts a meaningful initial for monogram avatars (skipping honorifics like Sri, Shri, Smt, Dr)
+ */
+export function getMonogramInitial(name: string): string {
+  if (!name) return 'V';
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const honorifics = ['sri', 'shri', 'smt', 'dr', 'mr', 'mrs', 'miss', 'lord', 'pandit', 'er'];
+  const meaningful = parts.find((p) => !honorifics.includes(p.toLowerCase())) || parts[0];
+  return meaningful ? meaningful.charAt(0).toUpperCase() : 'V';
+}
+
+
+

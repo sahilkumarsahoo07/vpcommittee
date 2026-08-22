@@ -215,29 +215,29 @@ export const AdminAnnouncementsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#D4A72C]/40 pb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-[#D4A72C]/40 pb-3">
         <div>
-          <h2 className="font-cinzel text-2xl font-black text-[#32070B] uppercase tracking-wider">
-            Ganesh Utsav Announcements & Popups CMS
+          <h2 className="font-cinzel text-lg sm:text-2xl font-black text-[#32070B] uppercase tracking-wider">
+            Ganesh Utsav Announcements CMS
           </h2>
-          <p className="text-xs text-[#2A1710]/70 font-semibold">
-            Create, schedule calendar dates, configure overlay popups, and manage multi-language translations (English, Hindi, Odia).
+          <p className="text-[11px] sm:text-xs text-[#2A1710]/70 font-semibold">
+            Manage festival announcements, popups, and multi-language translations (English, Hindi, Odia).
           </p>
         </div>
 
         <button
           onClick={handleOpenAdd}
-          className="px-4 py-2.5 rounded-xl bg-[#5A0F16] text-[#F4B942] border border-[#F4B942] font-black text-xs uppercase tracking-wider hover:bg-[#32070B] transition-all flex items-center gap-2 shadow"
+          className="px-3.5 py-2 rounded-xl bg-[#5A0F16] text-[#F4B942] border border-[#F4B942] font-black text-xs uppercase tracking-wider hover:bg-[#32070B] transition-all flex items-center gap-1.5 shadow"
         >
-          <Plus className="w-4 h-4" />
-          <span>New Announcement</span>
+          <Plus className="w-3.5 h-3.5" />
+          <span>New Notice</span>
         </button>
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-[#32070B] font-cinzel font-bold text-sm">Loading announcements from database...</div>
+        <div className="text-center py-12 text-[#32070B] font-cinzel font-bold text-xs">Loading announcements...</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
           {announcements.map((item) => (
             <div
               key={item.id}
@@ -365,15 +365,18 @@ export const AdminAnnouncementsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase text-[#FFF7E8]/80 block mb-1">English Content / Details *</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-bold uppercase text-[#FFF7E8]/80 block">English Content / Details *</label>
+                  <span className="text-[10px] text-[#F4B942]/80 font-mono font-bold">{description.length} chars</span>
+                </div>
                 <textarea
-                  rows={3}
+                  rows={4}
                   required
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   onBlur={handleAutoFillTranslations}
                   placeholder="Write complete notice details..."
-                  className="w-full bg-[#170204] border border-[#D4A72C]/40 rounded-xl py-2.5 px-3.5 text-xs text-[#FFF7E8] resize-none"
+                  className="w-full min-h-[110px] bg-[#170204] border border-[#D4A72C]/40 focus:border-[#F4B942] rounded-xl py-2.5 px-3.5 text-xs text-[#FFF7E8] resize-y outline-none leading-relaxed"
                 />
               </div>
 
@@ -403,11 +406,11 @@ export const AdminAnnouncementsPage: React.FC = () => {
                     className="w-full bg-[#240407] border border-[#D4A72C]/40 rounded-xl py-1.5 px-3 text-xs text-[#FFF7E8]"
                   />
                   <textarea
-                    rows={2}
+                    rows={3}
                     value={descriptionHi}
                     onChange={(e) => setDescriptionHi(e.target.value)}
                     placeholder="हिंदी विवरण..."
-                    className="w-full bg-[#240407] border border-[#D4A72C]/40 rounded-xl py-1.5 px-3 text-xs text-[#FFF7E8] resize-none"
+                    className="w-full min-h-[85px] bg-[#240407] border border-[#D4A72C]/40 focus:border-[#F4B942] rounded-xl py-2 px-3 text-xs text-[#FFF7E8] resize-y outline-none leading-relaxed"
                   />
                 </div>
 
@@ -421,11 +424,11 @@ export const AdminAnnouncementsPage: React.FC = () => {
                     className="w-full bg-[#240407] border border-[#D4A72C]/40 rounded-xl py-1.5 px-3 text-xs text-[#FFF7E8]"
                   />
                   <textarea
-                    rows={2}
+                    rows={3}
                     value={descriptionOr}
                     onChange={(e) => setDescriptionOr(e.target.value)}
                     placeholder="ଓଡ଼ିଆ ବିବରଣୀ..."
-                    className="w-full bg-[#240407] border border-[#D4A72C]/40 rounded-xl py-1.5 px-3 text-xs text-[#FFF7E8] resize-none"
+                    className="w-full min-h-[85px] bg-[#240407] border border-[#D4A72C]/40 focus:border-[#F4B942] rounded-xl py-2 px-3 text-xs text-[#FFF7E8] resize-y outline-none leading-relaxed"
                   />
                 </div>
               </div>

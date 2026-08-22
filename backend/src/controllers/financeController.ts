@@ -4,8 +4,18 @@ import { AuthRequest } from '../middleware/auth';
 import { Donation } from '../models/Donation';
 import { Expense } from '../models/Expense';
 import { Budget } from '../models/Budget';
-import { generateFinancialPDFReport, generateDonorStatementPDF } from '../services/pdfService';
-import { generateDonationsExcelReport } from '../services/excelService';
+import { User } from '../models/User';
+import {
+  generateFinancialPDFReport,
+  generateDonorStatementPDF,
+  generateExpensesPDFReport,
+  generateBudgetVariancePDFReport,
+} from '../services/pdfService';
+import {
+  generateDonationsExcelReport,
+  generateExpensesExcelReport,
+  generateBudgetVarianceExcelReport,
+} from '../services/excelService';
 import { logAudit } from '../middleware/auditLog';
 
 // In-Memory Storage for Fallback if MongoDB is offline
@@ -176,14 +186,11 @@ export const getFinancialSummary = async (req: AuthRequest, res: Response) => {
         totalDonations,
         totalExpenses,
         currentBalance,
+        remainingBalance: currentBalance,
         allocatedBudget,
         remainingBudget,
         utilizationPercentage,
-        monthlySummary: [
-          { month: 'June 2026', income: 45000, expense: 20000, balance: 25000 },
-          { month: 'July 2026', income: 85000, expense: 60000, balance: 25000 },
-          { month: 'August 2026', income: 105000, expense: 180000, balance: -75000 },
-        ],
+        festivalYear: 2026,
       },
     });
   } catch (error: any) {
@@ -197,7 +204,10 @@ export const getDonations = async (req: AuthRequest, res: Response) => {
     const isMongoConnected = mongoose.connection.readyState === 1;
     let list: any[] = [];
     if (isMongoConnected) {
-      list = await Donation.find().sort({ createdAt: -1 });
+      list = await Donation.find()
+        .populate('userId', 'name email phone address profilePhoto role')
+        .sort({ createdAt: -1 })
+        .lean();
     } else {
       list = mockDonations;
     }
@@ -211,17 +221,31 @@ export const getDonations = async (req: AuthRequest, res: Response) => {
 // CREATE Donation
 export const createDonation = async (req: AuthRequest, res: Response) => {
   try {
-    const { donorName, amount, paymentMethod, category, notes, phone, email, date, transactionId } = req.body;
+    const { userId, donorName, amount, paymentMethod, category, notes, phone, email, date, transactionId } = req.body;
 
     const receiptNumber = `VPC-DON-2026-${Math.floor(1000 + Math.random() * 9000)}`;
     const donationDate = date ? new Date(date) : new Date();
 
-    const newDonation = {
+    let userDoc: any = null;
+    if (userId) {
+      try {
+        if (mongoose.connection.readyState === 1 && mongoose.Types.ObjectId.isValid(userId)) {
+          userDoc = await User.findById(userId).lean();
+        }
+      } catch {}
+    }
+
+    const resolvedDonorName = userDoc?.name || donorName || 'Devotee';
+    const resolvedEmail = userDoc?.email || email || '';
+    const resolvedPhone = userDoc?.phone || phone || '';
+
+    const newDonation: any = {
       id: `don_${Date.now()}`,
       receiptNumber,
-      donorName,
-      phone: phone || '',
-      email: email || '',
+      userId: userDoc ? userDoc._id : (userId ? userId : undefined),
+      donorName: resolvedDonorName,
+      phone: resolvedPhone,
+      email: resolvedEmail,
       amount: Number(amount),
       paymentMethod: paymentMethod || 'UPI',
       transactionId: transactionId || '',
@@ -232,10 +256,28 @@ export const createDonation = async (req: AuthRequest, res: Response) => {
       createdAt: donationDate,
     };
 
+    let resultData: any = newDonation;
+
     if (mongoose.connection.readyState === 1) {
-      await Donation.create(newDonation);
+      const created = await Donation.create(newDonation);
+      resultData = await Donation.findById(created._id)
+        .populate('userId', 'name email phone address profilePhoto role')
+        .lean();
     } else {
+      if (userDoc) {
+        newDonation.userId = {
+          _id: userDoc._id,
+          id: userDoc.id || userDoc._id,
+          name: userDoc.name,
+          email: userDoc.email,
+          phone: userDoc.phone,
+          address: userDoc.address,
+          profilePhoto: userDoc.profilePhoto,
+          role: userDoc.role,
+        };
+      }
       mockDonations.unshift(newDonation as any);
+      resultData = newDonation;
     }
 
     if (req.user) {
@@ -246,14 +288,14 @@ export const createDonation = async (req: AuthRequest, res: Response) => {
         'DONATION_ADDED',
         'Donation',
         receiptNumber,
-        `Added donation of Rs. ${amount} by ${donorName}`
+        `Added donation of Rs. ${amount} by ${resolvedDonorName}`
       );
     }
 
     res.status(201).json({
       success: true,
       message: 'Donation recorded successfully',
-      data: newDonation,
+      data: resultData,
     });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
@@ -417,12 +459,36 @@ export const exportFinancialPDF = async (req: AuthRequest, res: Response) => {
     let donationsList: any[] = [];
     let expensesList: any[] = [];
     if (isMongoConnected) {
-      donationsList = await Donation.find({ status: 'SUCCESS' }).lean();
+      donationsList = await Donation.find({ status: 'SUCCESS' })
+        .populate('userId', 'name email phone address profilePhoto role')
+        .lean();
       expensesList = await Expense.find().lean();
     } else {
       donationsList = mockDonations;
       expensesList = mockExpenses;
     }
+
+    // Dynamic donorName resolution & date normalization from populated user
+    donationsList = donationsList.map((d: any) => {
+      const resolvedDate = d.createdAt || d.date || d.rawDate || new Date();
+      return {
+        ...d,
+        date: resolvedDate,
+        createdAt: resolvedDate,
+        donorName: d.userId?.name || d.donorName || 'Devotee Contributor',
+        phone: d.userId?.phone || d.phone || 'N/A',
+        email: d.userId?.email || d.email || 'N/A',
+      };
+    });
+
+    expensesList = expensesList.map((e: any) => {
+      const resolvedDate = e.date || e.createdAt || new Date();
+      return {
+        ...e,
+        date: resolvedDate,
+        createdAt: resolvedDate,
+      };
+    });
 
     // Date range filter
     let dateRangeLabel = 'Overall All Dates Audit';
@@ -431,18 +497,18 @@ export const exportFinancialPDF = async (req: AuthRequest, res: Response) => {
       const start = new Date(String(startDate)).getTime();
       const end = new Date(String(endDate)).getTime() + 86400000;
       donationsList = donationsList.filter((d) => {
-        const t = new Date(d.createdAt || (d as any).date).getTime();
+        const t = new Date(d.createdAt || d.date).getTime();
         return t >= start && t <= end;
       });
       expensesList = expensesList.filter((e) => {
-        const t = new Date(e.date || (e as any).createdAt).getTime();
+        const t = new Date(e.date || e.createdAt).getTime();
         return t >= start && t <= end;
       });
     } else if (month && month !== 'ALL') {
       dateRangeLabel = `Filter: ${month}`;
       const mStr = String(month).trim();
       donationsList = donationsList.filter((d: any) => {
-        const dStr = d.createdAt ? new Date(d.createdAt).toISOString() : (d.date || d.rawDate || '');
+        const dStr = d.createdAt ? new Date(d.createdAt).toISOString() : (d.date ? new Date(d.date).toISOString() : '');
         if (mStr.length === 2) {
           return dStr.includes(`-${mStr}-`);
         }
@@ -491,10 +557,26 @@ export const exportDonorPDF = async (req: AuthRequest, res: Response) => {
 
     let allDonations: any[] = [];
     if (isMongoConnected) {
-      allDonations = await Donation.find().sort({ createdAt: -1 }).lean();
+      allDonations = await Donation.find()
+        .populate('userId', 'name email phone address profilePhoto role')
+        .sort({ createdAt: -1 })
+        .lean();
     } else {
       allDonations = [...mockDonations];
     }
+
+    // Dynamic donor resolution & date normalization
+    allDonations = allDonations.map((d: any) => {
+      const resolvedDate = d.createdAt || d.date || d.rawDate || new Date();
+      return {
+        ...d,
+        date: resolvedDate,
+        createdAt: resolvedDate,
+        donorName: d.userId?.name || d.donorName || 'Devotee Contributor',
+        phone: d.userId?.phone || d.phone || 'N/A',
+        email: d.userId?.email || d.email || 'N/A',
+      };
+    });
 
     // Deduplicate by receipt number or ID
     const seenMap = new Map();
@@ -525,6 +607,7 @@ export const exportDonorPDF = async (req: AuthRequest, res: Response) => {
           paymentMethod: 'UPI',
           category: 'General Donation',
           createdAt: new Date(),
+          date: new Date(),
           festivalYear: 2026,
         },
       ];
@@ -555,15 +638,30 @@ export const exportDonationsExcel = async (req: AuthRequest, res: Response) => {
     const isMongoConnected = mongoose.connection.readyState === 1;
     let donationsList: any[] = [];
     if (isMongoConnected) {
-      donationsList = await Donation.find().sort({ createdAt: -1 }).lean();
+      donationsList = await Donation.find()
+        .populate('userId', 'name email phone address profilePhoto role')
+        .sort({ createdAt: -1 })
+        .lean();
     } else {
       donationsList = mockDonations;
     }
 
+    donationsList = donationsList.map((d: any) => {
+      const resolvedDate = d.createdAt || d.date || d.rawDate || new Date();
+      return {
+        ...d,
+        date: resolvedDate,
+        createdAt: resolvedDate,
+        donorName: d.userId?.name || d.donorName || 'Devotee Contributor',
+        phone: d.userId?.phone || d.phone || 'N/A',
+        email: d.userId?.email || d.email || 'N/A',
+      };
+    });
+
     if (month && month !== 'ALL') {
       const mStr = String(month).trim();
       donationsList = donationsList.filter((d: any) => {
-        const dStr = d.createdAt ? new Date(d.createdAt).toISOString() : (d.date || d.rawDate || '');
+        const dStr = d.createdAt ? new Date(d.createdAt).toISOString() : (d.date ? new Date(d.date).toISOString() : '');
         if (mStr.length === 2) {
           return dStr.includes(`-${mStr}-`);
         }
@@ -572,6 +670,193 @@ export const exportDonationsExcel = async (req: AuthRequest, res: Response) => {
     }
 
     await generateDonationsExcelReport(res, donationsList as any, 2026);
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// EXPORT Expenses PDF Report
+export const exportExpensesPDF = async (req: AuthRequest, res: Response) => {
+  try {
+    const { category, month } = req.query;
+    const isMongoConnected = mongoose.connection.readyState === 1;
+
+    let expensesList: any[] = [];
+    if (isMongoConnected) {
+      expensesList = await Expense.find().sort({ date: -1 }).lean();
+    } else {
+      expensesList = mockExpenses;
+    }
+
+    expensesList = expensesList.map((e: any) => {
+      const resolvedDate = e.date || e.createdAt || new Date();
+      return {
+        ...e,
+        date: resolvedDate,
+        createdAt: resolvedDate,
+      };
+    });
+
+    if (category && category !== 'ALL') {
+      const catStr = String(category).toLowerCase().trim();
+      expensesList = expensesList.filter((e: any) => e.category && e.category.toLowerCase().trim() === catStr);
+    }
+
+    if (month && month !== 'ALL') {
+      const mStr = String(month).trim();
+      expensesList = expensesList.filter((e: any) => {
+        const eStr = e.date ? new Date(e.date).toISOString() : (e.createdAt ? new Date(e.createdAt).toISOString() : '');
+        if (mStr.length === 2) {
+          return eStr.includes(`-${mStr}-`);
+        }
+        return eStr.includes(mStr);
+      });
+    }
+
+    const totalExpenses = expensesList.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
+    generateExpensesPDFReport(res, {
+      totalExpenses,
+      totalInvoices: expensesList.length,
+      expenses: expensesList,
+      generatedBy: req.user ? req.user.name : 'Admin',
+      festivalYear: 2026,
+      dateRangeLabel: month && month !== 'ALL' ? `Month: ${month}` : category && category !== 'ALL' ? `Category: ${category}` : 'All Vouchers',
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// EXPORT Expenses Excel Report
+export const exportExpensesExcel = async (req: AuthRequest, res: Response) => {
+  try {
+    const { category, month } = req.query;
+    const isMongoConnected = mongoose.connection.readyState === 1;
+
+    let expensesList: any[] = [];
+    if (isMongoConnected) {
+      expensesList = await Expense.find().sort({ date: -1 }).lean();
+    } else {
+      expensesList = mockExpenses;
+    }
+
+    expensesList = expensesList.map((e: any) => {
+      const resolvedDate = e.date || e.createdAt || new Date();
+      return {
+        ...e,
+        date: resolvedDate,
+        createdAt: resolvedDate,
+      };
+    });
+
+    if (category && category !== 'ALL') {
+      const catStr = String(category).toLowerCase().trim();
+      expensesList = expensesList.filter((e: any) => e.category && e.category.toLowerCase().trim() === catStr);
+    }
+
+    if (month && month !== 'ALL') {
+      const mStr = String(month).trim();
+      expensesList = expensesList.filter((e: any) => {
+        const eStr = e.date ? new Date(e.date).toISOString() : (e.createdAt ? new Date(e.createdAt).toISOString() : '');
+        if (mStr.length === 2) {
+          return eStr.includes(`-${mStr}-`);
+        }
+        return eStr.includes(mStr);
+      });
+    }
+
+    await generateExpensesExcelReport(res, expensesList, 2026);
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// EXPORT Budget vs Actual Variance PDF Report
+export const exportBudgetPDF = async (req: AuthRequest, res: Response) => {
+  try {
+    let budgetData: any = null;
+    try {
+      budgetData = await Budget.findOne({ festivalYear: 2026 });
+    } catch {
+      budgetData = mockBudget;
+    }
+    if (!budgetData) budgetData = mockBudget;
+
+    const spentByCategory: Record<string, number> = {};
+    const isMongoConnected = mongoose.connection.readyState === 1;
+    const currentExpenses = isMongoConnected ? await Expense.find() : mockExpenses;
+    currentExpenses.forEach((exp: any) => {
+      spentByCategory[exp.category] = (spentByCategory[exp.category] || 0) + exp.amount;
+    });
+
+    const categorySummary = (budgetData.categories || []).map((c: any) => {
+      const spent = spentByCategory[c.category] || 0;
+      const remaining = Math.max(0, c.allocatedAmount - spent);
+      const percentageUsed = c.allocatedAmount > 0 ? Math.round((spent / c.allocatedAmount) * 100) : 0;
+      return {
+        category: c.category,
+        allocated: c.allocatedAmount || 0,
+        spent,
+        remaining,
+        percentageUsed,
+      };
+    });
+
+    const totalAllocated = categorySummary.reduce((sum: number, c: any) => sum + c.allocated, 0) || budgetData.totalAllocatedBudget || 0;
+    const totalSpent = categorySummary.reduce((sum: number, c: any) => sum + c.spent, 0);
+    const totalRemaining = Math.max(0, totalAllocated - totalSpent);
+    const overallPercentage = totalAllocated > 0 ? Math.round((totalSpent / totalAllocated) * 100) : 0;
+
+    generateBudgetVariancePDFReport(res, {
+      totalAllocated,
+      totalSpent,
+      totalRemaining,
+      overallPercentage,
+      categories: categorySummary,
+      generatedBy: req.user ? req.user.name : 'Admin',
+      festivalYear: 2026,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// EXPORT Budget vs Actual Variance Excel Report
+export const exportBudgetExcel = async (req: AuthRequest, res: Response) => {
+  try {
+    let budgetData: any = null;
+    try {
+      budgetData = await Budget.findOne({ festivalYear: 2026 });
+    } catch {
+      budgetData = mockBudget;
+    }
+    if (!budgetData) budgetData = mockBudget;
+
+    const spentByCategory: Record<string, number> = {};
+    const isMongoConnected = mongoose.connection.readyState === 1;
+    const currentExpenses = isMongoConnected ? await Expense.find() : mockExpenses;
+    currentExpenses.forEach((exp: any) => {
+      spentByCategory[exp.category] = (spentByCategory[exp.category] || 0) + exp.amount;
+    });
+
+    const categorySummary = (budgetData.categories || []).map((c: any) => {
+      const spent = spentByCategory[c.category] || 0;
+      const remaining = Math.max(0, c.allocatedAmount - spent);
+      const percentageUsed = c.allocatedAmount > 0 ? Math.round((spent / c.allocatedAmount) * 100) : 0;
+      return {
+        category: c.category,
+        allocated: c.allocatedAmount || 0,
+        spent,
+        remaining,
+        percentageUsed,
+      };
+    });
+
+    const totalAllocated = categorySummary.reduce((sum: number, c: any) => sum + c.allocated, 0) || budgetData.totalAllocatedBudget || 0;
+    const totalSpent = categorySummary.reduce((sum: number, c: any) => sum + c.spent, 0);
+
+    await generateBudgetVarianceExcelReport(res, categorySummary, totalAllocated, totalSpent, 2026);
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }

@@ -21,7 +21,7 @@ export const AdminLayout: React.FC = () => {
       <div className="flex-1 flex overflow-hidden relative">
         <AdminSidebar isOpen={sidebarOpen} onCloseMobile={() => setSidebarOpen(false)} />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
+        <main className="flex-1 p-2.5 sm:p-5 lg:p-7 overflow-y-auto w-full">
           <Outlet />
         </main>
       </div>

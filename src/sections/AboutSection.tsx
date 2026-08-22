@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../data/translations';
+import { scrollToSection } from '../utils/scrollHelper';
 
 export const AboutSection: React.FC = () => {
   const { language } = useLanguage();
@@ -59,13 +60,13 @@ export const AboutSection: React.FC = () => {
             </p>
 
             <div className="pt-2">
-              <a
-                href="#events"
-                className={`inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-[#3D0B10] hover:bg-[#5A0F16] border border-[#D4A72C]/40 text-[#FFF7E8] font-bold text-xs sm:text-sm tracking-wider uppercase shadow-md hover:scale-105 transition-all group ${fontClass}`}
+              <button
+                onClick={(e) => scrollToSection('events', e)}
+                className={`inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-[#3D0B10] hover:bg-[#5A0F16] border border-[#D4A72C]/40 text-[#FFF7E8] font-bold text-xs sm:text-sm tracking-wider uppercase shadow-md hover:scale-105 transition-all group cursor-pointer ${fontClass}`}
               >
                 <span>{t.about.btn}</span>
                 <ArrowRight className="w-4 h-4 text-[#F4B942] group-hover:translate-x-1 transition-transform" />
-              </a>
+              </button>
             </div>
           </div>
 

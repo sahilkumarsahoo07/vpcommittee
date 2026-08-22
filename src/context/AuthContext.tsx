@@ -1,19 +1,35 @@
 import React, { createContext, useContext, useState } from 'react';
 
-export type UserRole = 'SUPERADMIN' | 'ADMIN' | 'COMMITTEE_MEMBER';
+export type UserRole = 'SUPERADMIN' | 'ADMIN' | 'COMMITTEE_MEMBER' | 'MEMBER';
 
 export interface UserProfile {
   id: string;
   name: string;
   email: string;
   role: UserRole;
+  phone?: string;
+  address?: string;
+  profilePhoto?: string;
+  permissions?: string[];
   mustChangePassword?: boolean;
 }
 
 interface AuthContextType {
   user: UserProfile | null;
   token: string | null;
-  login: (email: string, role: UserRole, token: string, name: string, mustChangePassword?: boolean, id?: string) => void;
+  login: (
+    email: string,
+    role: UserRole,
+    userToken: string,
+    name: string,
+    mustChangePassword?: boolean,
+    id?: string,
+    phone?: string,
+    address?: string,
+    profilePhoto?: string,
+    permissions?: string[]
+  ) => void;
+  updateUser: (updatedData: Partial<UserProfile>) => void;
   logout: () => void;
   clearMustChangePassword: () => void;
   isAuthenticated: boolean;
@@ -37,19 +53,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     userToken: string,
     name: string,
     mustChangePassword: boolean = false,
-    id?: string
+    id?: string,
+    phone?: string,
+    address?: string,
+    profilePhoto?: string,
+    permissions?: string[]
   ) => {
     const newUser: UserProfile = {
       id: id || `usr_${Date.now()}`,
       name,
       email,
       role,
+      phone: phone || '',
+      address: address || '',
+      profilePhoto: profilePhoto || '',
+      permissions: permissions || [],
       mustChangePassword,
     };
     setUser(newUser);
     setToken(userToken);
     localStorage.setItem('vighnaharta_user', JSON.stringify(newUser));
     localStorage.setItem('vighnaharta_token', userToken);
+  };
+
+  const updateUser = (updatedData: Partial<UserProfile>) => {
+    if (user) {
+      const updated = { ...user, ...updatedData };
+      setUser(updated);
+      localStorage.setItem('vighnaharta_user', JSON.stringify(updated));
+    }
   };
 
   const clearMustChangePassword = () => {
@@ -68,7 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, clearMustChangePassword, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, token, login, updateUser, logout, clearMustChangePassword, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

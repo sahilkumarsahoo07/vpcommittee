@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapPin, Navigation, Award, Users, HeartHandshake, Sparkles } from 'lucide-react';
+import { MapPin, Navigation, Award, Users, HeartHandshake, Sparkles, Phone, Mail } from 'lucide-react';
+import { InstagramIcon } from '../components/SocialIcons';
 import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../data/translations';
 import { publicAPI } from '../services/api';
+import { translateText, translateRole, getLocalizedText, getMonogramInitial, toIndicDigits } from '../utils/translationHelper';
 
 export const LocationCommunitySection: React.FC = () => {
   const { language } = useLanguage();
@@ -193,9 +195,9 @@ export const LocationCommunitySection: React.FC = () => {
                   <div className="w-11 h-11 rounded-full bg-[#5A0F16] text-[#F4B942] flex items-center justify-center mx-auto mb-3">
                     <IconComp className="w-5 h-5" />
                   </div>
-                  <div className="font-cinzel text-2xl sm:text-3xl md:text-4xl font-black text-[#5A0F16]">
-                    {currentVal}
-                    <span className="text-[#E87516]">{stat.suffix}</span>
+                  <div className={`text-2xl sm:text-3xl md:text-4xl font-black text-[#5A0F16] ${fontClass}`}>
+                    {toIndicDigits(currentVal, language)}
+                    <span className="text-[#E87516]">{toIndicDigits(stat.suffix, language)}</span>
                   </div>
                   <p className={`text-xs sm:text-sm font-semibold text-[#2A1710]/75 mt-1 uppercase tracking-wide ${fontClass}`}>
                     {getStatLabel(stat.id, stat.label)}
@@ -204,42 +206,9 @@ export const LocationCommunitySection: React.FC = () => {
               );
             })}
           </div>
-
-          {/* Executive Panel / Committee Leadership Grid */}
-          <div className="pt-6 space-y-6">
-            <h4 className={`text-xl font-bold text-[#5A0F16] text-center uppercase tracking-wider ${fontClass}`}>
-              Committee Executive Leadership
-            </h4>
-
-            {loadingMembers ? (
-              <div className="text-center py-6 text-[#5A0F16] font-cinzel font-bold text-xs">Loading committee leaders...</div>
-            ) : members.length === 0 ? (
-              <div className="text-center py-6 text-[#2A1710]/60 text-xs">Executive directory updated regularly.</div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-                {members.map((m: any) => (
-                  <div
-                    key={m._id || m.id}
-                    className="bg-white border-2 border-[#D4A72C]/30 hover:border-[#D4A72C] rounded-2xl p-5 shadow-sm hover:shadow-lg transition-all text-left flex flex-col justify-between"
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-12 h-12 rounded-full bg-[#5A0F16] text-[#F4B942] flex items-center justify-center font-bold font-cinzel text-lg flex-shrink-0 border border-[#D4A72C]">
-                        {m.name ? m.name.charAt(0) : 'V'}
-                      </div>
-                      <div>
-                        <h5 className={`font-bold text-sm text-[#5A0F16] leading-tight ${fontClass}`}>{m.name || 'Committee Leader'}</h5>
-                        <span className={`text-[11px] text-[#E87516] font-bold block ${fontClass}`}>{m.designation || m.roleType || 'Executive Member'}</span>
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-[#2A1710]/70 line-clamp-2 italic">{m.bio || 'Devoted member of Vighnaharta Committee.'}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </section>
   );
 };
+

@@ -2,21 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IExpense extends Document {
   expenseName: string;
-  category:
-    | 'Decoration'
-    | 'Pandal'
-    | 'Food'
-    | 'Prasad'
-    | 'Music'
-    | 'Lighting'
-    | 'Electricity'
-    | 'Transportation'
-    | 'Marketing'
-    | 'Printing'
-    | 'Security'
-    | 'Cleaning'
-    | 'Cultural Program'
-    | 'Other';
+  category: string;
   amount: number;
   date: Date;
   vendor?: string;
@@ -35,23 +21,8 @@ const ExpenseSchema: Schema = new Schema(
     expenseName: { type: String, required: true, trim: true },
     category: {
       type: String,
-      enum: [
-        'Decoration',
-        'Pandal',
-        'Food',
-        'Prasad',
-        'Music',
-        'Lighting',
-        'Electricity',
-        'Transportation',
-        'Marketing',
-        'Printing',
-        'Security',
-        'Cleaning',
-        'Cultural Program',
-        'Other',
-      ],
       required: true,
+      trim: true,
     },
     amount: { type: Number, required: true, min: 0 },
     date: { type: Date, default: Date.now },

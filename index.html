@@ -14,9 +14,57 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Odia:wght@400;500;600;700;800&family=Noto+Serif+Devanagari:wght@500;600;700;800&family=Noto+Serif+Odia:wght@500;600;700;800&family=Rozha+One&family=Yatra+One&display=swap" rel="stylesheet">
+    <style>
+      #nl-badge,
+      .nl-badge,
+      #nl-card,
+      .nl-card,
+      .nl-badge-label,
+      .nl-badge-brand,
+      [aria-controls="nl-card"],
+      button[aria-label*="Netlify"],
+      button[aria-label*="netlify"],
+      button[aria-label*="Powered by Netlify"],
+      iframe[data-netlify-drawer],
+      iframe[src*="netlify"],
+      [data-netlify-create-badge],
+      #netlify-badge-container,
+      .netlify-badge {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        clip: rect(0, 0, 0, 0) !important;
+        position: absolute !important;
+        top: -9999px !important;
+        left: -9999px !important;
+        z-index: -99999 !important;
+      }
+    </style>
   </head>
   <body class="bg-[#32070B] text-[#FFF7E8] antialiased selection:bg-[#D4A72C] selection:text-[#32070B] overflow-x-hidden">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      (function() {
+        function removeNetlifyBadge() {
+          var badges = document.querySelectorAll('#nl-badge, .nl-badge, #nl-card, .nl-card, [aria-controls="nl-card"], iframe[data-netlify-drawer]');
+          badges.forEach(function(el) {
+            el.remove();
+          });
+        }
+        removeNetlifyBadge();
+        if (typeof MutationObserver !== 'undefined') {
+          var observer = new MutationObserver(function() {
+            removeNetlifyBadge();
+          });
+          observer.observe(document.documentElement, { childList: true, subtree: true });
+        }
+        window.addEventListener('DOMContentLoaded', removeNetlifyBadge);
+        window.addEventListener('load', removeNetlifyBadge);
+      })();
+    </script>
   </body>
 </html>

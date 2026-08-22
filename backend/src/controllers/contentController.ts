@@ -19,7 +19,7 @@ let mockMembers = [
     roleType: 'PRESIDENT',
     phone: '+91 98765 43210',
     email: 'president@vighnaharta.org',
-    image: '/assets/navlogo.png',
+    image: '',
     bio: 'Leading Ganesh Puja celebrations with devotion for over 10 years.',
     socialLinks: { instagram: 'https://instagram.com' },
     displayOrder: 1,
@@ -32,7 +32,7 @@ let mockMembers = [
     roleType: 'VICE_PRESIDENT',
     phone: '+91 94370 11223',
     email: 'vp@vighnaharta.org',
-    image: '/assets/navlogo.png',
+    image: '',
     bio: 'Overseeing pandal construction and cultural events.',
     displayOrder: 2,
     isActive: true,
@@ -44,7 +44,7 @@ let mockMembers = [
     roleType: 'SECRETARY',
     phone: '+91 91234 88990',
     email: 'secretary@vighnaharta.org',
-    image: '/assets/navlogo.png',
+    image: '',
     bio: 'Coordinating volunteer teams and public relations.',
     displayOrder: 3,
     isActive: true,
@@ -56,7 +56,7 @@ let mockMembers = [
     roleType: 'TREASURER',
     phone: '+91 99381 44556',
     email: 'treasurer@vighnaharta.org',
-    image: '/assets/navlogo.png',
+    image: '',
     bio: 'Managing committee budget and transparent financial records.',
     displayOrder: 4,
     isActive: true,
@@ -247,13 +247,50 @@ let mockGallery = [
 let mockVolunteers = [
   {
     id: 'vol_1',
+    name: 'Rahul Kumar Sahoo',
+    phone: '+91 98765 43210',
+    email: 'rahul.sahoo@example.com',
+    profilePhoto: '',
+    title: 'Senior Community Volunteer',
+    bio: 'Dedicated volunteer actively leading mandap coordination and prasadam distribution with devotion.',
+    category: 'Community Service',
+    volunteerSince: '2024',
+    achievements: 'Coordinated volunteer teams for 3 consecutive Ganesh Utsavs and blood donation camp.',
+    displayOrder: 1,
+    isVisible: true,
+    festivalYear: 2026,
+    createdAt: new Date(),
+  },
+  {
+    id: 'vol_2',
+    name: 'Priya Sharma',
+    phone: '+91 94370 12345',
+    email: 'priya.sharma@example.com',
+    profilePhoto: '',
+    title: 'Cultural & Stage In-charge',
+    bio: 'Managing youth devotional singing competitions, stage lighting, and cultural artists.',
+    category: 'Events & Cultural',
+    volunteerSince: '2025',
+    achievements: 'Organized cultural stage setup with over 200 performing participants.',
+    displayOrder: 2,
+    isVisible: true,
+    festivalYear: 2026,
+    createdAt: new Date(),
+  },
+  {
+    id: 'vol_3',
     name: 'Amit Kumar Sen',
-    phone: '+91 98765 11111',
+    phone: '+91 91234 56789',
     email: 'amit.sen@example.com',
-    areaOfInterest: 'Crowd Management',
-    availability: 'Full Time (All 5 Days)',
-    message: 'Eager to serve Lord Ganesha.',
-    status: 'NEW',
+    profilePhoto: '',
+    title: 'Crowd & Queue Lead',
+    bio: 'Ensuring seamless devotee darshan queues, safety, and elder devotee assistance.',
+    category: 'Crowd & Security',
+    volunteerSince: '2025',
+    achievements: 'Managed peak evening rush of 10,000+ devotees without any bottlenecks.',
+    displayOrder: 3,
+    isVisible: true,
+    festivalYear: 2026,
     createdAt: new Date(),
   },
 ];
@@ -302,6 +339,11 @@ let mockWebsiteSettings = {
     COMMITTEE_MEMBER: {
       FINANCE: false,
       CMS: true,
+      SYSTEM: false,
+    },
+    MEMBER: {
+      FINANCE: false,
+      CMS: false,
       SYSTEM: false,
     },
   },
@@ -530,72 +572,145 @@ export const resetSettings = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// MEMBERS
+// MEMBERS & LEADERSHIP SHOWCASE
 export const getMembers = async (req: Request, res: Response) => {
   try {
     if (mongoose.connection.readyState === 1) {
-      const members = await CommitteeMember.find().sort({ displayOrder: 1 });
-      return res.json({ success: true, data: members });
+      const members = await CommitteeMember.find()
+        .populate('userId', 'name email phone profilePhoto role address')
+        .sort({ displayOrder: 1, createdAt: -1 })
+        .lean();
+
+      if (members && members.length > 0) {
+        const mapped = members.map((m: any) => {
+          const resolvedEmail = m.email !== undefined ? m.email : '';
+          const resolvedPhone = m.displayPhone !== undefined ? m.displayPhone : (m.phone !== undefined ? m.phone : '');
+          const resolvedPhoto = m.image || m.profilePhoto || m.userId?.profilePhoto || '';
+
+          return {
+            ...m,
+            id: m._id ? m._id.toString() : m.id,
+            userId: m.userId,
+            name: m.name || m.userId?.name || 'Member',
+            email: resolvedEmail,
+            phone: resolvedPhone,
+            displayPhone: resolvedPhone,
+            userRole: m.userId?.role || m.roleType || 'MEMBER',
+            roleType: m.roleType || 'MEMBER',
+            designation: m.designation || 'Committee Member',
+            profilePhoto: resolvedPhoto,
+            image: resolvedPhoto,
+            galleryImage: m.galleryImage || '',
+            bio: m.bio || '',
+            instagram: m.instagram || m.instagramId || m.socialLinks?.instagram || '',
+            instagramId: m.instagram || m.instagramId || m.socialLinks?.instagram || '',
+            displayOrder: Number(m.displayOrder) || 1,
+            isVisible: m.isVisible !== false && m.isActive !== false,
+            isActive: m.isActive !== false && m.isVisible !== false,
+          };
+        });
+        return res.json({ success: true, data: mapped });
+      }
     }
-  } catch {}
+  } catch (err: any) {
+    console.error('Error fetching members:', err);
+  }
   res.json({ success: true, data: mockMembers });
 };
 
 export const createMember = async (req: AuthRequest, res: Response) => {
-  const instagramId = req.body.instagramId || req.body.instagram || req.body.socialLinks?.instagram || '';
-  const memberData = {
-    ...req.body,
-    image: req.body.image || req.body.photoUrl || '',
+  const {
+    userId,
+    name,
+    email,
+    phone,
+    profilePhoto,
+    designation,
+    roleType,
+    displayPhone,
+    bio,
+    instagram,
     instagramId,
+    displayOrder,
+    isVisible,
+    isActive,
+  } = req.body;
+
+  const resolvedInstagram = (instagram || instagramId || '').trim();
+  const resolvedPhone = (displayPhone || phone || '').trim();
+
+  // Duplicate User Protection Check
+  if (userId && mongoose.Types.ObjectId.isValid(userId) && mongoose.connection.readyState === 1) {
+    const existing = await CommitteeMember.findOne({ userId });
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: `${name || 'This user'} is already added to the Members section. Please edit their existing showcase entry instead.`,
+      });
+    }
+  }
+
+  const memberData: any = {
+    userId: userId && mongoose.Types.ObjectId.isValid(userId) ? userId : undefined,
+    name: name?.trim() || 'Committee Member',
+    email: email?.trim() || '',
+    phone: resolvedPhone,
+    displayPhone: resolvedPhone,
+    image: profilePhoto || '',
+    designation: designation?.trim() || 'Committee Member',
+    roleType: roleType || 'MEMBER',
+    bio: bio?.trim() || '',
+    instagram: resolvedInstagram,
+    instagramId: resolvedInstagram,
     socialLinks: {
-      ...(req.body.socialLinks || {}),
-      instagram: instagramId,
+      instagram: resolvedInstagram,
     },
+    displayOrder: Number(displayOrder) || mockMembers.length + 1,
+    isVisible: isVisible !== false && isActive !== false,
+    isActive: isActive !== false && isVisible !== false,
+    festivalYear: 2026,
   };
 
   const newMember = {
     id: `mem_${Date.now()}`,
     ...memberData,
-    displayOrder: mockMembers.length + 1,
-    isActive: true,
+    createdAt: new Date(),
   };
 
   try {
-    const dbMember = await CommitteeMember.create(memberData);
-    mockMembers.push(dbMember.toObject());
-  } catch {
-    mockMembers.push(newMember);
+    if (mongoose.connection.readyState === 1) {
+      const dbMember = await CommitteeMember.create(memberData);
+      if (dbMember && dbMember._id) {
+        newMember.id = dbMember._id.toString();
+      }
+      const populated = await CommitteeMember.findById(newMember.id)
+        .populate('userId', 'name email phone profilePhoto role')
+        .lean();
+      if (populated) {
+        mockMembers.push(populated as any);
+        return res.status(201).json({ success: true, message: 'Member added to homepage showcase!', data: populated });
+      }
+    }
+  } catch (err: any) {
+    console.error('Error creating member showcase:', err);
   }
 
-  if (req.user) {
-    await logAudit(
-      req.user.id,
-      req.user.name,
-      req.user.role,
-      'MEMBER_ADDED',
-      'CommitteeMember',
-      newMember.id,
-      `Added member ${req.body.name}`
-    );
-  }
-
-  res.status(201).json({ success: true, message: 'Committee member added', data: newMember });
+  mockMembers.push(newMember);
+  res.status(201).json({ success: true, message: 'Member added to homepage showcase!', data: newMember });
 };
 
 export const deleteMember = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   try {
-    if (mongoose.Types.ObjectId.isValid(id)) {
+    if (mongoose.Types.ObjectId.isValid(id) && mongoose.connection.readyState === 1) {
+      // CRITICAL: Delete ONLY the CommitteeMember showcase document. NEVER touch the User account!
       await CommitteeMember.findByIdAndDelete(id);
     }
-    await CommitteeMember.deleteMany({ id });
-  } catch {}
-  mockMembers = mockMembers.filter((m) => m.id !== id && (m as any)._id !== id);
-
-  if (req.user) {
-    await logAudit(req.user.id, req.user.name, req.user.role, 'MEMBER_DELETED', 'CommitteeMember', id, `Deleted member ${id}`);
+  } catch (err: any) {
+    console.error('Error deleting member showcase:', err);
   }
-  res.json({ success: true, message: 'Member deleted successfully' });
+  mockMembers = mockMembers.filter((m) => m.id !== id && (m as any)._id !== id);
+  res.json({ success: true, message: 'Member removed from homepage showcase (User account preserved)' });
 };
 
 // EVENTS
@@ -903,71 +1018,241 @@ export const getProxyThumbnail = async (req: Request, res: Response) => {
   }
 };
 
-// VOLUNTEERS
+// VOLUNTEERS — HOMEPAGE SHOWCASE & MANAGEMENT
+export const getPublicVolunteers = async (req: Request, res: Response) => {
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const volunteers = await Volunteer.find({ isVisible: true })
+        .populate('userId', 'name email phone profilePhoto role address')
+        .sort({ displayOrder: 1, createdAt: -1 })
+        .lean();
+
+      if (volunteers && volunteers.length > 0) {
+        const mapped = volunteers.map((v: any) => ({
+          ...v,
+          name: v.userId?.name || v.name,
+          email: v.userId?.email || v.email,
+          phone: v.userId?.phone || v.phone,
+          profilePhoto: v.userId?.profilePhoto || v.profilePhoto,
+          userRole: v.userId?.role || 'MEMBER',
+        }));
+        return res.json({ success: true, data: mapped });
+      }
+    }
+  } catch {}
+  const visibleMock = mockVolunteers
+    .filter((v) => v.isVisible !== false)
+    .sort((a, b) => (a.displayOrder || 1) - (b.displayOrder || 1));
+  res.json({ success: true, data: visibleMock });
+};
+
 export const getVolunteers = async (req: AuthRequest, res: Response) => {
   try {
-    const volunteers = await Volunteer.find().sort({ createdAt: -1 });
-    if (volunteers && volunteers.length > 0) {
-      return res.json({ success: true, data: volunteers });
+    if (mongoose.connection.readyState === 1) {
+      const volunteers = await Volunteer.find()
+        .populate('userId', 'name email phone profilePhoto role address')
+        .sort({ displayOrder: 1, createdAt: -1 })
+        .lean();
+
+      if (volunteers && volunteers.length > 0) {
+        const mapped = volunteers.map((v: any) => ({
+          ...v,
+          name: v.userId?.name || v.name,
+          email: v.userId?.email || v.email,
+          phone: v.userId?.phone || v.phone,
+          profilePhoto: v.userId?.profilePhoto || v.profilePhoto,
+          userRole: v.userId?.role || 'MEMBER',
+        }));
+        return res.json({ success: true, data: mapped });
+      }
     }
   } catch {}
   res.json({ success: true, data: mockVolunteers });
 };
 
-export const createVolunteer = async (req: Request, res: Response) => {
+export const createVolunteer = async (req: AuthRequest, res: Response) => {
+  const {
+    userId,
+    name,
+    email,
+    phone,
+    profilePhoto,
+    title,
+    bio,
+    category,
+    volunteerSince,
+    achievements,
+    displayOrder,
+    isVisible,
+  } = req.body;
+
   let createdId = `vol_${Date.now()}`;
+  const volunteerPayload: any = {
+    userId: userId && mongoose.Types.ObjectId.isValid(userId) ? userId : undefined,
+    name: name?.trim() || 'Volunteer Member',
+    email: email?.trim() || '',
+    phone: phone?.trim() || '',
+    profilePhoto: profilePhoto || '',
+    title: title?.trim() || 'Community Volunteer',
+    bio: bio?.trim() || '',
+    category: category?.trim() || 'Community Service',
+    volunteerSince: String(volunteerSince || '2026').trim(),
+    achievements: achievements?.trim() || '',
+    displayOrder: Number(displayOrder) || mockVolunteers.length + 1,
+    isVisible: isVisible !== false,
+    festivalYear: 2026,
+  };
+
   const newVol = {
     id: createdId,
-    ...req.body,
-    status: 'NEW',
+    ...volunteerPayload,
     createdAt: new Date(),
   };
 
   try {
-    const dbVol = await Volunteer.create(newVol);
-    if (dbVol && dbVol._id) {
-      createdId = dbVol._id.toString();
-      newVol.id = createdId;
+    if (mongoose.connection.readyState === 1) {
+      const dbVol = await Volunteer.create(volunteerPayload);
+      if (dbVol && dbVol._id) {
+        createdId = dbVol._id.toString();
+        newVol.id = createdId;
+      }
+      const populated = await Volunteer.findById(createdId).populate('userId', 'name email phone profilePhoto role').lean();
+      if (populated) {
+        mockVolunteers.unshift(populated as any);
+        return res.status(201).json({ success: true, message: 'Volunteer showcase profile created!', data: populated });
+      }
     }
-    mockVolunteers.unshift(dbVol.toObject() as any);
-  } catch {
-    mockVolunteers.unshift(newVol);
+  } catch (err: any) {
+    console.error('Error creating volunteer:', err);
   }
 
-  res.status(201).json({ success: true, message: 'Volunteer registration submitted!', data: newVol });
+  mockVolunteers.unshift(newVol);
+  res.status(201).json({ success: true, message: 'Volunteer showcase profile created!', data: newVol });
+};
+
+export const updateVolunteer = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const {
+    title,
+    bio,
+    category,
+    volunteerSince,
+    achievements,
+    displayOrder,
+    isVisible,
+    name,
+    email,
+    phone,
+    profilePhoto,
+  } = req.body;
+
+  const updateData: any = {};
+  if (title !== undefined) updateData.title = title.trim();
+  if (bio !== undefined) updateData.bio = bio.trim();
+  if (category !== undefined) updateData.category = category.trim();
+  if (volunteerSince !== undefined) updateData.volunteerSince = String(volunteerSince).trim();
+  if (achievements !== undefined) updateData.achievements = achievements.trim();
+  if (displayOrder !== undefined) updateData.displayOrder = Number(displayOrder);
+  if (isVisible !== undefined) updateData.isVisible = Boolean(isVisible);
+  if (name !== undefined) updateData.name = name.trim();
+  if (email !== undefined) updateData.email = email.trim();
+  if (phone !== undefined) updateData.phone = phone.trim();
+  if (profilePhoto !== undefined) updateData.profilePhoto = profilePhoto;
+
+  try {
+    if (mongoose.Types.ObjectId.isValid(id) && mongoose.connection.readyState === 1) {
+      const updated = await Volunteer.findByIdAndUpdate(id, updateData, { new: true })
+        .populate('userId', 'name email phone profilePhoto role')
+        .lean();
+      if (updated) {
+        mockVolunteers = mockVolunteers.map((v) => (v.id === id || (v as any)._id === id ? { ...v, ...updated } : v));
+        return res.json({ success: true, message: 'Volunteer showcase profile updated!', data: updated });
+      }
+    }
+  } catch (err: any) {
+    console.error('Error updating volunteer:', err);
+  }
+
+  mockVolunteers = mockVolunteers.map((v) => (v.id === id || (v as any)._id === id ? { ...v, ...updateData } : v));
+  const found = mockVolunteers.find((v) => v.id === id || (v as any)._id === id);
+  res.json({ success: true, message: 'Volunteer showcase profile updated!', data: found });
 };
 
 export const deleteVolunteer = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   try {
-    if (mongoose.Types.ObjectId.isValid(id)) {
+    if (mongoose.Types.ObjectId.isValid(id) && mongoose.connection.readyState === 1) {
+      // CRITICAL: Delete ONLY the Volunteer showcase document. NEVER touch the User account!
       await Volunteer.findByIdAndDelete(id);
     }
-  } catch {}
+  } catch (err: any) {
+    console.error('Error deleting volunteer:', err);
+  }
   mockVolunteers = mockVolunteers.filter((v) => v.id !== id && (v as any)._id !== id);
-  res.json({ success: true, message: 'Volunteer deleted successfully' });
+  res.json({ success: true, message: 'Volunteer showcase record deleted successfully (User account preserved)' });
 };
 
 export const updateMember = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
-  const instagramId = req.body.instagramId || req.body.instagram || req.body.socialLinks?.instagram || '';
-  const updateData = {
-    ...req.body,
-    image: req.body.image || req.body.photoUrl || '',
+  const {
+    designation,
+    roleType,
+    displayPhone,
+    phone,
+    bio,
+    instagram,
     instagramId,
-    socialLinks: {
-      ...(req.body.socialLinks || {}),
-      instagram: instagramId,
-    },
-  };
+    displayOrder,
+    isVisible,
+    isActive,
+    name,
+    email,
+    profilePhoto,
+    image,
+  } = req.body;
+
+  const resolvedInstagram = instagram !== undefined ? instagram : instagramId;
+  const resolvedPhone = displayPhone !== undefined ? displayPhone : phone;
+
+  const updateData: any = {};
+  if (designation !== undefined) updateData.designation = designation.trim();
+  if (roleType !== undefined) updateData.roleType = roleType;
+  if (resolvedPhone !== undefined) {
+    updateData.displayPhone = resolvedPhone.trim();
+    updateData.phone = resolvedPhone.trim();
+  }
+  if (bio !== undefined) updateData.bio = bio.trim();
+  if (resolvedInstagram !== undefined) {
+    updateData.instagram = resolvedInstagram.trim();
+    updateData.instagramId = resolvedInstagram.trim();
+    updateData.socialLinks = { instagram: resolvedInstagram.trim() };
+  }
+  if (displayOrder !== undefined) updateData.displayOrder = Number(displayOrder);
+  if (isVisible !== undefined) updateData.isVisible = Boolean(isVisible);
+  if (isActive !== undefined) updateData.isActive = Boolean(isActive);
+  if (name !== undefined) updateData.name = name.trim();
+  if (email !== undefined) updateData.email = email.trim();
+  if (profilePhoto !== undefined || image !== undefined) {
+    updateData.image = profilePhoto || image;
+  }
 
   try {
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      await CommitteeMember.findByIdAndUpdate(id, updateData, { new: true });
+    if (mongoose.Types.ObjectId.isValid(id) && mongoose.connection.readyState === 1) {
+      const updated = await CommitteeMember.findByIdAndUpdate(id, updateData, { new: true })
+        .populate('userId', 'name email phone profilePhoto role')
+        .lean();
+      if (updated) {
+        mockMembers = mockMembers.map((m) => (m.id === id || (m as any)._id === id ? { ...m, ...updated } : m));
+        return res.json({ success: true, message: 'Member showcase updated successfully', data: updated });
+      }
     }
-  } catch {}
+  } catch (err: any) {
+    console.error('Error updating member:', err);
+  }
+
   mockMembers = mockMembers.map((m) => (m.id === id || (m as any)._id === id ? { ...m, ...updateData } : m));
-  res.json({ success: true, message: 'Member updated successfully', data: updateData });
+  const found = mockMembers.find((m) => m.id === id || (m as any)._id === id);
+  res.json({ success: true, message: 'Member showcase updated successfully', data: found });
 };
 
 export const updateGalleryItem = async (req: AuthRequest, res: Response) => {
@@ -990,17 +1275,6 @@ export const updateGalleryItem = async (req: AuthRequest, res: Response) => {
   }
 
   res.json({ success: true, message: 'Gallery item updated successfully', data: updateData });
-};
-
-export const updateVolunteer = async (req: AuthRequest, res: Response) => {
-  const { id } = req.params;
-  try {
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      await Volunteer.findByIdAndUpdate(id, req.body);
-    }
-  } catch {}
-  mockVolunteers = mockVolunteers.map((v) => (v.id === id || (v as any)._id === id ? { ...v, ...req.body } : v));
-  res.json({ success: true, message: 'Volunteer updated successfully' });
 };
 
 // NEWSLETTER SUBSCRIBERS

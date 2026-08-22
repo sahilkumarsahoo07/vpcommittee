@@ -3,6 +3,7 @@ import { Menu, X, UserPlus } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../data/translations';
 import { LanguageSelector } from './LanguageSelector';
+import { scrollToSection } from '../utils/scrollHelper';
 
 interface NavbarProps {
   onOpenVolunteer: () => void;
@@ -21,12 +22,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVolunteer }) => {
   }, []);
 
   const navLinks = [
-    { label: t.nav.home, href: '#hero' },
-    { label: t.nav.about, href: '#about' },
-    { label: t.nav.events, href: '#events' },
-    { label: t.nav.gallery, href: '#gallery' },
-    { label: t.nav.donate, href: '#donate' },
-    { label: t.nav.contact, href: '#contact' },
+    { label: t.nav.home, target: 'hero' },
+    { label: t.nav.about, target: 'about' },
+    { label: t.nav.events, target: 'events' },
+    { label: t.nav.gallery, target: 'gallery' },
+    { label: t.nav.donate, target: 'donate' },
+    { label: t.nav.contact, target: 'contact' },
   ];
 
   const fontClass = language === 'hi' ? 'font-devanagari' : language === 'or' ? 'font-odia' : 'font-cinzel';
@@ -42,25 +43,29 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVolunteer }) => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-3 md:gap-4">
-            {/* Logo Image */}
-            <a href="#hero" className="flex-shrink-0 group">
+            {/* Logo Image (Clean scroll without hash) */}
+            <button
+              onClick={(e) => scrollToSection('hero', e)}
+              className="flex-shrink-0 group cursor-pointer border-0 bg-transparent p-0"
+              title="Vighnaharta Puja Committee"
+            >
               <img
                 src="/assets/navlogo.png"
                 alt="Vighnaharta Puja Committee"
                 className="h-10 sm:h-12 md:h-[3.25rem] w-auto object-contain group-hover:opacity-90 transition-opacity drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
               />
-            </a>
+            </button>
 
             {/* Desktop Center Nav */}
             <nav className="hidden lg:flex items-center gap-4 xl:gap-8 mx-auto px-2">
               {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className={`text-xs xl:text-sm font-medium text-[#FFF7E8] hover:text-[#F4B942] transition-colors tracking-wide whitespace-nowrap ${fontClass}`}
+                <button
+                  key={link.target}
+                  onClick={(e) => scrollToSection(link.target, e)}
+                  className={`text-xs xl:text-sm font-medium text-[#FFF7E8] hover:text-[#F4B942] transition-colors tracking-wide whitespace-nowrap cursor-pointer border-0 bg-transparent p-0 ${fontClass}`}
                 >
                   {link.label}
-                </a>
+                </button>
               ))}
             </nav>
 
@@ -104,14 +109,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenVolunteer }) => {
           <div className="h-px w-24 mx-auto bg-[#D4A72C]/30 mb-4" />
           <nav className="space-y-1 text-center flex-1">
             {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setIsMobileDrawerOpen(false)}
-                className={`block text-lg text-[#FFF7E8] hover:text-[#F4B942] py-2.5 border-b border-[#D4A72C]/10 ${fontClass}`}
+              <button
+                key={link.target}
+                onClick={(e) => {
+                  setIsMobileDrawerOpen(false);
+                  scrollToSection(link.target, e);
+                }}
+                className={`w-full block text-center text-lg text-[#FFF7E8] hover:text-[#F4B942] py-2.5 border-b border-[#D4A72C]/10 cursor-pointer bg-transparent ${fontClass}`}
               >
                 {link.label}
-              </a>
+              </button>
             ))}
           </nav>
 

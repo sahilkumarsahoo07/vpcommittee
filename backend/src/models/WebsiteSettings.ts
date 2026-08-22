@@ -11,6 +11,11 @@ export interface IRolePermissions {
     CMS: boolean;
     SYSTEM: boolean;
   };
+  MEMBER: {
+    FINANCE: boolean;
+    CMS: boolean;
+    SYSTEM: boolean;
+  };
 }
 
 export interface IWebsiteSettings extends Document {
@@ -74,6 +79,11 @@ const WebsiteSettingsSchema: Schema = new Schema(
       COMMITTEE_MEMBER: {
         FINANCE: { type: Boolean, default: false },
         CMS: { type: Boolean, default: true },
+        SYSTEM: { type: Boolean, default: false },
+      },
+      MEMBER: {
+        FINANCE: { type: Boolean, default: false },
+        CMS: { type: Boolean, default: false },
         SYSTEM: { type: Boolean, default: false },
       },
     },

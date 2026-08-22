@@ -62,9 +62,11 @@ export function processMediaUrl(url: string): ProcessedMedia {
       videoId = cleanUrl.split('/shorts/')[1]?.split('?')[0]?.split('/')[0] || '';
     } else if (cleanUrl.includes('v=')) {
       videoId = cleanUrl.split('v=')[1]?.split('&')[0] || '';
+    } else if (cleanUrl.includes('/embed/')) {
+      videoId = cleanUrl.split('/embed/')[1]?.split('?')[0]?.split('/')[0] || '';
     }
 
-    const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0` : cleanUrl;
+    const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&playsinline=1&enablejsapi=1` : cleanUrl;
     const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : '';
 
     return {

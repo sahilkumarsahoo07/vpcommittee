@@ -119,21 +119,21 @@ export const AdminWebsiteSettingsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#D4A72C]/40 pb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-[#D4A72C]/40 pb-3">
         <div>
-          <h2 className="font-cinzel text-2xl font-black text-[#32070B] uppercase tracking-wider">
+          <h2 className="font-cinzel text-lg sm:text-2xl font-black text-[#32070B] uppercase tracking-wider">
             Website CMS Global Settings
           </h2>
-          <p className="text-xs text-[#2A1710]/70 font-semibold">
-            Update public website headers, Hero text, Instagram handle, donation UPI ID, contact details, and Community Stats counters.
+          <p className="text-[11px] sm:text-xs text-[#2A1710]/70 font-semibold">
+            Update public website headers, Hero text, Instagram handle, donation UPI ID, contact details, and Community Stats.
           </p>
         </div>
 
         <button
           type="button"
           onClick={() => setIsResetModalOpen(true)}
-          className="px-3 py-2.5 rounded-xl bg-red-900/30 text-red-700 border border-red-300 font-bold text-xs uppercase hover:bg-red-900/50 transition-all flex items-center gap-1.5"
-          title="Reset to System Defaults (DELETE /settings API)"
+          className="px-3 py-1.5 rounded-xl bg-red-900/30 text-red-700 border border-red-300 font-bold text-xs uppercase hover:bg-red-900/50 transition-all flex items-center gap-1.5"
+          title="Reset to System Defaults"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           <span>Reset Defaults</span>
@@ -141,80 +141,80 @@ export const AdminWebsiteSettingsPage: React.FC = () => {
       </div>
 
       {saved && (
-        <div className="bg-emerald-100 border border-emerald-400 text-emerald-800 px-4 py-3 rounded-2xl text-xs font-bold flex items-center gap-2">
-          <CheckCircle className="w-4 h-4 text-emerald-600" />
+        <div className="bg-emerald-100 border border-emerald-400 text-emerald-800 px-3.5 py-2.5 rounded-2xl text-[11px] sm:text-xs font-bold flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>Website Global Settings updated successfully! Changes reflect dynamically on the public site.</span>
         </div>
       )}
 
       {loading ? (
-        <div className="text-center py-8 text-[#32070B] font-cinzel font-bold text-sm">
+        <div className="text-center py-8 text-[#32070B] font-cinzel font-bold text-xs">
           Processing settings...
         </div>
       ) : (
-        <form onSubmit={handleSave} className="bg-white border-2 border-[#D4A72C]/40 rounded-3xl p-6 shadow-sm space-y-6">
+        <form onSubmit={handleSave} className="bg-white border-2 border-[#D4A72C]/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-sm space-y-4 sm:space-y-6">
           {/* 1. HERO BANNER */}
-          <div className="space-y-4">
-            <h3 className="font-cinzel text-base font-black text-[#32070B] uppercase border-b border-[#D4A72C]/30 pb-2">
+          <div className="space-y-3">
+            <h3 className="font-cinzel text-sm sm:text-base font-black text-[#32070B] uppercase border-b border-[#D4A72C]/30 pb-2">
               1. Hero Banner Content
             </h3>
 
             <div>
-              <label className="text-xs font-bold text-[#32070B] block mb-1">Hero Title</label>
+              <label className="text-[11px] sm:text-xs font-bold text-[#32070B] block mb-1">Hero Title</label>
               <input
                 type="text"
                 value={heroTitle}
                 onChange={(e) => setHeroTitle(e.target.value)}
-                className="w-full bg-[#FFF7E8] border border-[#D4A72C]/50 rounded-xl py-2 px-3 text-xs font-bold text-[#32070B]"
+                className="w-full bg-[#FFF7E8] border border-[#D4A72C]/50 rounded-xl py-1.5 px-3 text-[11px] sm:text-xs font-bold text-[#32070B]"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-[#32070B] block mb-1">Hero Subtitle</label>
+              <label className="text-[11px] sm:text-xs font-bold text-[#32070B] block mb-1">Hero Subtitle</label>
               <input
                 type="text"
                 value={heroSubtitle}
                 onChange={(e) => setHeroSubtitle(e.target.value)}
-                className="w-full bg-[#FFF7E8] border border-[#D4A72C]/50 rounded-xl py-2 px-3 text-xs font-bold text-[#32070B]"
+                className="w-full bg-[#FFF7E8] border border-[#D4A72C]/50 rounded-xl py-1.5 px-3 text-[11px] sm:text-xs font-bold text-[#32070B]"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-[#32070B] block mb-1">Hero Description</label>
+              <label className="text-[11px] sm:text-xs font-bold text-[#32070B] block mb-1">Hero Description</label>
               <textarea
-                rows={2}
+                rows={3}
                 value={heroDescription}
                 onChange={(e) => setHeroDescription(e.target.value)}
-                className="w-full bg-[#FFF7E8] border border-[#D4A72C]/50 rounded-xl py-2 px-3 text-xs font-medium text-[#32070B]"
+                className="w-full min-h-[75px] bg-[#FFF7E8] border border-[#D4A72C]/50 rounded-xl py-1.5 px-3 text-[11px] sm:text-xs font-medium text-[#32070B] resize-y outline-none leading-relaxed"
               />
             </div>
           </div>
 
           {/* MAHOTSAV COUNTDOWN TARGET DATE SETTINGS */}
-          <div className="space-y-4 bg-[#FFF7E8] p-5 rounded-2xl border border-[#D4A72C]/50">
-            <h3 className="font-cinzel text-base font-black text-[#32070B] uppercase border-b border-[#D4A72C]/30 pb-2 flex items-center gap-2">
+          <div className="space-y-3 bg-[#FFF7E8] p-3.5 sm:p-5 rounded-2xl border border-[#D4A72C]/50">
+            <h3 className="font-cinzel text-sm sm:text-base font-black text-[#32070B] uppercase border-b border-[#D4A72C]/30 pb-2 flex items-center gap-2">
               <span>⏰ Mahotsav Countdown Target Date & Time Settings</span>
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-bold text-[#32070B] block mb-1">
+                <label className="text-[11px] sm:text-xs font-bold text-[#32070B] block mb-1">
                   Target Date & Time for Mahotsav Countdown
                 </label>
                 <input
                   type="datetime-local"
                   value={countdownDate}
                   onChange={(e) => setCountdownDate(e.target.value)}
-                  className="w-full bg-[#FFFFFF] border border-[#D4A72C] rounded-xl py-2 px-3 text-xs font-bold text-[#32070B] focus:ring-2 focus:ring-[#D4A72C]"
+                  className="w-full bg-[#FFFFFF] border border-[#D4A72C] rounded-xl py-1.5 px-3 text-[11px] sm:text-xs font-bold text-[#32070B] focus:ring-2 focus:ring-[#D4A72C]"
                   required
                 />
-                <p className="text-[11px] text-[#2A1710]/70 mt-1 font-medium">
+                <p className="text-[10px] text-[#2A1710]/70 mt-1 font-medium">
                   The live website countdown timer calculates days, hours, and seconds remaining until this target date.
                 </p>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-[#32070B] block mb-1">
+                <label className="text-[11px] sm:text-xs font-bold text-[#32070B] block mb-1">
                   Festival Mahotsav Year
                 </label>
                 <input
@@ -222,10 +222,10 @@ export const AdminWebsiteSettingsPage: React.FC = () => {
                   value={festivalYear}
                   onChange={(e) => setFestivalYear(Number(e.target.value))}
                   placeholder="2026"
-                  className="w-full bg-[#FFFFFF] border border-[#D4A72C] rounded-xl py-2 px-3 text-xs font-bold text-[#32070B]"
+                  className="w-full bg-[#FFFFFF] border border-[#D4A72C] rounded-xl py-1.5 px-3 text-[11px] sm:text-xs font-bold text-[#32070B]"
                   required
                 />
-                <p className="text-[11px] text-[#2A1710]/70 mt-1 font-medium">
+                <p className="text-[10px] text-[#2A1710]/70 mt-1 font-medium">
                   Reflects the festival year title (e.g. Ganesh Utsav 2026).
                 </p>
               </div>

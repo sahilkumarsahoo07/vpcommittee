@@ -16,6 +16,9 @@ export let mockUsers = [
     plainPassword: '123456',
     role: 'SUPERADMIN' as UserRole,
     phone: '+91 98765 43210',
+    address: 'Kamakhyanagar, Dhenkanal, Odisha',
+    profilePhoto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+    permissions: ['ALL'],
     isActive: true,
     mustChangePassword: false,
     createdAt: new Date('2026-08-01'),
@@ -29,6 +32,9 @@ export let mockUsers = [
     plainPassword: 'Admin@2026',
     role: 'ADMIN' as UserRole,
     phone: '+91 99381 44556',
+    address: 'Main Town, Dhenkanal, Odisha',
+    profilePhoto: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+    permissions: ['FINANCE', 'CMS', 'REPORTS'],
     isActive: true,
     mustChangePassword: true,
     createdAt: new Date('2026-08-05'),
@@ -42,9 +48,28 @@ export let mockUsers = [
     plainPassword: 'Member@2026',
     role: 'COMMITTEE_MEMBER' as UserRole,
     phone: '+91 91234 88990',
+    address: 'Sector 4, Bhubaneswar, Odisha',
+    profilePhoto: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+    permissions: ['CMS'],
     isActive: true,
     mustChangePassword: true,
     createdAt: new Date('2026-08-10'),
+  },
+  {
+    _id: 'usr_member_04',
+    id: 'usr_member_04',
+    name: 'Standard Member',
+    email: 'newmember@vighnaharta.org',
+    password: '',
+    plainPassword: 'Member@2026',
+    role: 'MEMBER' as UserRole,
+    phone: '+91 98765 00000',
+    address: 'Kamakhyanagar, Dhenkanal, Odisha',
+    profilePhoto: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+    permissions: [] as string[],
+    isActive: true,
+    mustChangePassword: true,
+    createdAt: new Date('2026-08-15'),
   },
 ];
 
@@ -53,6 +78,7 @@ export let mockUsers = [
   mockUsers[0].password = await bcrypt.hash('123456', 10);
   mockUsers[1].password = await bcrypt.hash('Admin@2026', 10);
   mockUsers[2].password = await bcrypt.hash('Member@2026', 10);
+  mockUsers[3].password = await bcrypt.hash('Member@2026', 10);
 })();
 
 // Active Reset Tokens Store (in-memory for demo / fallback)
@@ -107,6 +133,9 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
         email: u.email,
         role: u.role,
         phone: u.phone || '',
+        address: u.address || '',
+        profilePhoto: u.profilePhoto || '',
+        permissions: u.permissions || [],
         isActive: u.isActive ?? true,
         mustChangePassword: u.mustChangePassword ?? false,
         createdAt: u.createdAt,
@@ -131,26 +160,26 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
 /**
  * POST /api/users
  * Create Account Controller enforcing Role Hierarchy:
- * - SUPERADMIN can create SUPERADMIN, ADMIN, COMMITTEE_MEMBER
- * - ADMIN can ONLY create COMMITTEE_MEMBER
+ * - SUPERADMIN can create SUPERADMIN, ADMIN, COMMITTEE_MEMBER, MEMBER
+ * - ADMIN can create COMMITTEE_MEMBER, MEMBER
  */
 export const createUser = async (req: AuthRequest, res: Response) => {
   try {
     const requesterRole = req.user?.role;
-    const { name, email, password, role, phone } = req.body;
+    const { name, email, password, role, phone, address, profilePhoto } = req.body;
 
-    if (!name || !email || !password || !role) {
+    if (!name || !email || !role) {
       return res.status(400).json({
         success: false,
-        message: 'Name, email, initial password, and role are required',
+        message: 'Name, email, and role are required',
       });
     }
 
     // Enforce Hierarchy Rules:
-    if (requesterRole === 'ADMIN' && role !== 'COMMITTEE_MEMBER') {
+    if (requesterRole === 'ADMIN' && role !== 'COMMITTEE_MEMBER' && role !== 'MEMBER') {
       return res.status(403).json({
         success: false,
-        message: 'Permission denied: Admins can only create Committee Member accounts.',
+        message: 'Permission denied: Admins can only create Committee Member and Member accounts.',
       });
     }
 
@@ -159,6 +188,30 @@ export const createUser = async (req: AuthRequest, res: Response) => {
         success: false,
         message: 'Permission denied: Only SuperAdmin and Admin can create user accounts.',
       });
+    }
+
+    // Validate Required Fields for MEMBER role:
+    if (role === 'MEMBER') {
+      const trimmedName = (name || '').trim();
+      const trimmedEmail = (email || '').trim();
+      const trimmedPhone = (phone || '').trim();
+      const trimmedAddress = (address || '').trim();
+      const trimmedPhoto = (profilePhoto || '').trim();
+
+      if (!trimmedName || !trimmedEmail || !trimmedPhone || !trimmedAddress || !trimmedPhoto) {
+        return res.status(400).json({
+          success: false,
+          message: 'All fields (Full Name, Email, Phone Number, Address, and Profile Photo) are strictly required to create a Member account.',
+        });
+      }
+    } else {
+      // Non-member roles require password
+      if (!password || password.length < 6) {
+        return res.status(400).json({
+          success: false,
+          message: 'Initial password of at least 6 characters is required for this role.',
+        });
+      }
     }
 
     const cleanEmail = email.trim().toLowerCase();
@@ -180,19 +233,40 @@ export const createUser = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // For Member without password, set empty placeholder
+    let hashedPassword = '';
+    const initialPassword = password || '';
+    if (initialPassword) {
+      hashedPassword = await bcrypt.hash(initialPassword, 10);
+    } else {
+      hashedPassword = await bcrypt.hash(`MEMBER_NO_LOGIN_${Date.now()}`, 10);
+    }
+
     let createdId = `usr_${Date.now()}`;
+
+    // New Members receive ZERO permissions by default. Other roles receive appropriate defaults.
+    const initialPermissions: string[] =
+      role === 'MEMBER'
+        ? []
+        : role === 'ADMIN'
+        ? ['FINANCE', 'CMS', 'REPORTS']
+        : role === 'COMMITTEE_MEMBER'
+        ? ['CMS']
+        : ['ALL'];
 
     try {
       const dbUser = await User.create({
-        name,
+        name: name.trim(),
         email: cleanEmail,
         password: hashedPassword,
-        plainPassword: password,
+        plainPassword: initialPassword || undefined,
         role,
-        phone,
+        phone: (phone || '').trim(),
+        address: (address || '').trim(),
+        profilePhoto: (profilePhoto || '').trim(),
+        permissions: initialPermissions,
         isActive: true,
-        mustChangePassword: true,
+        mustChangePassword: role !== 'MEMBER',
       });
       if (dbUser && dbUser._id) {
         createdId = dbUser._id.toString();
@@ -202,14 +276,17 @@ export const createUser = async (req: AuthRequest, res: Response) => {
     const newUserObj = {
       _id: createdId,
       id: createdId,
-      name,
+      name: name.trim(),
       email: cleanEmail,
       password: hashedPassword,
-      plainPassword: password,
+      plainPassword: initialPassword || '',
       role: role as UserRole,
-      phone: phone || '',
+      phone: (phone || '').trim(),
+      address: (address || '').trim(),
+      profilePhoto: (profilePhoto || '').trim(),
+      permissions: initialPermissions,
       isActive: true,
-      mustChangePassword: true, // First login requires password change
+      mustChangePassword: role !== 'MEMBER',
       createdAt: new Date(),
     };
 
@@ -229,17 +306,22 @@ export const createUser = async (req: AuthRequest, res: Response) => {
 
     res.status(201).json({
       success: true,
-      message: `Account created successfully for ${name} (${role}). First login password change enforced.`,
+      message: `Account created successfully for ${name} (${role}). ${
+        role === 'MEMBER' ? 'Zero permissions assigned by default (No password required).' : 'Initial login password set.'
+      }`,
       data: {
         id: createdId,
         _id: createdId,
-        name,
+        name: name.trim(),
         email: cleanEmail,
         role,
-        phone,
+        phone: (phone || '').trim(),
+        address: (address || '').trim(),
+        profilePhoto: (profilePhoto || '').trim(),
+        permissions: initialPermissions,
         isActive: true,
-        mustChangePassword: true,
-        plainPassword: requesterRole === 'SUPERADMIN' ? password : undefined,
+        mustChangePassword: role !== 'MEMBER',
+        plainPassword: requesterRole === 'SUPERADMIN' && initialPassword ? initialPassword : undefined,
       },
     });
   } catch (error: any) {
@@ -249,13 +331,16 @@ export const createUser = async (req: AuthRequest, res: Response) => {
 
 /**
  * PUT /api/users/:id
- * Update user status, role, or details
+ * Update user status, role, details, password, or permissions
  */
 export const updateUser = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
+    const requesterId = req.user?.id;
+    const requesterEmail = req.user?.email?.toLowerCase();
     const requesterRole = req.user?.role;
-    const { name, phone, role, isActive } = req.body;
+    const isSuperAdmin = requesterRole === 'SUPERADMIN';
+    const { name, email, phone, address, profilePhoto, role, permissions, password, isActive } = req.body;
 
     // Fetch target user to check permissions
     let targetUser: any = null;
@@ -268,26 +353,91 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       targetUser = mockUsers.find((u) => u.id === id || u._id === id);
     }
 
+    if (!targetUser) {
+      return res.status(404).json({ success: false, message: 'User account not found' });
+    }
+
+    const targetUserId = targetUser._id?.toString() || targetUser.id;
+    const isSelf = requesterId === targetUserId || requesterEmail === targetUser.email?.toLowerCase();
+
+    // Self-Protection Rule 1: No account can change their own role
+    if (isSelf && role !== undefined && role !== targetUser.role) {
+      return res.status(403).json({
+        success: false,
+        message: 'Security violation: You cannot change or modify your own account role.',
+      });
+    }
+
+    // Self-Protection Rule 2: No account can suspend their own active account
+    if (isSelf && isActive === false) {
+      return res.status(403).json({
+        success: false,
+        message: 'Security violation: You cannot suspend or deactivate your own logged-in account.',
+      });
+    }
+
+    // Admin Hierarchy Restrictions:
     if (requesterRole === 'ADMIN') {
-      if (targetUser && targetUser.role !== 'COMMITTEE_MEMBER') {
-        return res.status(403).json({
-          success: false,
-          message: 'Permission denied: Admins can only manage Committee Member accounts.',
-        });
+      if (!isSelf) {
+        // Admin managing other accounts
+        if (targetUser.role !== 'COMMITTEE_MEMBER' && targetUser.role !== 'MEMBER') {
+          return res.status(403).json({
+            success: false,
+            message: 'Permission denied: Admins can only manage Committee Member and Member accounts.',
+          });
+        }
+        if (role && role !== 'COMMITTEE_MEMBER' && role !== 'MEMBER') {
+          return res.status(403).json({
+            success: false,
+            message: 'Permission denied: Admins cannot promote users to Admin or SuperAdmin.',
+          });
+        }
+      } else {
+        // Admin updating their own profile: role and permissions cannot be touched
+        if (role !== undefined && role !== targetUser.role) {
+          return res.status(403).json({
+            success: false,
+            message: 'Permission denied: Admins cannot change their own role.',
+          });
+        }
       }
-      if (role && role !== 'COMMITTEE_MEMBER') {
+
+      if (permissions !== undefined) {
         return res.status(403).json({
           success: false,
-          message: 'Permission denied: Admins can only assign Committee Member role.',
+          message: 'Permission denied: Only SuperAdmin can modify user permissions.',
         });
       }
     }
 
     const updateFields: any = {};
-    if (name) updateFields.name = name;
-    if (phone !== undefined) updateFields.phone = phone;
-    if (role) updateFields.role = role;
-    if (isActive !== undefined) updateFields.isActive = isActive;
+    if (name !== undefined) updateFields.name = name.trim();
+    if (email !== undefined) updateFields.email = email.trim().toLowerCase();
+    if (phone !== undefined) updateFields.phone = phone.trim();
+    if (address !== undefined) updateFields.address = address.trim();
+    if (profilePhoto !== undefined) updateFields.profilePhoto = profilePhoto.trim();
+    if (role !== undefined && !isSelf) updateFields.role = role;
+    if (isActive !== undefined && !isSelf) updateFields.isActive = isActive;
+
+    // If a new password is provided
+    if (password && password.length >= 6) {
+      // Admin cannot change other Admin/SuperAdmin passwords
+      if (requesterRole === 'ADMIN' && !isSelf && targetUser.role !== 'COMMITTEE_MEMBER' && targetUser.role !== 'MEMBER') {
+        return res.status(403).json({
+          success: false,
+          message: 'Permission denied: Admins cannot modify passwords for Admin or SuperAdmin accounts.',
+        });
+      }
+      const hashed = await bcrypt.hash(password, 10);
+      updateFields.password = hashed;
+      updateFields.plainPassword = password;
+      updateFields.mustChangePassword = !isSelf;
+    }
+
+    // SuperAdmin can manage granular permissions array for other accounts
+    if (isSuperAdmin && permissions !== undefined && Array.isArray(permissions)) {
+      updateFields.permissions = permissions;
+    }
 
     if (mongoose.Types.ObjectId.isValid(id)) {
       try {
@@ -329,29 +479,41 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
 export const deleteUser = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
+    const requesterId = req.user?.id;
+    const requesterEmail = req.user?.email?.toLowerCase();
     const requesterRole = req.user?.role;
 
-    if (req.user && (req.user.id === id || (req.user as any)._id === id)) {
+    let targetUser: any = null;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      try {
+        targetUser = await User.findById(id);
+      } catch {}
+    }
+    if (!targetUser) {
+      targetUser = mockUsers.find((u) => u.id === id || u._id === id);
+    }
+
+    if (!targetUser) {
+      return res.status(404).json({ success: false, message: 'User account not found' });
+    }
+
+    const targetUserId = targetUser._id?.toString() || targetUser.id;
+    const isSelf = requesterId === targetUserId || requesterEmail === targetUser.email?.toLowerCase();
+
+    // Self-Protection Rule: Current account CANNOT delete their own account
+    if (isSelf) {
       return res.status(400).json({
         success: false,
-        message: 'You cannot delete your own logged-in account.',
+        message: 'Security violation: You cannot delete your own logged-in account.',
       });
     }
 
+    // Admin Hierarchy Restrictions:
     if (requesterRole === 'ADMIN') {
-      let targetUser: any = null;
-      if (mongoose.Types.ObjectId.isValid(id)) {
-        try {
-          targetUser = await User.findById(id);
-        } catch {}
-      }
-      if (!targetUser) {
-        targetUser = mockUsers.find((u) => u.id === id || u._id === id);
-      }
-      if (targetUser && targetUser.role !== 'COMMITTEE_MEMBER') {
+      if (targetUser.role !== 'COMMITTEE_MEMBER' && targetUser.role !== 'MEMBER') {
         return res.status(403).json({
           success: false,
-          message: 'Permission denied: Admins can only delete Committee Member accounts.',
+          message: 'Permission denied: Admins can only delete Committee Member and Member accounts.',
         });
       }
     }

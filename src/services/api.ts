@@ -48,7 +48,16 @@ export const userAPI = {
     const response = await apiClient.get('/users');
     return response.data;
   },
-  createUser: async (userData: { name: string; email: string; password: string; role: string; phone?: string }) => {
+  createUser: async (userData: {
+    name: string;
+    email: string;
+    password: string;
+    role: string;
+    phone?: string;
+    address?: string;
+    profilePhoto?: string;
+    permissions?: string[];
+  }) => {
     const response = await apiClient.post('/users', userData);
     return response.data;
   },
@@ -86,6 +95,10 @@ export const publicAPI = {
   },
   getGallery: async () => {
     const response = await apiClient.get('/gallery');
+    return response.data;
+  },
+  getHomepageVolunteers: async () => {
+    const response = await apiClient.get('/volunteers/public');
     return response.data;
   },
   submitVolunteer: async (volunteerData: any) => {
@@ -231,6 +244,10 @@ export const adminAPI = {
     const response = await apiClient.get('/volunteers');
     return response.data;
   },
+  createVolunteer: async (volunteerData: any) => {
+    const response = await apiClient.post('/volunteers', volunteerData);
+    return response.data;
+  },
   updateVolunteer: async (id: string, volunteerData: any) => {
     const response = await apiClient.put(`/volunteers/${id}`, volunteerData);
     return response.data;
@@ -252,6 +269,12 @@ export const adminAPI = {
 
   getAuditLogs: async () => {
     const response = await apiClient.get('/audit-logs');
+    return response.data;
+  },
+
+  // Users Management
+  getUsers: async () => {
+    const response = await apiClient.get('/users');
     return response.data;
   },
 
@@ -297,6 +320,68 @@ export const adminAPI = {
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', `Donations_Report_2026.xlsx`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  },
+
+  exportExpensesPDF: async (params?: { category?: string; month?: string }) => {
+    const query = params ? '?' + new URLSearchParams(params as any).toString() : '';
+    const response = await apiClient.get(`/exports/expenses-pdf${query}`, {
+      responseType: 'blob',
+    });
+    const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Expenses_Report_Ganesh_Utsav_2026.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  },
+
+  exportExpensesExcel: async (params?: { category?: string; month?: string }) => {
+    const query = params ? '?' + new URLSearchParams(params as any).toString() : '';
+    const response = await apiClient.get(`/exports/expenses-excel${query}`, {
+      responseType: 'blob',
+    });
+    const url = window.URL.createObjectURL(
+      new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+    );
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Expenses_Report_2026.xlsx`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  },
+
+  exportBudgetPDF: async () => {
+    const response = await apiClient.get('/exports/budget-pdf', {
+      responseType: 'blob',
+    });
+    const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Budget_vs_Actual_Variance_2026.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  },
+
+  exportBudgetExcel: async () => {
+    const response = await apiClient.get('/exports/budget-excel', {
+      responseType: 'blob',
+    });
+    const url = window.URL.createObjectURL(
+      new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+    );
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Budget_vs_Actual_Variance_2026.xlsx`);
     document.body.appendChild(link);
     link.click();
     link.remove();

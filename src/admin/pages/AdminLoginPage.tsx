@@ -42,7 +42,11 @@ export const AdminLoginPage: React.FC = () => {
           userToken,
           loggedUser.name,
           loggedUser.mustChangePassword ?? false,
-          loggedUser.id
+          loggedUser.id,
+          loggedUser.phone,
+          loggedUser.address,
+          loggedUser.profilePhoto,
+          loggedUser.permissions
         );
         navigate('/admin');
       } else {

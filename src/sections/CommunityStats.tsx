@@ -2,8 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Award, Users, HeartHandshake, Sparkles } from 'lucide-react';
 import { OmIcon } from '../components/DevotionalIcons';
 import { publicAPI } from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
+import { translateText, toIndicDigits } from '../utils/translationHelper';
 
 export const CommunityStats: React.FC = () => {
+  const { language } = useLanguage();
+  const fontClass = language === 'hi' ? 'font-devanagari' : language === 'or' ? 'font-odia' : 'font-cinzel';
   const [statsItems, setStatsItems] = useState([
     { id: 's1', value: 12, suffix: '+', iconName: 'Award', label: 'Years of Celebration' },
     { id: 's2', value: 50, suffix: 'K+', iconName: 'Users', label: 'Annual Devotees' },
@@ -148,15 +152,15 @@ export const CommunityStats: React.FC = () => {
 
                 {/* Main Animated Number */}
                 <div className="my-4 relative z-10">
-                  <div className="font-cinzel text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-[#FFF7E8] via-[#F4B942] to-[#D4A72C] tracking-tight group-hover:scale-105 transition-transform">
-                    {currentVal}
-                    <span className="text-[#E87516] ml-0.5">{stat.suffix}</span>
+                  <div className={`text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-[#FFF7E8] via-[#F4B942] to-[#D4A72C] tracking-tight group-hover:scale-105 transition-transform ${fontClass}`}>
+                    {toIndicDigits(currentVal, language)}
+                    <span className="text-[#E87516] ml-0.5">{toIndicDigits(stat.suffix, language)}</span>
                   </div>
                 </div>
 
                 {/* Label at Bottom of Arch */}
-                <p className="font-cinzel text-xs sm:text-sm font-black text-[#FFF7E8]/90 uppercase tracking-widest leading-relaxed relative z-10">
-                  {stat.label}
+                <p className={`text-xs sm:text-sm font-black text-[#FFF7E8]/90 uppercase tracking-widest leading-relaxed relative z-10 ${fontClass}`}>
+                  {translateText(stat.label, language)}
                 </p>
 
               </div>

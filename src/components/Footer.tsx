@@ -3,6 +3,7 @@ import { Phone, Mail, MapPin, Heart, ShieldCheck } from 'lucide-react';
 import { OmIcon } from './DevotionalIcons';
 import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../data/translations';
+import { scrollToSection } from '../utils/scrollHelper';
 
 export const Footer: React.FC = () => {
   const { language } = useLanguage();
@@ -36,29 +37,44 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-2 text-xs text-[#FFF7E8]/80 font-medium">
               <li>
-                <a href="#hero" className={`hover:text-[#F4B942] transition-colors ${fontClass}`}>
+                <button
+                  onClick={(e) => scrollToSection('hero', e)}
+                  className={`hover:text-[#F4B942] transition-colors cursor-pointer border-0 bg-transparent p-0 ${fontClass}`}
+                >
                   {t.nav.home}
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#about" className={`hover:text-[#F4B942] transition-colors ${fontClass}`}>
+                <button
+                  onClick={(e) => scrollToSection('about', e)}
+                  className={`hover:text-[#F4B942] transition-colors cursor-pointer border-0 bg-transparent p-0 ${fontClass}`}
+                >
                   {t.nav.about}
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#events" className={`hover:text-[#F4B942] transition-colors ${fontClass}`}>
+                <button
+                  onClick={(e) => scrollToSection('events', e)}
+                  className={`hover:text-[#F4B942] transition-colors cursor-pointer border-0 bg-transparent p-0 ${fontClass}`}
+                >
                   {t.nav.events}
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#gallery" className={`hover:text-[#F4B942] transition-colors ${fontClass}`}>
+                <button
+                  onClick={(e) => scrollToSection('gallery', e)}
+                  className={`hover:text-[#F4B942] transition-colors cursor-pointer border-0 bg-transparent p-0 ${fontClass}`}
+                >
                   {t.nav.gallery}
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#donate" className={`hover:text-[#F4B942] transition-colors ${fontClass}`}>
+                <button
+                  onClick={(e) => scrollToSection('donate', e)}
+                  className={`hover:text-[#F4B942] transition-colors cursor-pointer border-0 bg-transparent p-0 ${fontClass}`}
+                >
                   {t.nav.donate}
-                </a>
+                </button>
               </li>
               <li>
                 <a

@@ -324,33 +324,33 @@ export const AdminFinancialReportsPage: React.FC = () => {
           </div>
 
           {/* Category-wise Expense Breakdown Table */}
-          <div className="bg-white border-2 border-[#D4A72C]/40 rounded-3xl p-6 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#D4A72C]/30 pb-3">
+          <div className="bg-white border-2 border-[#D4A72C]/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-sm space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 border-b border-[#D4A72C]/30 pb-2.5">
               <div>
-                <h3 className="font-cinzel text-lg font-black text-[#32070B] uppercase tracking-wider">
+                <h3 className="font-cinzel text-sm sm:text-lg font-black text-[#32070B] uppercase tracking-wider">
                   Category Expense & Budget Utilization
                 </h3>
-                <p className="text-xs text-[#2A1710]/70 font-semibold">
+                <p className="text-[11px] sm:text-xs text-[#2A1710]/70 font-semibold">
                   Track how much money is spent per category versus allocated budget.
                 </p>
               </div>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-[#2A1710]">
-                <thead className="bg-[#32070B] text-[#F4B942] font-cinzel uppercase">
+              <table className="min-w-[600px] w-full text-left text-[11px] sm:text-xs text-[#2A1710]">
+                <thead className="bg-[#32070B] text-[#F4B942] font-cinzel uppercase text-[10px] sm:text-[11px]">
                   <tr>
-                    <th className="py-3 px-4 rounded-l-xl">Expense Head / Category</th>
-                    <th className="py-3 px-4">Allocated Budget (₹)</th>
-                    <th className="py-3 px-4">Actual Expense Spent (₹)</th>
-                    <th className="py-3 px-4">Remaining Unspent (₹)</th>
-                    <th className="py-3 px-4 text-center rounded-r-xl">Status</th>
+                    <th className="py-2.5 sm:py-3 px-3 sm:px-4 rounded-l-xl">Expense Head / Category</th>
+                    <th className="py-2.5 sm:py-3 px-3 sm:px-4">Allocated Budget (₹)</th>
+                    <th className="py-2.5 sm:py-3 px-3 sm:px-4">Actual Spent (₹)</th>
+                    <th className="py-2.5 sm:py-3 px-3 sm:px-4">Remaining Unspent (₹)</th>
+                    <th className="py-2.5 sm:py-3 px-3 sm:px-4 text-center rounded-r-xl">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#D4A72C]/20 font-medium">
                   {categoriesSummary.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-6 text-center text-[#2A1710]/60">
+                      <td colSpan={5} className="py-6 text-center text-[#2A1710]/60 text-xs">
                         No expense category data recorded yet.
                       </td>
                     </tr>
@@ -359,23 +359,23 @@ export const AdminFinancialReportsPage: React.FC = () => {
                       const isOver = cat.spent > cat.allocated && cat.allocated > 0;
                       return (
                         <tr key={idx} className="hover:bg-[#FFF7E8]/80 transition-colors">
-                          <td className="py-3 px-4 font-bold text-[#5A0F16]">{cat.category}</td>
-                          <td className="py-3 px-4 font-bold text-[#2A1710]">
+                          <td className="py-2.5 sm:py-3 px-3 sm:px-4 font-bold text-[#5A0F16]">{cat.category}</td>
+                          <td className="py-2.5 sm:py-3 px-3 sm:px-4 font-bold text-[#2A1710]">
                             {cat.allocated > 0 ? `₹${cat.allocated.toLocaleString('en-IN')}` : 'Unallocated'}
                           </td>
-                          <td className="py-3 px-4 text-rose-700 font-bold">
+                          <td className="py-2.5 sm:py-3 px-3 sm:px-4 text-rose-700 font-bold">
                             ₹{cat.spent.toLocaleString('en-IN')}
                           </td>
-                          <td className={`py-3 px-4 font-black ${cat.remaining >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>
+                          <td className={`py-2.5 sm:py-3 px-3 sm:px-4 font-black ${cat.remaining >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>
                             ₹{cat.remaining.toLocaleString('en-IN')}
                           </td>
-                          <td className="py-3 px-4 text-center">
+                          <td className="py-2.5 sm:py-3 px-3 sm:px-4 text-center">
                             {isOver ? (
-                              <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-black uppercase">
+                              <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[9.5px] font-black uppercase">
                                 Over Budget
                               </span>
                             ) : (
-                              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase">
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9.5px] font-black uppercase">
                                 Within Limit
                               </span>
                             )}
@@ -390,32 +390,32 @@ export const AdminFinancialReportsPage: React.FC = () => {
           </div>
 
           {/* Download & Export Quick Actions Footer Box */}
-          <div className="bg-[#240407] text-[#FFF7E8] border-2 border-[#D4A72C]/40 rounded-3xl p-6 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="bg-[#240407] text-[#FFF7E8] border-2 border-[#D4A72C]/40 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-md flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div>
-              <h4 className="font-cinzel text-base font-black text-[#F4B942] uppercase">
+              <h4 className="font-cinzel text-sm sm:text-base font-black text-[#F4B942] uppercase">
                 Need Official Exported Audit Files?
               </h4>
-              <p className="text-xs text-[#FFF7E8]/70 font-semibold">
+              <p className="text-[11px] sm:text-xs text-[#FFF7E8]/70 font-semibold">
                 Generate instant watermarked PDFs or Microsoft Excel spreadsheets for committee meetings.
               </p>
             </div>
 
-            <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto shrink-0">
               <button
                 onClick={downloadPDF}
                 disabled={downloadingPdf}
-                className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-[#F4B942] text-[#32070B] font-black text-xs uppercase tracking-wider hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow disabled:opacity-50"
+                className="px-3.5 py-2 rounded-xl bg-[#F4B942] text-[#32070B] font-black text-[11px] sm:text-xs uppercase tracking-wider hover:brightness-110 transition-all flex items-center justify-center gap-1.5 shadow disabled:opacity-50"
               >
-                <Download className="w-4 h-4" />
+                <Download className="w-3.5 h-3.5" />
                 <span>PDF Audit Report</span>
               </button>
 
               <button
                 onClick={downloadExcel}
                 disabled={downloadingExcel}
-                className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-black text-xs uppercase tracking-wider hover:bg-emerald-500 transition-all flex items-center justify-center gap-2 shadow disabled:opacity-50"
+                className="px-3.5 py-2 rounded-xl bg-emerald-600 text-white font-black text-[11px] sm:text-xs uppercase tracking-wider hover:bg-emerald-500 transition-all flex items-center justify-center gap-1.5 shadow disabled:opacity-50"
               >
-                <Download className="w-4 h-4" />
+                <Download className="w-3.5 h-3.5" />
                 <span>Excel Spreadsheet</span>
               </button>
             </div>

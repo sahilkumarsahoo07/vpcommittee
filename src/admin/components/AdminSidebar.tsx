@@ -21,6 +21,8 @@ import {
   UserPlus,
 } from 'lucide-react';
 
+import { checkModuleAccess } from './PermissionGuard';
+
 interface AdminSidebarProps {
   isOpen: boolean;
   onCloseMobile: () => void;
@@ -30,13 +32,16 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onCloseMobil
   const { user } = useAuth();
   const role = user?.role || 'COMMITTEE_MEMBER';
   const isSuperAdmin = role === 'SUPERADMIN';
+  const userPerms = user?.permissions || [];
 
   const [rolePermissions, setRolePermissions] = useState<{
     ADMIN: { FINANCE: boolean; CMS: boolean; SYSTEM: boolean };
     COMMITTEE_MEMBER: { FINANCE: boolean; CMS: boolean; SYSTEM: boolean };
+    MEMBER: { FINANCE: boolean; CMS: boolean; SYSTEM: boolean };
   }>({
     ADMIN: { FINANCE: true, CMS: true, SYSTEM: false },
     COMMITTEE_MEMBER: { FINANCE: false, CMS: true, SYSTEM: false },
+    MEMBER: { FINANCE: false, CMS: false, SYSTEM: false },
   });
 
   useEffect(() => {
@@ -51,34 +56,41 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onCloseMobil
   }, []);
 
   const currentRolePerms =
-    rolePermissions[role as 'ADMIN' | 'COMMITTEE_MEMBER'] || { FINANCE: false, CMS: false, SYSTEM: false };
+    rolePermissions[role as 'ADMIN' | 'COMMITTEE_MEMBER' | 'MEMBER'] || { FINANCE: false, CMS: false, SYSTEM: false };
 
-  // Permission checks
-  const canAccessFinance = isSuperAdmin || currentRolePerms.FINANCE;
-  const canAccessCMS = isSuperAdmin || currentRolePerms.CMS;
-  const canAccessSystemSettings = isSuperAdmin || currentRolePerms.SYSTEM;
-  const canAccessAuditLogs = isSuperAdmin;
+  // Permission checks combining role matrix and granular permissions
+  const canAccessDashboard = isSuperAdmin || role === 'ADMIN' || role === 'COMMITTEE_MEMBER' || checkModuleAccess(role, userPerms, 'DASHBOARD');
+  const canAccessFinance = isSuperAdmin || currentRolePerms.FINANCE || checkModuleAccess(role, userPerms, 'FINANCE');
+  const canAccessReports = isSuperAdmin || currentRolePerms.FINANCE || checkModuleAccess(role, userPerms, 'REPORTS');
+  const canAccessCMSMembers = isSuperAdmin || currentRolePerms.CMS || checkModuleAccess(role, userPerms, 'CMS_MEMBERS');
+  const canAccessCMSEvents = isSuperAdmin || currentRolePerms.CMS || checkModuleAccess(role, userPerms, 'CMS_EVENTS');
+  const canAccessCMSGallery = isSuperAdmin || currentRolePerms.CMS || checkModuleAccess(role, userPerms, 'CMS_GALLERY');
+  const canAccessCMSAnnouncements = isSuperAdmin || currentRolePerms.CMS || checkModuleAccess(role, userPerms, 'CMS_ANNOUNCEMENTS');
+  const canAccessCMSVolunteers = isSuperAdmin || currentRolePerms.CMS || checkModuleAccess(role, userPerms, 'CMS_VOLUNTEERS');
+  const canAccessCMSSubscribers = isSuperAdmin || (role === 'ADMIN' && currentRolePerms.CMS) || checkModuleAccess(role, userPerms, 'CMS_SUBSCRIBERS');
+  const canAccessSystemSettings = isSuperAdmin || currentRolePerms.SYSTEM || checkModuleAccess(role, userPerms, 'SETTINGS');
+  const canAccessUsers = isSuperAdmin || (role === 'ADMIN') || checkModuleAccess(role, userPerms, 'USERS');
+  const canAccessAuditLogs = isSuperAdmin || checkModuleAccess(role, userPerms, 'AUDIT_LOGS');
 
   const navItems = [
-    { label: 'Overview Dashboard', path: '/admin', icon: LayoutDashboard, category: 'MAIN' },
+    { label: 'Overview Dashboard', path: '/admin', icon: LayoutDashboard, category: 'MAIN', restricted: !canAccessDashboard },
 
     // FINANCE SECTION
     { label: 'Donation Management', path: '/admin/donations', icon: DollarSign, category: 'FINANCE', restricted: !canAccessFinance },
-    { label: 'Expense Tracker', path: '/admin/expenses', icon: Receipt, category: 'FINANCE', restricted: !canAccessFinance },
-    { label: 'Budget vs Actual', path: '/admin/budget', icon: PieChart, category: 'FINANCE', restricted: !canAccessFinance },
-    { label: 'Financial Reports', path: '/admin/reports', icon: FileSpreadsheet, category: 'FINANCE', restricted: !canAccessFinance },
+    { label: 'Expense Tracker & Budget', path: '/admin/expenses', icon: Receipt, category: 'FINANCE', restricted: !canAccessFinance },
+    { label: 'Financial Reports', path: '/admin/reports', icon: FileSpreadsheet, category: 'FINANCE', restricted: !canAccessReports },
 
     // OPERATIONAL CONTENT CMS
-    { label: 'Committee Executive Leadership', path: '/admin/members', icon: Users, category: 'CMS', restricted: !canAccessCMS },
-    { label: 'Festival Schedule', path: '/admin/events', icon: Calendar, category: 'CMS', restricted: !canAccessCMS },
-    { label: 'Gallery & Media', path: '/admin/gallery', icon: Image, category: 'CMS', restricted: !canAccessCMS },
-    { label: 'Announcements', path: '/admin/announcements', icon: Bell, category: 'CMS', restricted: !canAccessCMS },
-    { label: 'Volunteer Roster', path: '/admin/volunteers', icon: HeartHandshake, category: 'CMS', restricted: !canAccessCMS },
-    { label: 'Newsletter Subscribers', path: '/admin/subscribers', icon: Mail, category: 'CMS', restricted: !canAccessCMS },
+    { label: 'Members & Leadership', path: '/admin/members', icon: Users, category: 'CMS', restricted: !canAccessCMSMembers },
+    { label: 'Festival Schedule', path: '/admin/events', icon: Calendar, category: 'CMS', restricted: !canAccessCMSEvents },
+    { label: 'Gallery & Media', path: '/admin/gallery', icon: Image, category: 'CMS', restricted: !canAccessCMSGallery },
+    { label: 'Announcements', path: '/admin/announcements', icon: Bell, category: 'CMS', restricted: !canAccessCMSAnnouncements },
+    { label: 'Volunteer Management', path: '/admin/volunteers', icon: HeartHandshake, category: 'CMS', restricted: !canAccessCMSVolunteers },
+    { label: 'Newsletter Subscribers', path: '/admin/subscribers', icon: Mail, category: 'CMS', restricted: !canAccessCMSSubscribers },
 
     // SYSTEM & AUDIT
-    { label: 'Account & Role Manager', path: '/admin/users', icon: UserPlus, category: 'SYSTEM', restricted: !canAccessSystemSettings },
-    { label: 'Export Center (PDF/Excel)', path: '/admin/exports', icon: FileText, category: 'SYSTEM', restricted: !canAccessFinance },
+    { label: 'Account & Role Manager', path: '/admin/users', icon: UserPlus, category: 'SYSTEM', restricted: !canAccessUsers },
+    { label: 'Export Center (PDF/Excel)', path: '/admin/exports', icon: FileText, category: 'SYSTEM', restricted: !canAccessReports },
     { label: 'Website CMS Settings', path: '/admin/settings', icon: Settings, category: 'SYSTEM', restricted: !canAccessSystemSettings },
     { label: 'Audit Security Logs', path: '/admin/audit', icon: ShieldAlert, category: 'SYSTEM', restricted: !canAccessAuditLogs },
   ];

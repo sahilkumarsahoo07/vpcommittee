@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LanguageProvider } from './context/LanguageContext';
 import { AuthProvider } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
@@ -10,7 +10,9 @@ import { FestivalTimeline } from './sections/FestivalTimeline';
 import { FeatureCards } from './components/FeatureCards';
 import { ActionRowSection } from './sections/ActionRowSection';
 import { LocationCommunitySection } from './sections/LocationCommunitySection';
+import { BestVolunteersSection } from './sections/BestVolunteersSection';
 import { AnnouncementsSection } from './sections/AnnouncementsSection';
+import { MembersSection } from './sections/MembersSection';
 import { GallerySection } from './sections/GallerySection';
 import { Footer } from './components/Footer';
 import { DonationModal } from './components/DonationModal';
@@ -25,7 +27,6 @@ import { AdminDashboardHome } from './admin/pages/AdminDashboardHome';
 import { AdminDonationsPage } from './admin/pages/AdminDonationsPage';
 import { AdminDonorProfilesPage } from './admin/pages/AdminDonorProfilesPage';
 import { AdminExpensesPage } from './admin/pages/AdminExpensesPage';
-import { AdminBudgetPage } from './admin/pages/AdminBudgetPage';
 import { AdminFinancialReportsPage } from './admin/pages/AdminFinancialReportsPage';
 import { AdminMembersPage } from './admin/pages/AdminMembersPage';
 import { AdminEventsPage } from './admin/pages/AdminEventsPage';
@@ -42,6 +43,20 @@ export function PublicWebsite() {
   const [isDonateOpen, setIsDonateOpen] = useState(false);
   const [isVolunteerOpen, setIsVolunteerOpen] = useState(false);
   const [presetDonateAmount, setPresetDonateAmount] = useState<number>(1001);
+
+  useEffect(() => {
+    // If the page loaded with a # hash in URL, clean the URL immediately and smooth scroll
+    if (window.location.hash) {
+      const targetHash = window.location.hash.replace(/^#/, '');
+      window.history.replaceState(null, '', window.location.pathname);
+      if (targetHash) {
+        setTimeout(() => {
+          const el = document.getElementById(targetHash);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      }
+    }
+  }, []);
 
   const handleOpenDonate = (amount?: number) => {
     if (amount) setPresetDonateAmount(amount);
@@ -70,7 +85,10 @@ export function PublicWebsite() {
           onOpenVolunteer={handleOpenVolunteer}
         />
         <LocationCommunitySection />
+        <BestVolunteersSection />
         <AnnouncementsSection />
+        {/* Members / Leadership & Members (Immediately before Memories From Our Celebrations) */}
+        <MembersSection />
         <GallerySection />
       </main>
 
@@ -93,6 +111,8 @@ export function PublicWebsite() {
   );
 }
 
+import { PermissionGuard } from './admin/components/PermissionGuard';
+
 export function App() {
   return (
     <AuthProvider>
@@ -108,21 +128,122 @@ export function App() {
             {/* Protected Admin Dashboard Routes */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboardHome />} />
-              <Route path="donations" element={<AdminDonationsPage />} />
-              <Route path="donor-profiles" element={<AdminDonorProfilesPage />} />
-              <Route path="expenses" element={<AdminExpensesPage />} />
-              <Route path="budget" element={<AdminBudgetPage />} />
-              <Route path="reports" element={<AdminFinancialReportsPage />} />
-              <Route path="members" element={<AdminMembersPage />} />
-              <Route path="events" element={<AdminEventsPage />} />
-              <Route path="gallery" element={<AdminGalleryPage />} />
-              <Route path="announcements" element={<AdminAnnouncementsPage />} />
-              <Route path="volunteers" element={<AdminVolunteersPage />} />
-              <Route path="subscribers" element={<AdminSubscribersPage />} />
-              <Route path="settings" element={<AdminWebsiteSettingsPage />} />
-              <Route path="audit" element={<AdminAuditLogsPage />} />
-              <Route path="exports" element={<AdminExportCenterPage />} />
-              <Route path="users" element={<AdminUsersPage />} />
+              <Route
+                path="donations"
+                element={
+                  <PermissionGuard module="FINANCE">
+                    <AdminDonationsPage />
+                  </PermissionGuard>
+                }
+              />
+              <Route
+                path="donor-profiles"
+                element={
+                  <PermissionGuard module="FINANCE">
+                    <AdminDonorProfilesPage />
+                  </PermissionGuard>
+                }
+              />
+              <Route
+                path="expenses"
+                element={
+                  <PermissionGuard module="FINANCE">
+                    <AdminExpensesPage />
+                  </PermissionGuard>
+                }
+              />
+              <Route
+                path="budget"
+                element={<Navigate to="/admin/expenses" replace />}
+              />
+              <Route
+                path="reports"
+                element={
+                  <PermissionGuard module="REPORTS">
+                    <AdminFinancialReportsPage />
+                  </PermissionGuard>
+                }
+              />
+              <Route
+                path="members"
+                element={
+                  <PermissionGuard module="CMS_MEMBERS">
+                    <AdminMembersPage />
+                  </PermissionGuard>
+                }
+              />
+              <Route
+                path="events"
+                element={
+                  <PermissionGuard module="CMS_EVENTS">
+                    <AdminEventsPage />
+                  </PermissionGuard>
+                }
+              />
+              <Route
+                path="gallery"
+                element={
+                  <PermissionGuard module="CMS_GALLERY">
+                    <AdminGalleryPage />
+                  </PermissionGuard>
+                }
+              />
+              <Route
+                path="announcements"
+                element={
+                  <PermissionGuard module="CMS_ANNOUNCEMENTS">
+                    <AdminAnnouncementsPage />
+                  </PermissionGuard>
+                }
+              />
+              <Route
+                path="volunteers"
+                element={
+                  <PermissionGuard module="CMS_VOLUNTEERS">
+                    <AdminVolunteersPage />
+                  </PermissionGuard>
+                }
+              />
+              <Route
+                path="subscribers"
+                element={
+                  <PermissionGuard module="CMS_SUBSCRIBERS">
+                    <AdminSubscribersPage />
+                  </PermissionGuard>
+                }
+              />
+              <Route
+                path="settings"
+                element={
+                  <PermissionGuard module="SETTINGS">
+                    <AdminWebsiteSettingsPage />
+                  </PermissionGuard>
+                }
+              />
+              <Route
+                path="audit"
+                element={
+                  <PermissionGuard module="AUDIT_LOGS">
+                    <AdminAuditLogsPage />
+                  </PermissionGuard>
+                }
+              />
+              <Route
+                path="exports"
+                element={
+                  <PermissionGuard module="REPORTS">
+                    <AdminExportCenterPage />
+                  </PermissionGuard>
+                }
+              />
+              <Route
+                path="users"
+                element={
+                  <PermissionGuard module="USERS">
+                    <AdminUsersPage />
+                  </PermissionGuard>
+                }
+              />
             </Route>
           </Routes>
         </BrowserRouter>

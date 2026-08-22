@@ -15,7 +15,7 @@ import {
   FileText,
   ArrowRight,
 } from 'lucide-react';
-import { adminAPI } from '../../services/api';
+import { adminAPI, userAPI } from '../../services/api';
 import { ConfirmDeleteModal } from '../components/ConfirmDeleteModal';
 
 interface MemberProfile {
@@ -24,10 +24,13 @@ interface MemberProfile {
   role: string;
   category: string;
   phone?: string;
+  email?: string;
+  address?: string;
   targetAmount?: number;
   paidAmount?: number;
   bio?: string;
   image?: string;
+  isUserAccount?: boolean;
 }
 
 export const AdminDonorProfilesPage: React.FC = () => {
@@ -52,39 +55,68 @@ export const AdminDonorProfilesPage: React.FC = () => {
   const loadProfiles = async () => {
     setLoading(true);
     try {
-      const [membersRes, donationsRes] = await Promise.all([
+      const [usersRes, membersRes, donationsRes] = await Promise.all([
+        userAPI.getUsers().catch(() => null),
         adminAPI.getMembers().catch(() => null),
         adminAPI.getDonations().catch(() => null),
       ]);
 
+      const usersList = usersRes?.success && Array.isArray(usersRes.data) ? usersRes.data : [];
       const membersList = membersRes?.success && Array.isArray(membersRes.data) ? membersRes.data : [];
       const donationsList = donationsRes?.success && Array.isArray(donationsRes.data) ? donationsRes.data : [];
 
-      // Compute total paid per member
+      // Compute total paid per user ID and per donor name
       const paidMap: Record<string, number> = {};
       donationsList.forEach((d: any) => {
-        const name = (d.donorName || d.name || '').trim();
+        const uid = d.userId?._id || d.userId?.id || (typeof d.userId === 'string' ? d.userId : null);
+        if (uid) {
+          paidMap[`uid_${uid}`] = (paidMap[`uid_${uid}`] || 0) + (Number(d.amount) || 0);
+        }
+        const name = (d.donorName || d.name || '').trim().toLowerCase();
         if (name) {
-          paidMap[name] = (paidMap[name] || 0) + (Number(d.amount) || 0);
+          paidMap[`name_${name}`] = (paidMap[`name_${name}`] || 0) + (Number(d.amount) || 0);
         }
       });
 
-      const mapped: MemberProfile[] = membersList.map((m: any) => {
-        const mName = m.name || m.title || 'Anonymous Donor';
+      const userProfiles: MemberProfile[] = usersList.map((u: any) => {
+        const uid = u._id || u.id;
+        const totalPaid = (paidMap[`uid_${uid}`] || 0) + (paidMap[`name_${u.name.trim().toLowerCase()}`] || 0);
         return {
-          id: m._id || m.id,
-          name: mName,
-          role: m.role || 'Contributor',
-          category: m.category || 'Executive',
-          phone: m.phone || '+91 98765 43210',
-          targetAmount: Number(m.targetAmount) || 25000,
-          paidAmount: paidMap[mName] || 0,
-          bio: m.bio || 'Record-keeping donor profile',
-          image: m.image,
+          id: uid,
+          name: u.name,
+          role: u.role,
+          category: 'Account Contributor',
+          phone: u.phone || '',
+          email: u.email || '',
+          address: u.address || '',
+          targetAmount: 25000,
+          paidAmount: totalPaid,
+          bio: `${u.role} Account Profile`,
+          image: u.profilePhoto,
+          isUserAccount: true,
         };
       });
 
-      setProfiles(mapped);
+      // Add legacy members if they don't overlap with user accounts
+      const legacyProfiles: MemberProfile[] = membersList
+        .filter((m: any) => !usersList.some((u: any) => u.name.trim().toLowerCase() === (m.name || '').trim().toLowerCase()))
+        .map((m: any) => {
+          const mName = m.name || m.title || 'Anonymous Donor';
+          return {
+            id: m._id || m.id,
+            name: mName,
+            role: m.role || 'Contributor',
+            category: m.category || 'Executive',
+            phone: m.phone || '',
+            targetAmount: Number(m.targetAmount) || 25000,
+            paidAmount: paidMap[`name_${mName.trim().toLowerCase()}`] || 0,
+            bio: m.bio || 'Record-keeping donor profile',
+            image: m.image,
+            isUserAccount: false,
+          };
+        });
+
+      setProfiles([...userProfiles, ...legacyProfiles]);
     } catch (err) {
       console.error('Failed to load donor profiles:', err);
     } finally {
@@ -200,11 +232,10 @@ export const AdminDonorProfilesPage: React.FC = () => {
                 Full REST API Directory (GET, POST, PUT, DELETE)
               </span>
             </div>
-            <h1 className="font-cinzel text-2xl md:text-3xl font-black text-[#F4B942] uppercase tracking-wider flex items-center gap-2">
-              <UserPlus className="w-7 h-7 text-[#F4B942]" />
-              <span>Committee Member & Contributor Profiles</span>
-            </h1>
-            <p className="text-xs text-[#FFF7E8]/80 max-w-2xl mt-1">
+            <h2 className="font-cinzel text-lg sm:text-2xl font-black text-[#F4B942] uppercase tracking-wider">
+              Executive & Donor Profile Ledger
+            </h2>
+            <p className="text-[11px] sm:text-xs text-[#FFF7E8]/80 max-w-2xl font-medium">
               Directory of committee members, executive office bearers, and key contributors to track pledged contribution targets and donation receipts.
             </p>
           </div>
@@ -212,77 +243,77 @@ export const AdminDonorProfilesPage: React.FC = () => {
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => navigate('/admin/donations')}
-              className="px-4 py-2.5 rounded-2xl bg-[#170204] border border-[#D4A72C]/40 text-[#FFF7E8] text-xs font-bold uppercase tracking-wider hover:bg-[#32070B] transition-all flex items-center gap-2 shadow"
+              className="px-3 py-2 rounded-xl bg-[#170204] border border-[#D4A72C]/40 text-[#FFF7E8] text-[11px] sm:text-xs font-bold uppercase tracking-wider hover:bg-[#32070B] transition-all flex items-center gap-1.5 shadow"
             >
-              <DollarSign className="w-4 h-4 text-[#F4B942]" />
-              <span>Go to Donations Register</span>
+              <DollarSign className="w-3.5 h-3.5 text-[#F4B942]" />
+              <span>Donations</span>
             </button>
 
             <button
               onClick={handleOpenAdd}
-              className="px-4 py-2.5 rounded-2xl bg-[#F4B942] text-[#32070B] font-black text-xs uppercase tracking-wider hover:brightness-110 transition-all flex items-center gap-2 shadow-lg"
+              className="px-3.5 py-2 rounded-xl bg-[#F4B942] text-[#32070B] font-black text-[11px] sm:text-xs uppercase tracking-wider hover:brightness-110 transition-all flex items-center gap-1.5 shadow"
             >
-              <Plus className="w-4 h-4 stroke-[3]" />
-              <span>+ Add New Donor Profile</span>
+              <Plus className="w-3.5 h-3.5 stroke-[3]" />
+              <span>+ Add Profile</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* Overview Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#240407] border-2 border-[#D4A72C]/40 rounded-3xl p-5 text-[#FFF7E8] shadow-md">
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#F4B942] block mb-1">
-            Total Donor Profiles
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="bg-[#240407] border-2 border-[#D4A72C]/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 text-[#FFF7E8] shadow-sm min-w-0">
+          <span className="text-[9.5px] sm:text-[10px] font-extrabold uppercase tracking-widest text-[#F4B942] block mb-0.5 truncate">
+            Total Profiles
           </span>
-          <div className="font-cinzel text-3xl font-black text-white flex items-center gap-2">
-            <User className="w-6 h-6 text-[#F4B942]" />
-            <span>{totalProfilesCount} Donors</span>
+          <div className="font-cinzel text-base sm:text-2xl font-black text-white flex items-center gap-1.5 truncate">
+            <User className="w-4 h-4 sm:w-5 sm:h-5 text-[#F4B942] shrink-0" />
+            <span className="truncate">{totalProfilesCount} Donors</span>
           </div>
         </div>
 
-        <div className="bg-[#240407] border-2 border-[#D4A72C]/40 rounded-3xl p-5 text-[#FFF7E8] shadow-md">
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-300 block mb-1">
-            Total Pledged Target
+        <div className="bg-[#240407] border-2 border-[#D4A72C]/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 text-[#FFF7E8] shadow-sm min-w-0">
+          <span className="text-[9.5px] sm:text-[10px] font-extrabold uppercase tracking-widest text-amber-300 block mb-0.5 truncate">
+            Pledged Target
           </span>
-          <div className="font-cinzel text-3xl font-black text-amber-300">
+          <div className="font-cinzel text-base sm:text-2xl font-black text-amber-300 truncate">
             ₹{totalTargetAmount.toLocaleString('en-IN')}
           </div>
         </div>
 
-        <div className="bg-[#240407] border-2 border-[#D4A72C]/40 rounded-3xl p-5 text-[#FFF7E8] shadow-md">
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-400 block mb-1">
-            Total Money Collected
+        <div className="bg-[#240407] border-2 border-[#D4A72C]/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 text-[#FFF7E8] shadow-sm min-w-0">
+          <span className="text-[9.5px] sm:text-[10px] font-extrabold uppercase tracking-widest text-emerald-400 block mb-0.5 truncate">
+            Money Collected
           </span>
-          <div className="font-cinzel text-3xl font-black text-emerald-400">
+          <div className="font-cinzel text-base sm:text-2xl font-black text-emerald-400 truncate">
             ₹{totalCollectedAmount.toLocaleString('en-IN')}
           </div>
         </div>
 
-        <div className="bg-[#240407] border-2 border-[#D4A72C]/40 rounded-3xl p-5 text-[#FFF7E8] shadow-md">
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-rose-300 block mb-1">
-            Remaining Pledged Due
+        <div className="bg-[#240407] border-2 border-[#D4A72C]/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 text-[#FFF7E8] shadow-sm min-w-0">
+          <span className="text-[9.5px] sm:text-[10px] font-extrabold uppercase tracking-widest text-rose-300 block mb-0.5 truncate">
+            Remaining Due
           </span>
-          <div className="font-cinzel text-3xl font-black text-rose-300">
+          <div className="font-cinzel text-base sm:text-2xl font-black text-rose-300 truncate">
             ₹{totalOutstandingDue.toLocaleString('en-IN')}
           </div>
         </div>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="bg-white border-2 border-[#D4A72C]/40 rounded-3xl p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="relative w-full sm:w-96">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#2A1710]/50" />
+      <div className="bg-white border-2 border-[#D4A72C]/40 rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+        <div className="relative flex-1">
+          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#2A1710]/50" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search donor profiles by name or phone..."
-            className="w-full bg-[#FFF7E8] border border-[#D4A72C]/60 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-[#32070B] placeholder-[#2A1710]/50 focus:outline-none focus:border-[#5A0F16]"
+            className="w-full bg-[#FFF7E8] border border-[#D4A72C]/60 rounded-xl pl-9 pr-3 py-1.5 text-[11px] sm:text-xs font-bold text-[#32070B] placeholder-[#2A1710]/50 focus:outline-none focus:border-[#5A0F16]"
           />
         </div>
 
-        <div className="text-xs font-bold text-[#5A0F16]">
+        <div className="text-[11px] sm:text-xs font-bold text-[#5A0F16]">
           Showing <span className="text-[#E87516]">{filteredProfiles.length}</span> of {totalProfilesCount} Profiles
         </div>
       </div>

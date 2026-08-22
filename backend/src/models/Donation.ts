@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IDonation extends Document {
+  userId?: mongoose.Types.ObjectId;
   donorName: string;
   phone?: string;
   email?: string;
@@ -18,6 +19,7 @@ export interface IDonation extends Document {
 
 const DonationSchema: Schema = new Schema(
   {
+    userId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
     donorName: { type: String, required: true, trim: true },
     phone: { type: String, trim: true },
     email: { type: String, trim: true },

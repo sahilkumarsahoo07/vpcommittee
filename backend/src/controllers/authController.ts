@@ -59,7 +59,17 @@ export const login = async (req: Request, res: Response) => {
     } catch {}
 
     const token = jwt.sign(
-      { id: user._id || user.id, email: user.email, name: user.name, role: user.role, mustChangePassword: user.mustChangePassword ?? false },
+      {
+        id: user._id || user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        phone: user.phone || '',
+        address: user.address || '',
+        profilePhoto: user.profilePhoto || '',
+        permissions: user.permissions || [],
+        mustChangePassword: user.mustChangePassword ?? false,
+      },
       process.env.JWT_SECRET || 'vighnaharta_puja_committee_super_secret_jwt_key_2026',
       { expiresIn: '7d' }
     );
@@ -85,6 +95,10 @@ export const login = async (req: Request, res: Response) => {
           name: user.name,
           email: user.email,
           role: user.role,
+          phone: user.phone || '',
+          address: user.address || '',
+          profilePhoto: user.profilePhoto || '',
+          permissions: user.permissions || [],
           mustChangePassword: user.mustChangePassword ?? false,
         },
       },
@@ -100,9 +114,36 @@ export const login = async (req: Request, res: Response) => {
 
 export const getMe = async (req: any, res: Response) => {
   try {
+    const userId = req.user?.id;
+    const userEmail = req.user?.email;
+
+    let freshUser: any = null;
+    if (userId) {
+      try {
+        freshUser = await User.findById(userId);
+      } catch {}
+    }
+    if (!freshUser && userEmail) {
+      freshUser = mockUsers.find((u) => u.email.toLowerCase() === userEmail.toLowerCase() || u.id === userId);
+    }
+
+    const userData = freshUser
+      ? {
+          id: freshUser._id || freshUser.id,
+          name: freshUser.name,
+          email: freshUser.email,
+          role: freshUser.role,
+          phone: freshUser.phone || '',
+          address: freshUser.address || '',
+          profilePhoto: freshUser.profilePhoto || '',
+          permissions: freshUser.permissions || [],
+          mustChangePassword: freshUser.mustChangePassword ?? false,
+        }
+      : req.user;
+
     res.json({
       success: true,
-      data: { user: req.user },
+      data: { user: userData },
     });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });

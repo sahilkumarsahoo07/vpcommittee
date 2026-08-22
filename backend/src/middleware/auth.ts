@@ -8,6 +8,11 @@ export interface AuthRequest extends Request {
     email: string;
     name: string;
     role: UserRole;
+    phone?: string;
+    address?: string;
+    profilePhoto?: string;
+    permissions?: string[];
+    mustChangePassword?: boolean;
   };
 }
 

@@ -207,38 +207,36 @@ export const AdminGalleryPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h2 className="font-cinzel text-xl sm:text-2xl font-black text-[#5A0F16]">Gallery & Media CMS</h2>
-          <p className="text-xs text-[#32070B]/70 font-semibold">
+          <h2 className="font-cinzel text-lg sm:text-2xl font-black text-[#5A0F16]">Gallery & Media CMS</h2>
+          <p className="text-[11px] sm:text-xs text-[#32070B]/70 font-semibold">
             Manage festival photos, Instagram reels, YouTube streams & devotional media
           </p>
         </div>
         <button
           onClick={handleOpenAdd}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5A0F16] text-[#F4B942] border border-[#D4A72C] font-bold text-xs shadow-md hover:bg-[#32070B] transition-colors"
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#5A0F16] text-[#F4B942] border border-[#D4A72C] font-bold text-xs shadow-md hover:bg-[#32070B] transition-colors"
         >
-          <Plus className="w-4 h-4" />
-          <span>Add Media Item</span>
+          <Plus className="w-3.5 h-3.5" />
+          <span>Add Media</span>
         </button>
       </div>
 
       {/* Instagram Official Stream Configuration Card */}
-      <div className="bg-[#240407] text-[#FFF7E8] p-5 rounded-3xl border-2 border-[#D4A72C]/50 shadow-md space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-yellow-500 via-pink-600 to-purple-600 flex items-center justify-center shadow-lg flex-shrink-0">
-              <InstagramIcon className="w-6 h-6 text-white" />
+      <div className="bg-[#240407] text-[#FFF7E8] p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border-2 border-[#D4A72C]/50 shadow-sm space-y-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-yellow-500 via-pink-600 to-purple-600 flex items-center justify-center shadow flex-shrink-0">
+              <InstagramIcon className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h4 className="font-cinzel font-black text-sm text-[#F4B942]">Official Instagram Handle Stream</h4>
-              <p className="text-[11px] text-[#FFF7E8]/70">
+              <h4 className="font-cinzel font-black text-xs sm:text-sm text-[#F4B942]">Official Instagram Handle Stream</h4>
+              <p className="text-[10.5px] text-[#FFF7E8]/70">
                 Sync festival Instagram handle: @{instagramHandle} (Embeds Reels & feeds live)
               </p>
             </div>
           </div>
-
           <form onSubmit={handleSaveInstagramHandle} className="flex items-center gap-2 w-full md:w-auto">
             <div className="relative flex-1 md:w-56">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#F4B942]">@</span>
@@ -338,11 +336,11 @@ export const AdminGalleryPage: React.FC = () => {
                     </span>
                   </div>
 
-                  {/* Sleek Hover Play Icon */}
+                  {/* Play Button Overlay */}
                   {!isPhoto && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-300">
-                      <div className="w-12 h-12 rounded-full bg-black/75 backdrop-blur-md border-2 border-[#F4B942] text-[#F4B942] flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-transform">
-                        <Play className="w-5 h-5 fill-[#F4B942] ml-0.5" />
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#D4A72C] via-[#F4B942] to-[#FFF7E8] text-[#32070B] flex items-center justify-center shadow-xl border-2 border-white/80 ring-2 ring-[#F4B942]/40 group-hover:scale-110 transition-transform">
+                        <Play className="w-5 h-5 fill-current ml-0.5" />
                       </div>
                     </div>
                   )}

@@ -3,6 +3,7 @@ import { Heart, Sparkles } from 'lucide-react';
 import { DiyaIcon } from '../components/DevotionalIcons';
 import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../data/translations';
+import { scrollToSection } from '../utils/scrollHelper';
 
 interface HeroSectionProps {
   onOpenDonate: () => void;
@@ -79,13 +80,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDonate }) => {
 
           {/* Luxury CTA Action Buttons */}
           <div className="flex flex-wrap items-center gap-4 pt-3">
-            <a
-              href="#events"
-              className={`btn-gold-premium px-8 py-4 rounded-xl font-extrabold text-sm uppercase tracking-[0.12em] text-[#32070B] hover:scale-105 active:scale-95 transition-all flex items-center gap-2 ${fontClass}`}
+            <button
+              onClick={(e) => scrollToSection('events', e)}
+              className={`btn-gold-premium px-8 py-4 rounded-xl font-extrabold text-sm uppercase tracking-[0.12em] text-[#32070B] hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer border-0 ${fontClass}`}
             >
               <span>{t.hero.exploreBtn}</span>
               <span className="text-lg">❖</span>
-            </a>
+            </button>
 
             <button
               onClick={onOpenDonate}

@@ -62,42 +62,42 @@ export const AdminSubscribersPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between border-b border-[#D4A72C]/40 pb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-[#D4A72C]/40 pb-3">
         <div>
-          <h2 className="font-cinzel text-2xl font-black text-[#32070B] uppercase tracking-wider">
+          <h2 className="font-cinzel text-lg sm:text-2xl font-black text-[#32070B] uppercase tracking-wider">
             Newsletter Subscribers
           </h2>
-          <p className="text-xs text-[#2A1710]/70 font-semibold">
-            Devotees who subscribed via the "Stay Connected" card on the homepage to receive Ganesh Utsav updates.
+          <p className="text-[11px] sm:text-xs text-[#2A1710]/70 font-semibold">
+            Devotees who subscribed to receive Ganesh Utsav updates.
           </p>
         </div>
-        <div className="px-3 py-1.5 rounded-full bg-[#5A0F16] text-[#F4B942] border border-[#F4B942] text-xs font-black uppercase">
-          Total Subscribers: {subscribers.length}
+        <div className="px-3 py-1 rounded-full bg-[#5A0F16] text-[#F4B942] border border-[#F4B942] text-[11px] sm:text-xs font-black uppercase">
+          Subscribers: {subscribers.length}
         </div>
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-[#32070B] font-cinzel font-bold text-sm">Loading subscribers from database...</div>
+        <div className="text-center py-12 text-[#32070B] font-cinzel font-bold text-xs">Loading subscribers...</div>
       ) : subscribers.length === 0 ? (
         <div className="text-center py-12 text-[#2A1710]/70 text-xs font-semibold">No subscribers found.</div>
       ) : (
-        <div className="bg-[#240407] border-2 border-[#D4A72C]/40 rounded-3xl p-4 shadow-lg overflow-x-auto">
-          <table className="w-full text-left text-xs text-[#FFF7E8]">
+        <div className="bg-[#240407] border-2 border-[#D4A72C]/40 rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-sm overflow-x-auto">
+          <table className="min-w-[500px] w-full text-left text-[11px] sm:text-xs text-[#FFF7E8]">
             <thead>
-              <tr className="border-b border-[#D4A72C]/30 text-[#F4B942] font-cinzel font-black uppercase tracking-wider">
-                <th className="py-3 px-4">#</th>
-                <th className="py-3 px-4">Email Address</th>
-                <th className="py-3 px-4">Subscribed Date</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+              <tr className="border-b border-[#D4A72C]/30 text-[#F4B942] font-cinzel font-black uppercase tracking-wider text-[10px] sm:text-[11px]">
+                <th className="py-2.5 px-3">#</th>
+                <th className="py-2.5 px-3">Email Address</th>
+                <th className="py-2.5 px-3">Subscribed Date</th>
+                <th className="py-2.5 px-3">Status</th>
+                <th className="py-2.5 px-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#D4A72C]/15">
               {subscribers.map((sub, idx) => (
                 <tr key={sub.id} className="hover:bg-[#32070B]/50 transition-colors">
-                  <td className="py-3 px-4 text-[#F4B942] font-bold">{idx + 1}</td>
-                  <td className="py-3 px-4 font-semibold text-white">
-                    <div className="flex items-center gap-2">
+                  <td className="py-2.5 px-3 text-[#F4B942] font-bold">{idx + 1}</td>
+                  <td className="py-2.5 px-3 font-semibold text-white">
+                    <div className="flex items-center gap-1.5">
                       <Mail className="w-4 h-4 text-[#E87516]" />
                       <span>{sub.email}</span>
                     </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, ChevronLeft, ChevronRight, X, Film } from 'lucide-react';
+import { Play, ChevronLeft, ChevronRight, X, Film, Maximize2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../data/translations';
 import { publicAPI } from '../services/api';
@@ -18,172 +18,24 @@ interface GalleryItem {
   caption?: string;
 }
 
-interface InstagramReelItem {
-  id: string;
-  title: string;
-  tag: string;
-  mediaUrl: string;
-  embedUrl: string;
-  imageUrl: string;
-  mediaType?: 'REEL' | 'IMAGE' | 'VIDEO';
-  caption?: string;
-}
-
-
-
-interface InstagramViewerModalProps {
-  item: InstagramReelItem;
-  handle: string;
-  onClose: () => void;
-}
-
-const InstagramViewerModal: React.FC<InstagramViewerModalProps> = ({ item, handle, onClose }) => {
-  const [useIframe, setUseIframe] = useState<boolean>(false);
-  const isVideo = item.mediaType === 'REEL' || item.mediaType === 'VIDEO' || !item.tag.toLowerCase().includes('photo');
-
-  return (
-    <div
-      onClick={onClose}
-      className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 overflow-y-auto animate-fadeIn"
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md bg-[#160205] border-2 border-[#F4B942] rounded-3xl p-5 text-[#FFF7E8] space-y-4 shadow-2xl relative flex flex-col items-center"
-      >
-        {/* Modal Header */}
-        <div className="w-full flex justify-between items-center border-b border-[#D4A72C]/30 pb-3">
-          <div className="flex items-center gap-2">
-            <InstagramIcon className="w-4 h-4 text-pink-400" />
-            <div>
-              <span className="text-xs font-black text-[#F4B942] uppercase tracking-widest">
-                @{handle}
-              </span>
-              <span className="ml-2 text-[9px] px-2 py-0.5 rounded-full bg-pink-950/80 text-pink-300 font-bold border border-pink-500/40 uppercase">
-                {isVideo ? 'Reel' : 'Photo'}
-              </span>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-full bg-red-950/80 border border-red-500/40 text-white hover:bg-red-900 transition-colors"
-            title="Close"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Media Container: Guaranteed NO WHITE SCREEN */}
-        <div className="w-full max-w-sm aspect-[9/16] max-h-[60vh] rounded-2xl overflow-hidden border border-[#D4A72C]/40 bg-black shadow-2xl relative flex items-center justify-center group">
-          {useIframe ? (
-            <iframe
-              title={item.title}
-              src={item.embedUrl}
-              width="100%"
-              height="100%"
-              frameBorder="0"
-              scrolling="no"
-              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-              className="border-0 w-full h-full bg-black"
-            />
-          ) : (
-            <div className="relative w-full h-full flex items-center justify-center bg-black">
-              {/* Actual Instagram Media Preview Image */}
-              <img
-                src={item.imageUrl}
-                alt={item.title}
-                className="w-full h-full object-cover rounded-2xl"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/assets/cultural-night.png';
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
-
-              {/* In-Site Interactive Play Action for Videos/Reels */}
-              {isVideo && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center z-10 bg-black/30 backdrop-blur-[2px]">
-                  <button
-                    onClick={() => setUseIframe(true)}
-                    className="w-16 h-16 rounded-full bg-gradient-to-r from-pink-600 via-purple-600 to-yellow-500 text-white flex items-center justify-center shadow-2xl hover:scale-110 transition-transform border-2 border-white/40 group-hover:scale-110"
-                  >
-                    <Play className="w-7 h-7 fill-current ml-1" />
-                  </button>
-                  <span className="mt-3 text-xs font-black text-white bg-black/80 px-3.5 py-1.5 rounded-full border border-[#F4B942]/50 backdrop-blur-md shadow-lg">
-                    Play Reel In-Site
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Modal Footer Info */}
-        <div className="w-full max-w-sm text-center space-y-2 pt-1">
-          <div>
-            <h4 className="text-xs font-extrabold text-white line-clamp-2">{item.title}</h4>
-            <p className="text-[9px] text-[#F4B942] uppercase tracking-widest font-black mt-1">
-              {item.tag} • {isVideo ? 'Instagram Reel' : 'Instagram Photo'}
-            </p>
-          </div>
-
-          {/* Direct In-Site Controls */}
-          {isVideo && (
-            <div className="flex justify-center items-center gap-2 pt-1">
-              <button
-                onClick={() => setUseIframe(!useIframe)}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#5A0F16] to-[#3B070C] hover:from-[#7A151E] hover:to-[#5A0F16] border border-[#F4B942]/40 text-[#F4B942] text-xs font-black transition-all flex items-center gap-2 shadow-md"
-              >
-                <Film className="w-3.5 h-3.5 text-pink-400" />
-                <span>{useIframe ? 'Show Media Preview' : 'Load Interactive Embed'}</span>
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 export const GallerySection: React.FC = () => {
   const { language } = useLanguage();
   const t = translations[language];
 
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('All');
-  const [selectedMedia, setSelectedMedia] = useState<any | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<GalleryItem | null>(null);
+  const [playingItemId, setPlayingItemId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState<number>(1);
   const ITEMS_PER_PAGE = 6;
 
-  // Instagram Handle Stream & Video Portfolio state
-  const [instagramHandle, setInstagramHandle] = useState<string>('vighnaharta_puja');
-  const [selectedInstagramVideo, setSelectedInstagramVideo] = useState<InstagramReelItem | null>(null);
-
-  const fetchInstagramApiFeed = async (_handleStr: string) => {
-    try {
-      const res = await publicAPI.getInstagramFeed(_handleStr);
-      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-        // Feed loaded
-      }
-    } catch {}
-  };
-
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Fetch settings for Instagram handle
-        let activeHandle = 'vighnaharta_puja';
-        try {
-          const settingsRes = await publicAPI.getSettings();
-          if (settingsRes.success && settingsRes.data?.instagramHandle) {
-            activeHandle = settingsRes.data.instagramHandle;
-          }
-        } catch {}
-        setInstagramHandle(activeHandle);
-        fetchInstagramApiFeed(activeHandle);
-
         // Fetch gallery items
         const res = await publicAPI.getGallery();
         if (res.success && Array.isArray(res.data)) {
@@ -253,15 +105,27 @@ export const GallerySection: React.FC = () => {
   const handleCategoryChange = (catKey: string) => {
     setActiveCategory(catKey);
     setCurrentPage(1);
+    setPlayingItemId(null);
   };
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
+      setPlayingItemId(null);
       const section = document.getElementById('gallery');
       if (section) {
         section.scrollIntoView({ behavior: 'smooth' });
       }
+    }
+  };
+
+  const handleCardClick = (item: GalleryItem) => {
+    const isPhoto = item.mediaType === 'IMAGE';
+    if (isPhoto) {
+      setSelectedMedia(item);
+    } else {
+      // Instantly start playing inline
+      setPlayingItemId(item.id);
     }
   };
 
@@ -318,73 +182,146 @@ export const GallerySection: React.FC = () => {
               const isGdrive = item.mediaType === 'GDRIVE';
               const isVideo = item.mediaType === 'VIDEO';
               const isPhoto = item.mediaType === 'IMAGE';
+              const isPlaying = playingItemId === item.id;
 
               const shortcode = isReel ? extractInstagramShortcode(item.mediaUrl || '') : null;
 
               return (
                 <div
                   key={item.id}
-                  onClick={() => setSelectedMedia(item)}
-                  className="group relative rounded-3xl overflow-hidden border-2 border-[#D4A72C]/40 hover:border-[#F4B942] bg-[#120103] shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer aspect-[4/5] min-h-[380px] sm:min-h-[440px] flex items-center justify-center"
+                  className={`group relative rounded-3xl overflow-hidden border-2 transition-all duration-300 shadow-lg hover:shadow-2xl aspect-[4/5] min-h-[380px] sm:min-h-[440px] flex items-center justify-center bg-[#120103] ${
+                    isPlaying
+                      ? 'border-[#F4B942] ring-4 ring-[#F4B942]/30 shadow-2xl'
+                      : 'border-[#D4A72C]/40 hover:border-[#F4B942] cursor-pointer'
+                  }`}
                 >
-                  {/* Media Content */}
-                  {isReel ? (
-                    <div className="w-full h-full relative overflow-hidden bg-black flex items-center justify-center pointer-events-none">
-                      <iframe
-                        src={item.embedUrl || `https://www.instagram.com/p/${shortcode}/embed/`}
-                        title={item.title}
-                        className="w-full h-[620px] -mt-10 border-0 pointer-events-none opacity-95 group-hover:opacity-100 transition-opacity scale-100"
-                        scrolling="no"
-                      />
+                  {/* Active Inline Instant Video Player */}
+                  {isPlaying ? (
+                    <div className="w-full h-full relative bg-black flex items-center justify-center">
+                      {isReel ? (
+                        <iframe
+                          src={item.embedUrl || `https://www.instagram.com/p/${shortcode}/embed/`}
+                          title={item.title}
+                          className="w-full h-full border-0 bg-black"
+                          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                          allowFullScreen
+                          scrolling="no"
+                        />
+                      ) : isYoutube ? (
+                        <iframe
+                          src={item.embedUrl}
+                          title={item.title}
+                          className="w-full h-full border-0 bg-black"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : isGdrive ? (
+                        <iframe
+                          src={item.embedUrl}
+                          title={item.title}
+                          className="w-full h-full border-0 bg-black"
+                          allowFullScreen
+                        />
+                      ) : isVideo ? (
+                        <video
+                          src={item.mediaUrl}
+                          controls
+                          autoPlay
+                          playsInline
+                          className="w-full h-full object-contain bg-black"
+                        />
+                      ) : null}
+
+                      {/* In-Player Overlay Controls: Fullscreen & Stop/Close */}
+                      <div className="absolute top-3 right-3 flex items-center gap-2 z-30">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedMedia(item);
+                          }}
+                          className="p-2 rounded-xl bg-black/80 hover:bg-[#5A0F16] text-[#F4B942] border border-[#F4B942]/40 backdrop-blur-md shadow-lg transition-all"
+                          title="Open Fullscreen Player"
+                        >
+                          <Maximize2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPlayingItemId(null);
+                          }}
+                          className="p-2 rounded-xl bg-red-950/90 hover:bg-red-900 text-white border border-red-500/40 backdrop-blur-md shadow-lg transition-all"
+                          title="Close Video"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   ) : (
-                    <img
-                      src={item.imageUrl || '/assets/bannerimage.png'}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/assets/bannerimage.png';
-                      }}
-                    />
-                  )}
+                    /* Default Card Preview State */
+                    <div
+                      onClick={() => handleCardClick(item)}
+                      className="w-full h-full relative flex items-center justify-center cursor-pointer"
+                    >
+                      {/* Media Image / Background */}
+                      <img
+                        src={item.imageUrl || '/assets/bannerimage.png'}
+                        alt={item.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/assets/bannerimage.png';
+                        }}
+                      />
 
-                  {/* Gradient Scrim */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#100103] via-black/30 to-black/20 group-hover:via-black/10 transition-colors pointer-events-none" />
+                      {/* Gradient Scrim */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#100103] via-black/30 to-black/20 group-hover:via-black/10 transition-colors pointer-events-none" />
 
-                  {/* Top Floating Badges */}
-                  <div className="absolute top-3.5 inset-x-3.5 flex items-center justify-between z-10 pointer-events-none">
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-[#F4B942] bg-[#3A060B]/90 border border-[#F4B942]/50 backdrop-blur-md shadow-md">
-                      {item.category}
-                    </span>
+                      {/* Top Floating Badges */}
+                      <div className="absolute top-3.5 inset-x-3.5 flex items-center justify-between z-10 pointer-events-none">
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-[#F4B942] bg-[#3A060B]/90 border border-[#F4B942]/50 backdrop-blur-md shadow-md">
+                          {item.category}
+                        </span>
 
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold text-white/90 bg-black/60 border border-white/20 backdrop-blur-md shadow-md flex items-center gap-1.5">
-                      {isReel && <InstagramIcon className="w-3 h-3 text-pink-400" />}
-                      {isYoutube && <YoutubeIcon className="w-3 h-3 text-red-400" />}
-                      {isGdrive && <GoogleDriveIcon className="w-3 h-3 text-blue-400" />}
-                      {isVideo && <Film className="w-3 h-3 text-[#F4B942]" />}
-                      {isPhoto && <Film className="w-3 h-3 text-emerald-400" />}
-                      <span>{isReel ? 'Instagram' : isYoutube ? 'YouTube' : isPhoto ? 'Photo' : 'Video'}</span>
-                    </span>
-                  </div>
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold text-white/90 bg-black/60 border border-white/20 backdrop-blur-md shadow-md flex items-center gap-1.5">
+                          {isReel && <InstagramIcon className="w-3 h-3 text-pink-400" />}
+                          {isYoutube && <YoutubeIcon className="w-3 h-3 text-red-400" />}
+                          {isGdrive && <GoogleDriveIcon className="w-3 h-3 text-blue-400" />}
+                          {isVideo && <Film className="w-3 h-3 text-[#F4B942]" />}
+                          {isPhoto && <Film className="w-3 h-3 text-emerald-400" />}
+                          <span>{isReel ? 'Instagram' : isYoutube ? 'YouTube' : isPhoto ? 'Photo' : 'Video'}</span>
+                        </span>
+                      </div>
 
-                  {/* Sleek Hover-Only Play Button for Videos/Reels */}
-                  {!isPhoto && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-300">
-                      <div className="w-14 h-14 rounded-full bg-black/75 backdrop-blur-md border-2 border-[#F4B942] text-[#F4B942] flex items-center justify-center shadow-2xl transform scale-90 group-hover:scale-100 transition-transform">
-                        <Play className="w-6 h-6 fill-[#F4B942] ml-0.5" />
+                      {/* Instant Play Button for Videos / Reels / YouTube */}
+                      {!isPhoto && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-auto">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPlayingItemId(item.id);
+                            }}
+                            className="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-[#D4A72C] via-[#F4B942] to-[#FFF7E8] text-[#32070B] flex items-center justify-center shadow-2xl hover:scale-115 active:scale-95 transition-all duration-300 border-2 border-white/80 ring-4 ring-[#F4B942]/40 group-hover:shadow-[0_0_30px_rgba(244,185,66,0.8)]"
+                            title="Click to Play Instantly"
+                          >
+                            <Play className="w-8 h-8 fill-current ml-1" />
+                          </button>
+                          <span className="mt-3 text-[11px] font-black text-[#FFF7E8] bg-black/80 px-3.5 py-1 rounded-full border border-[#F4B942]/50 backdrop-blur-md shadow-lg tracking-wider uppercase opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all">
+                            Play Instantly
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Bottom Information */}
+                      <div className="absolute bottom-0 inset-x-0 p-4 sm:p-5 space-y-1 text-left z-10 pointer-events-none">
+                        <h4 className={`text-base font-extrabold text-[#FFF7E8] group-hover:text-[#F4B942] transition-colors leading-snug drop-shadow line-clamp-1 ${fontClass}`}>
+                          {item.title}
+                        </h4>
+                        {item.caption && (
+                          <p className={`text-xs text-[#FFF7E8]/70 line-clamp-1 font-medium ${fontClass}`}>{item.caption}</p>
+                        )}
                       </div>
                     </div>
                   )}
-
-                  {/* Bottom Information */}
-                  <div className="absolute bottom-0 inset-x-0 p-4 sm:p-5 space-y-1 text-left z-10 pointer-events-none">
-                    <h4 className={`text-base font-extrabold text-[#FFF7E8] group-hover:text-[#F4B942] transition-colors leading-snug drop-shadow line-clamp-1 ${fontClass}`}>
-                      {item.title}
-                    </h4>
-                    {item.caption && (
-                      <p className={`text-xs text-[#FFF7E8]/70 line-clamp-1 font-medium ${fontClass}`}>{item.caption}</p>
-                    )}
-                  </div>
                 </div>
               );
             })}
@@ -429,22 +366,6 @@ export const GallerySection: React.FC = () => {
         )}
       </div>
 
-      {/* 2. DYNAMIC INSTAGRAM VIDEO PORTFOLIO & REELS SHOWCASE (HIDDEN) */}
-      {/* 
-      <div id="instagram-videos" className="max-w-7xl mx-auto bg-gradient-to-br from-[#240407] via-[#1A0305] to-[#120204] text-[#FFF7E8] p-6 sm:p-10 rounded-3xl border-2 border-[#F4B942]/60 shadow-2xl space-y-8">
-        ...
-      </div>
-      */}
-
-      {/* 3. INSTAGRAM VIDEO PLAYER POPUP MODAL */}
-      {selectedInstagramVideo && (
-        <InstagramViewerModal
-          item={selectedInstagramVideo}
-          handle={instagramHandle}
-          onClose={() => setSelectedInstagramVideo(null)}
-        />
-      )}
-
       {/* General Media Modal Popup */}
       {selectedMedia && (
         <MediaModal item={selectedMedia} onClose={() => setSelectedMedia(null)} />
@@ -452,3 +373,4 @@ export const GallerySection: React.FC = () => {
     </section>
   );
 };
+

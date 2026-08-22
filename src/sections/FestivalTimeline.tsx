@@ -5,6 +5,7 @@ import { translations } from '../data/translations';
 import { OmIcon } from '../components/DevotionalIcons';
 import { publicAPI } from '../services/api';
 import { getLocalizedText } from '../utils/translationHelper';
+import { scrollToSection } from '../utils/scrollHelper';
 
 export const FestivalTimeline: React.FC = () => {
   const { language } = useLanguage();
@@ -132,13 +133,13 @@ export const FestivalTimeline: React.FC = () => {
 
             {/* Right Action Button */}
             <div className="relative z-10 flex-shrink-0 w-full lg:w-auto">
-              <a
-                href="#location"
-                className={`inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-[#F4B942] via-[#D4A72C] to-[#E87516] text-[#32070B] font-black text-sm uppercase tracking-widest shadow-[0_8px_25px_rgba(244,185,66,0.4)] hover:shadow-[0_12px_35px_rgba(244,185,66,0.6)] hover:scale-105 transition-all w-full lg:w-auto ${fontClass}`}
+              <button
+                onClick={(e) => scrollToSection('location', e)}
+                className={`inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-[#F4B942] via-[#D4A72C] to-[#E87516] text-[#32070B] font-black text-sm uppercase tracking-widest shadow-[0_8px_25px_rgba(244,185,66,0.4)] hover:shadow-[0_12px_35px_rgba(244,185,66,0.6)] hover:scale-105 transition-all w-full lg:w-auto cursor-pointer border-0 ${fontClass}`}
               >
                 <Navigation className="w-5 h-5 fill-current" />
                 <span>{t.timeline.viewLocBtn}</span>
-              </a>
+              </button>
             </div>
 
           </div>
