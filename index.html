@@ -25,11 +25,26 @@
       button[aria-label*="Netlify"],
       button[aria-label*="netlify"],
       button[aria-label*="Powered by Netlify"],
+      a[aria-label*="Powered by Netlify"],
       iframe[data-netlify-drawer],
       iframe[src*="netlify"],
+      iframe[id*="netlify"],
       [data-netlify-create-badge],
       #netlify-badge-container,
-      .netlify-badge {
+      .netlify-badge,
+      netlify-drawer,
+      netlify-drawer-root,
+      netlify-cdp-drawer,
+      [data-netlify-drawer],
+      [data-netlify-badge],
+      [data-netlify-preview],
+      [data-netlify-feedback],
+      div[class*="netlify-badge"],
+      div[id*="netlify-badge"],
+      div[class*="netlify-drawer"],
+      div[id*="netlify-drawer"],
+      a[href*="netlify.com"][class*="badge"],
+      a[href*="netlify.com"][style*="position: fixed"] {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
@@ -50,9 +65,25 @@
     <script>
       (function() {
         function removeNetlifyBadge() {
-          var badges = document.querySelectorAll('#nl-badge, .nl-badge, #nl-card, .nl-card, [aria-controls="nl-card"], iframe[data-netlify-drawer]');
-          badges.forEach(function(el) {
-            el.remove();
+          var selectors = [
+            '#nl-badge', '.nl-badge', '#nl-card', '.nl-card', '[aria-controls="nl-card"]',
+            'iframe[data-netlify-drawer]', 'iframe[src*="netlify"]', 'iframe[id*="netlify"]',
+            'netlify-drawer', 'netlify-drawer-root', 'netlify-cdp-drawer',
+            '[data-netlify-drawer]', '[data-netlify-badge]', '[data-netlify-preview]', '[data-netlify-feedback]',
+            '#netlify-badge-container', '.netlify-badge',
+            'button[aria-label*="Netlify"]', 'button[aria-label*="netlify"]', 'button[aria-label*="Powered by Netlify"]',
+            'a[aria-label*="Powered by Netlify"]'
+          ];
+          selectors.forEach(function(sel) {
+            document.querySelectorAll(sel).forEach(function(el) {
+              el.remove();
+            });
+          });
+          // Also check any fixed element containing "Powered by Netlify"
+          document.querySelectorAll('a, button, div').forEach(function(el) {
+            if (el.textContent && el.textContent.trim().toLowerCase().includes('powered by netlify')) {
+              el.remove();
+            }
           });
         }
         removeNetlifyBadge();
