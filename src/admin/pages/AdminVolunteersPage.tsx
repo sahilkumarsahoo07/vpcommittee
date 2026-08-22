@@ -7,20 +7,10 @@ import {
   Trash2,
   Eye,
   EyeOff,
-  User,
-  Phone,
-  Mail,
-  Award,
-  Trophy,
-  Calendar,
   Tag,
   ArrowUp,
   ArrowDown,
   X,
-  CheckCircle2,
-  AlertCircle,
-  Sparkles,
-  SlidersHorizontal,
 } from 'lucide-react';
 import { adminAPI, userAPI } from '../../services/api';
 import { ConfirmDeleteModal } from '../components/ConfirmDeleteModal';

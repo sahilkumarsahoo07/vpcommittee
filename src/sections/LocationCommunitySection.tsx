@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapPin, Navigation, Award, Users, HeartHandshake, Sparkles, Phone, Mail } from 'lucide-react';
-import { InstagramIcon } from '../components/SocialIcons';
+import { MapPin, Navigation, Award, Users, HeartHandshake, Sparkles } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../data/translations';
 import { publicAPI } from '../services/api';
-import { translateText, translateRole, getLocalizedText, getMonogramInitial, toIndicDigits } from '../utils/translationHelper';
+import { toIndicDigits } from '../utils/translationHelper';
 
 export const LocationCommunitySection: React.FC = () => {
   const { language } = useLanguage();
@@ -19,8 +18,8 @@ export const LocationCommunitySection: React.FC = () => {
 
   const [hasAnimated, setHasAnimated] = useState(false);
   const [counts, setCounts] = useState<Record<string, number>>({});
-  const [members, setMembers] = useState<any[]>([]);
-  const [loadingMembers, setLoadingMembers] = useState(true);
+  const [_members, setMembers] = useState<any[]>([]);
+  const [_loadingMembers, setLoadingMembers] = useState(true);
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

@@ -7,7 +7,6 @@ import {
   Download,
   FileSpreadsheet,
   Receipt,
-  Tag,
   DollarSign,
   X,
   TrendingUp,
@@ -16,7 +15,6 @@ import {
   Layers,
   AlertTriangle,
   Sparkles,
-  SlidersHorizontal,
 } from 'lucide-react';
 import { adminAPI } from '../../services/api';
 import { ConfirmDeleteModal } from '../components/ConfirmDeleteModal';

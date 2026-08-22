@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Phone, Mail, Sparkles, Send } from 'lucide-react';
+import { ShieldCheck, Phone, Mail, Sparkles } from 'lucide-react';
 import { InstagramIcon } from '../components/SocialIcons';
 import { useLanguage } from '../context/LanguageContext';
 import { publicAPI } from '../services/api';
-import { translateText, getLocalizedText, getMonogramInitial, toIndicDigits } from '../utils/translationHelper';
+import { translateText, getLocalizedText, getMonogramInitial } from '../utils/translationHelper';
 
 export interface HomepageMember {
   id: string;

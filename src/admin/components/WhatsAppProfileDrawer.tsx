@@ -8,7 +8,6 @@ import {
   Mail,
   MapPin,
   Shield,
-  ShieldCheck,
   Key,
   Copy,
   Check,
@@ -16,15 +15,11 @@ import {
   Calendar,
   Lock,
   MessageCircle,
-  ExternalLink,
   Save,
-  Trash2,
   CheckCircle2,
   AlertCircle,
   Eye,
   EyeOff,
-  UserCheck,
-  UserX,
 } from 'lucide-react';
 
 export interface WhatsAppProfileDrawerProps {

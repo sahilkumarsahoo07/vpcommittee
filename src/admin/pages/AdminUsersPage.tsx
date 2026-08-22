@@ -23,13 +23,9 @@ import {
   Mail,
   User as UserIcon,
   MapPin,
-  Camera,
-  Edit2,
   Shield,
   CheckSquare,
   Square,
-  MessageCircle,
-  ExternalLink,
   Info,
 } from 'lucide-react';
 
@@ -82,7 +78,7 @@ export const AdminUsersPage: React.FC = () => {
     ADMIN: { FINANCE: true, CMS: true, SYSTEM: false },
     COMMITTEE_MEMBER: { FINANCE: false, CMS: true, SYSTEM: false },
   });
-  const [savingPermissions, setSavingPermissions] = useState(false);
+  const [_savingPermissions, setSavingPermissions] = useState(false);
 
   // WHATSAPP PROFILE DRAWER STATE
   const [drawerUser, setDrawerUser] = useState<UserAccount | null>(null);
@@ -159,6 +155,7 @@ export const AdminUsersPage: React.FC = () => {
       },
     }));
   };
+  void handleTogglePermission;
 
   const handleSavePermissions = async () => {
     setSavingPermissions(true);
@@ -179,6 +176,7 @@ export const AdminUsersPage: React.FC = () => {
       setSavingPermissions(false);
     }
   };
+  void handleSavePermissions;
 
   const handleGeneratePassword = () => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$';

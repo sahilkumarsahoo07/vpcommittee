@@ -6,7 +6,6 @@ import {
   LayoutDashboard,
   DollarSign,
   Receipt,
-  PieChart,
   FileSpreadsheet,
   Users,
   Calendar,

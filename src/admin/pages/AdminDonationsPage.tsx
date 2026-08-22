@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Search,
   Plus,
-  CheckCircle,
   Edit2,
   Trash2,
   FileText,
@@ -12,9 +10,7 @@ import {
   Calendar,
   Download,
   Loader2,
-  History,
   CheckCircle2,
-  AlertCircle,
   ShieldCheck,
   Mail,
   Phone,
@@ -109,9 +105,6 @@ const formatMonthYearLabel = (monthIso: string) => {
 };
 
 export const AdminDonationsPage: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
   const [donations, setDonations] = useState<DonationItem[]>([]);
   const [usersList, setUsersList] = useState<UserOption[]>([]);
   const [loading, setLoading] = useState(true);
