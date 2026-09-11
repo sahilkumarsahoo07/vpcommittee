@@ -1,215 +1,336 @@
 /* ===========================================================
-   Ganesh Chaturthi Invitation
-   Ported from "Ganesh Chaturthi Invitation.dc.html" (Claude Design)
+   ପବିତ୍ର ଶ୍ରୀ ଗଣେଶ ପୂଜା — Royal Odia Festive Invitation
+   Full-Bleed 100% Responsive Viewport Layout System
    =========================================================== */
 
-/* --- Base ------------------------------------------------- */
-/* One ground colour under everything. Scene backgrounds are warm glows that
-   fade to *transparent* over this ground rather than to their own opaque
-   colour, so no section boundary can ever show as a tonal step. */
+/* --- Design Tokens & Color Palette --- */
 :root {
-  --ground: #fbeadb;
-  --glow: 255, 248, 239;
-  --shade: 233, 201, 173;
+  --ground: #faf0e4;
+  --ground-dark: #f0dac4;
+  --royal-maroon: #540b16;
+  --royal-crimson: #7c1424;
+  --festive-red: #9e1b2f;
+  --gold-primary: #c98e2c;
+  --gold-rich: #dfa338;
+  --gold-bright: #fbe08e;
+  --gold-dark: #8c5d13;
+  --gold-gradient: linear-gradient(135deg, #d4952e 0%, #fae192 50%, #b8791c 100%);
+  --crimson-gradient: linear-gradient(135deg, #660c1a 0%, #8c1427 50%, #560a16 100%);
+  --card-bg: rgba(255, 253, 248, 0.94);
+  --card-border: rgba(201, 142, 44, 0.55);
+  --shadow-warm: 0 16px 40px rgba(90, 20, 10, 0.16);
+  --text-dark: #421606;
+  --text-muted: #6b371c;
+  --text-gold: #a86c18;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 html, body {
   margin: 0;
   padding: 0;
-  background: var(--ground);
+  width: 100%;
+  min-height: 100vh;
+  /* Seamless 100% full screen background */
+  background: linear-gradient(180deg,
+    var(--ground) 0%,
+    var(--ground) 35%,
+    #faede0 65%,
+    var(--ground-dark) 100%);
+  background-attachment: fixed;
+  color: var(--text-dark);
+  font-family: 'Noto Sans Oriya', Mukta, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
 }
-body { overflow-x: clip; }
 
-a { color: #9a5a1c; text-decoration: none; }
-a:hover { color: #6d3c10; }
+a {
+  color: var(--royal-crimson);
+  text-decoration: none;
+  transition: color .2s ease;
+}
+a:hover { color: var(--festive-red); }
 
-img { -webkit-user-drag: none; user-select: none; }
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+  max-width: 100%;
+}
 
-p, h1, h2 { margin: 0; }
+p, h1, h2, h3 { margin: 0; }
 
-/* --- Keyframes -------------------------------------------- */
-@keyframes swing     { 0%, 100% { transform: rotate(-2.2deg); } 50% { transform: rotate(2.2deg); } }
-@keyframes swingSlow { 0%, 100% { transform: rotate(-1.4deg); } 50% { transform: rotate(1.4deg); } }
-@keyframes bob       { 0%, 100% { transform: translateY(0); }   50% { transform: translateY(-7px); } }
-@keyframes glow      { 0%, 100% { opacity: .35; transform: scale(1); } 50% { opacity: .9; transform: scale(1.25); } }
-@keyframes hintDown  { 0%, 100% { transform: translateY(0); opacity: .55; } 50% { transform: translateY(7px); opacity: 1; } }
+/* --- Fullscreen Flower Shower Particle Canvas --- */
+.petal-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 998;
+}
+
+/* --- Floating Toast Message --- */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--crimson-gradient);
+  color: #fff9ed;
+  border: 1px solid var(--gold-bright);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  padding: 10px 22px;
+  border-radius: 30px;
+  font-family: 'Noto Sans Oriya', Mukta, sans-serif;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .35s cubic-bezier(0.18, 0.89, 0.32, 1.28), opacity .3s ease;
+  text-align: center;
+  max-width: 90vw;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* --- Keyframe Animations --- */
+@keyframes swing       { 0%, 100% { transform: rotate(-3.5deg); } 50% { transform: rotate(3.5deg); } }
+@keyframes swingSlow   { 0%, 100% { transform: rotate(-2.2deg); } 50% { transform: rotate(2.2deg); } }
+@keyframes swingRing   { 0% { transform: rotate(0deg); } 20% { transform: rotate(15deg); } 40% { transform: rotate(-13deg); } 60% { transform: rotate(9deg); } 80% { transform: rotate(-4deg); } 100% { transform: rotate(0deg); } }
+@keyframes bob         { 0%, 100% { transform: translateY(0); }   50% { transform: translateY(-7px); } }
+@keyframes pulseGlow   { 0%, 100% { opacity: .45; transform: scale(1); } 50% { opacity: .9; transform: scale(1.25); } }
+@keyframes haloFlicker { 0%, 100% { opacity: .65; transform: scale(1); } 35% { opacity: .85; transform: scale(1.08); } 70% { opacity: .55; transform: scale(0.95); } }
+@keyframes ringWave {
+  0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0.95; }
+  100% { transform: translate(-50%, -50%) scale(1.35); opacity: 0; }
+}
 @keyframes fall {
   0%   { transform: translate3d(0, -8vh, 0) rotate(0deg); opacity: 0; }
   10%  { opacity: .85; }
   100% { transform: translate3d(6vw, 105vh, 0) rotate(240deg); opacity: 0; }
 }
 
-/* --- Frame ------------------------------------------------ */
+/* --- Full-Width Fluid Frame --- */
 .frame {
   width: 100%;
-  max-width: 540px;
   margin: 0 auto;
   position: relative;
-  /* The page's only background. Because it lives on this one element that
-     spans every section, there is no boundary anywhere for a tone to step
-     across; the sticky stages below are transparent and let it through.
-     It holds flat --ground through the hero and most of scene 2, so the
-     hero's scrim resolves onto exactly the same colour. */
-  background: linear-gradient(180deg,
-    var(--ground) 0%,
-    var(--ground) 42%,
-    #f6e0cd 100%);
-  box-shadow: 0 0 80px rgba(120, 70, 30, .07);
+  background: transparent;
   overflow-x: clip;
 }
 
 /* ===========================================================
-   01 — Hero
+   01 — Hero Scene
    =========================================================== */
 .hero {
   position: relative;
   height: 100vh;
   height: 100svh;
+  width: 100%;
   overflow: hidden;
   background: transparent;
 }
+
 .hero__video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
 }
+
 .hero__scrim {
   position: absolute;
   left: 0; right: 0; bottom: 0;
-  height: 52%;
-  /* Fully opaque at the base so the hero's bottom edge *is* the ground,
-     leaving nothing to step against where the next scene begins. */
+  height: 62%;
   background: linear-gradient(to top,
-    var(--ground) 10%,
-    rgba(251, 234, 219, .72) 42%,
-    rgba(251, 234, 219, 0));
+    var(--ground) 15%,
+    rgba(250, 240, 228, 0.92) 50%,
+    rgba(250, 240, 228, 0.45) 78%,
+    rgba(250, 240, 228, 0) 100%);
 }
+
 .hero__text {
   position: absolute;
   left: 0; right: 0;
-  bottom: 6.5vh;
-  bottom: 6.5svh;
-  padding: 0 28px;
+  bottom: 5.5vh;
+  bottom: 5.5svh;
+  padding: 0 20px;
   text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
 }
+
+.hero__shloka-tag {
+  display: inline-block;
+  font-family: 'Noto Sans Oriya', sans-serif;
+  font-size: clamp(12.5px, 2.8vw, 15px);
+  font-weight: 700;
+  color: var(--royal-crimson);
+  letter-spacing: .04em;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 4px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(201, 142, 44, 0.5);
+  margin-bottom: 8px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 12px rgba(84, 11, 22, 0.08);
+}
+
 .hero__mantra {
-  font-family: Mukta, sans-serif;
-  font-weight: 600;
-  font-size: 26px;
-  line-height: 1.3;
-  color: #8f4f16;
-  letter-spacing: .4px;
+  font-family: 'Noto Serif Oriya', serif;
+  font-weight: 700;
+  font-size: clamp(28px, 6.5vw, 44px);
+  line-height: 1.25;
+  color: var(--royal-crimson);
+  text-shadow: 0 2px 10px rgba(255, 245, 230, 0.95);
+  letter-spacing: .5px;
 }
+
 .hero__roman {
-  font-family: Marcellus, serif;
-  font-size: 15px;
-  letter-spacing: .34em;
-  text-transform: uppercase;
-  color: #a9711f;
-  margin-top: 10px;
+  font-family: 'Noto Sans Oriya', 'Cinzel', serif;
+  font-size: clamp(13px, 2.8vw, 16px);
+  font-weight: 700;
+  letter-spacing: .15em;
+  color: var(--gold-dark);
+  margin-top: 6px;
 }
+
 .hero__rule {
-  width: 54px;
+  position: relative;
+  width: 110px;
   height: 1px;
-  background: #c99a4e;
-  margin: 18px auto 0;
+  background: linear-gradient(90deg, transparent, var(--gold-rich), transparent);
+  margin: 16px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.hero__rule-diya {
+  position: absolute;
+  font-size: 15px;
+  top: -10px;
+  background: var(--ground);
+  padding: 0 6px;
+}
+
 .hero__cue {
-  font-family: Mukta, sans-serif;
-  font-weight: 400;
-  font-size: 13px;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: #8a6647;
-  margin-top: 20px;
+  font-family: 'Noto Sans Oriya', sans-serif;
+  font-weight: 600;
+  font-size: clamp(12px, 2.5vw, 13.5px);
+  letter-spacing: .08em;
+  color: var(--text-muted);
+  margin-top: 18px;
 }
+
 .hero__arrow {
-  font-family: Mukta, sans-serif;
-  font-size: 22px;
-  color: #b5813a;
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--gold-rich);
   margin-top: 2px;
   animation: hintDown 1.8s ease-in-out infinite;
 }
 
 /* ===========================================================
-   Scroll scenes (sticky stages)
+   02 & 03 — Scroll Scenes (Fluid 100% Width)
    =========================================================== */
-.scene { position: relative; }
+.scene {
+  position: relative;
+  width: 100%;
+}
 .scene--invite  { height: 180vh; height: 180svh; }
-.scene--details { height: 170vh; height: 170svh; }
+.scene--details { height: 175vh; height: 175svh; }
 
 .scene__stage {
   position: sticky;
   top: 0;
+  width: 100%;
   height: 100vh;
   height: 100svh;
   overflow: hidden;
 }
-.stage--invite {
-  background: transparent;
-}
+
+.stage--invite { background: transparent; }
 .stage--details {
   display: flex;
   flex-direction: column;
   background: transparent;
 }
 
-/* --- 02: sparks ------------------------------------------- */
+/* --- Divine Sparks --- */
 .spark {
   position: absolute;
   border-radius: 50%;
-  animation: glow 5s ease-in-out infinite;
+  animation: pulseGlow 4.5s ease-in-out infinite;
 }
 .spark--1 {
-  left: 12%; top: 26%; width: 9px; height: 9px;
-  background: #ffe6b0;
-  box-shadow: 0 0 18px 8px rgba(255, 220, 150, .55);
-  animation-duration: 5s;
+  left: 8%; top: 22%; width: 10px; height: 10px;
+  background: #fff0cf;
+  box-shadow: 0 0 20px 8px rgba(255, 200, 100, .7);
+  animation-duration: 4.8s;
 }
 .spark--2 {
-  right: 16%; top: 44%; width: 7px; height: 7px;
-  background: #ffe6b0;
-  box-shadow: 0 0 16px 7px rgba(255, 220, 150, .5);
-  animation-duration: 6.5s;
-  animation-delay: .8s;
+  right: 10%; top: 38%; width: 8px; height: 8px;
+  background: #ffe3a3;
+  box-shadow: 0 0 18px 7px rgba(255, 190, 80, .65);
+  animation-duration: 6s;
+  animation-delay: .7s;
 }
 .spark--3 {
-  left: 26%; top: 62%; width: 6px; height: 6px;
-  background: #fff0cf;
-  box-shadow: 0 0 14px 6px rgba(255, 225, 170, .45);
-  animation-duration: 7.5s;
-  animation-delay: 1.6s;
+  left: 18%; top: 58%; width: 7px; height: 7px;
+  background: #fff8e8;
+  box-shadow: 0 0 16px 6px rgba(255, 215, 130, .6);
+  animation-duration: 7s;
+  animation-delay: 1.4s;
+}
+.spark--4 {
+  right: 20%; top: 65%; width: 6px; height: 6px;
+  background: #ffe3a3;
+  box-shadow: 0 0 14px 5px rgba(255, 180, 80, .5);
+  animation-duration: 5.5s;
+  animation-delay: 2.1s;
 }
 
-/* --- 02: garland ------------------------------------------ */
+/* --- Full-Width Garland Framing (Left & Right) --- */
 .garland {
   position: absolute;
   top: 0;
-  /* Each half is clipped to its side of the art and slides in from its own
-     edge. The source image is empty between x=320 and x=703 of 1024, so the
-     split at the midline never cuts through a flower. */
-  width: 55%;
-  overflow: hidden;
+  width: clamp(120px, 20vw, 260px);
   will-change: transform;
+  z-index: 2;
+  pointer-events: none;
 }
 .garland img {
   display: block;
-  width: 200%;
+  width: 100%;
   height: auto;
+  filter: drop-shadow(0 8px 18px rgba(90, 20, 10, 0.2));
 }
-.garland--left  { left: -5%;  transform: translate3d(-110%, 0, 0); }
-.garland--right { right: -5%; transform: translate3d(110%, 0, 0); }
-.garland--right img { margin-left: -100%; }
+.garland--left  { left: 0; transform: translate3d(-115%, 0, 0); }
+.garland--right { right: 0; transform: translate3d(115%, 0, 0); }
 
-/* --- 02: bells -------------------------------------------- */
+/* --- Full-Width Distributed Temple Bells --- */
 .bell {
   position: absolute;
   top: 0;
   transform-origin: 50% 0;
   will-change: transform;
+  cursor: pointer;
+  z-index: 3;
+  -webkit-tap-highlight-color: transparent;
+}
+.bell:hover {
+  filter: drop-shadow(0 0 14px rgba(223, 163, 56, 0.9));
 }
 .bell__swing {
   width: 100%;
@@ -221,78 +342,142 @@ p, h1, h2 { margin: 0; }
   height: 100%;
   object-fit: contain;
   object-position: top center;
+  filter: drop-shadow(0 8px 18px rgba(84, 11, 22, 0.25));
 }
+
 .bell__swing--slow-a { animation: swingSlow 5.2s ease-in-out infinite; }
 .bell__swing--fast-a { animation: swing 4.1s ease-in-out .4s infinite; }
 .bell__swing--fast-b { animation: swing 4.6s ease-in-out .9s infinite; }
 .bell__swing--slow-b { animation: swingSlow 6s ease-in-out 1.3s infinite; }
 
-.bell--1 { left: 6%;  width: 22%; height: 52%; transform: translate3d(0, -150%, 0); }
-.bell--2 { left: 27%; width: 17%; height: 31%; transform: translate3d(0, -190%, 0); }
-.bell--3 { right: 8%; width: 19%; height: 34%; transform: translate3d(0, -190%, 0); }
-.bell--4 { right: 26%; width: 23%; height: 55%; transform: translate3d(0, -150%, 0); }
+.bell.ringing .bell__swing {
+  animation: swingRing 1.2s cubic-bezier(0.36, 0.07, 0.19, 0.97) !important;
+}
 
-/* --- 02: oil lamps ---------------------------------------- */
+.bell__ring-wave {
+  position: absolute;
+  bottom: 8%;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid var(--gold-bright);
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.7);
+  transform: translate(-50%, -50%) scale(0.6);
+  opacity: 0;
+  pointer-events: none;
+}
+.bell.ringing .bell__ring-wave {
+  animation: ringWave 0.7s ease-out;
+}
+
+/* Fluid spacing across screen width between the two garlands */
+.bell--1 { left: clamp(70px, 14vw, 190px);  width: clamp(70px, 12vw, 120px); height: 48%; transform: translate3d(0, -150%, 0); }
+.bell--2 { left: clamp(170px, 34vw, 440px); width: clamp(55px, 10vw, 100px); height: 29%; transform: translate3d(0, -190%, 0); }
+.bell--3 { right: clamp(170px, 34vw, 440px); width: clamp(60px, 10vw, 105px); height: 32%; transform: translate3d(0, -190%, 0); }
+.bell--4 { right: clamp(70px, 14vw, 190px); width: clamp(75px, 13vw, 125px); height: 50%; transform: translate3d(0, -150%, 0); }
+
+/* --- Oil Lamps with Glowing Flame Halos --- */
 .diya {
   position: absolute;
   bottom: -1%;
-  width: 36%;
-  object-fit: contain;
+  width: clamp(110px, 22vw, 220px);
   will-change: transform;
+  pointer-events: none;
+  z-index: 3;
 }
-.diya--left  { left: -6%;  transform: translate3d(-130%, 0, 0); }
-.diya--right { right: -6%; transform: translate3d(130%, 0, 0) scaleX(-1); }
+.diya img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 20px rgba(90, 20, 10, 0.25));
+}
+.diya__halo {
+  position: absolute;
+  top: 18%;
+  left: 48%;
+  width: clamp(60px, 12vw, 100px);
+  height: clamp(60px, 12vw, 100px);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255, 210, 100, 0.8) 0%, rgba(255, 150, 40, 0.4) 45%, transparent 75%);
+  border-radius: 50%;
+  animation: haloFlicker 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+.diya--left  { left: clamp(0px, 2vw, 40px);  transform: translate3d(-130%, 0, 0); }
+.diya--right { right: clamp(0px, 2vw, 40px); transform: translate3d(130%, 0, 0) scaleX(-1); }
 
-/* --- 02: invitation copy ---------------------------------- */
+/* --- Invitation Copy (Scene 2) --- */
 .invite {
   position: absolute;
   left: 0; right: 0;
-  top: 34%;
-  padding: 0 16%;
+  top: 32%;
+  padding: 0 20px;
+  max-width: 680px;
+  margin: 0 auto;
   text-align: center;
   opacity: 0;
   will-change: transform, opacity;
+  z-index: 4;
 }
 .invite__salutation {
-  font-family: Mukta, sans-serif;
-  font-weight: 600;
-  font-size: 15px;
+  font-family: 'Noto Sans Oriya', sans-serif;
+  font-weight: 700;
+  font-size: clamp(15px, 3vw, 18px);
   letter-spacing: .1em;
-  color: #a9711f;
+  color: var(--royal-crimson);
 }
-.invite__stem {
-  width: 1px;
-  height: 22px;
-  background: linear-gradient(#c99a4e, rgba(201, 154, 78, 0));
-  margin: 14px auto;
+.invite__ornament {
+  font-size: 14px;
+  color: var(--gold-primary);
+  margin: 8px 0;
+  letter-spacing: .4em;
 }
 .invite__title {
-  font-family: Marcellus, serif;
-  font-weight: 400;
-  font-size: 38px;
-  line-height: 1.12;
-  color: #7a3f12;
+  font-family: 'Noto Serif Oriya', serif;
+  font-weight: 700;
+  font-size: clamp(28px, 6vw, 42px);
+  line-height: 1.2;
+  color: var(--royal-maroon);
   text-wrap: balance;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 .invite__body {
-  margin-top: 16px;
-  font-family: Mukta, sans-serif;
-  font-weight: 300;
-  font-size: 16px;
+  margin-top: 14px;
+  font-family: 'Noto Sans Oriya', sans-serif;
+  font-weight: 500;
+  font-size: clamp(15px, 3.2vw, 17.5px);
   line-height: 1.65;
-  color: #6d4b32;
+  color: var(--text-dark);
   text-wrap: pretty;
 }
-.invite__marathi {
-  font-family: Mukta, sans-serif;
-  font-weight: 400;
-  font-size: 15px;
-  color: #8f5a2a;
+.invite__badge {
+  display: inline-block;
   margin-top: 14px;
+  padding: 6px 22px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1.5px solid rgba(201, 142, 44, 0.55);
+  border-radius: 30px;
+  box-shadow: 0 4px 14px rgba(84, 11, 22, 0.1);
+}
+.invite__marathi {
+  font-family: 'Noto Sans Oriya', sans-serif;
+  font-weight: 700;
+  font-size: clamp(14px, 3vw, 16px);
+  color: var(--royal-crimson);
+}
+.bell-hint {
+  font-family: 'Noto Sans Oriya', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--gold-dark);
+  margin-top: 12px;
+  letter-spacing: .02em;
+  opacity: .9;
 }
 
 /* ===========================================================
-   03 — Details
+   03 — Details & Card Scene
    =========================================================== */
 .petals {
   position: absolute;
@@ -306,163 +491,301 @@ p, h1, h2 { margin: 0; }
   border-radius: 50%;
   animation: fall linear infinite;
 }
-.petal--1 { left: 8%;  width: 13px; height: 9px;  background: #f6a8bd; opacity: .8;  animation-duration: 11s; }
-.petal--2 { left: 34%; width: 10px; height: 7px;  background: #f9c3d1; opacity: .8;  animation-duration: 14s;   animation-delay: 2s; }
-.petal--3 { left: 58%; width: 14px; height: 10px; background: #f4a1b8; opacity: .75; animation-duration: 12.5s; animation-delay: 4.5s; }
-.petal--4 { left: 79%; width: 11px; height: 8px;  background: #fbd0da; opacity: .8;  animation-duration: 15s;   animation-delay: 1s; }
+.petal--1 { left: 8%;  width: 14px; height: 10px; background: #e65c7b; opacity: .8;  animation-duration: 11s; }
+.petal--2 { left: 34%; width: 11px; height: 8px;  background: #ffb142; opacity: .8;  animation-duration: 14s;   animation-delay: 2s; }
+.petal--3 { left: 58%; width: 15px; height: 11px; background: #d63052; opacity: .75; animation-duration: 12.5s; animation-delay: 4.5s; }
+.petal--4 { left: 79%; width: 12px; height: 9px;  background: #ffa502; opacity: .8;  animation-duration: 15s;   animation-delay: 1s; }
 
 .card-region {
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
   z-index: 3;
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
+
 .card {
   position: absolute;
   left: 0; right: 0; top: 0;
-  padding: 14px 26px 0;
+  max-width: 540px;
+  margin: 0 auto;
+  padding: 8px 18px 0;
   transform-origin: top center;
   opacity: 0;
   will-change: transform, opacity;
+  width: 100%;
 }
 .card__head { text-align: center; }
+.card__crest {
+  font-family: 'Noto Serif Oriya', serif;
+  font-size: 28px;
+  color: var(--royal-crimson);
+  line-height: 1;
+  text-shadow: 0 2px 6px rgba(201, 142, 44, 0.4);
+}
 .card__eyebrow {
-  font-family: Mukta, sans-serif;
-  font-weight: 600;
-  font-size: 12px;
-  letter-spacing: .32em;
+  font-family: 'Noto Sans Oriya', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .15em;
   text-transform: uppercase;
-  color: #a9711f;
+  color: var(--gold-dark);
+  margin-top: 2px;
 }
 .card__title {
-  margin-top: 10px;
-  font-family: Marcellus, serif;
-  font-weight: 400;
-  font-size: 30px;
-  line-height: 1.15;
-  color: #7a3f12;
+  margin-top: 4px;
+  font-family: 'Noto Serif Oriya', serif;
+  font-weight: 700;
+  font-size: clamp(22px, 5vw, 28px);
+  line-height: 1.2;
+  color: var(--royal-maroon);
 }
+
+/* --- Card Panel (Glassmorphism & Gold Trim) --- */
 .card__panel {
-  margin-top: 22px;
+  margin-top: 14px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  background: rgba(255, 250, 243, .72);
-  border: 1px solid rgba(196, 148, 80, .38);
-  border-radius: 18px;
-  padding: 22px 20px;
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
-  box-shadow: 0 14px 34px rgba(140, 86, 36, .1);
+  gap: 12px;
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: 20px;
+  padding: clamp(14px, 3.5vw, 22px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-warm), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  position: relative;
 }
+
+/* --- Live Countdown Timer Box --- */
+.countdown-box {
+  background: linear-gradient(135deg, rgba(84, 11, 22, 0.06) 0%, rgba(201, 142, 44, 0.14) 100%);
+  border: 1px dashed rgba(201, 142, 44, 0.65);
+  border-radius: 14px;
+  padding: 10px 12px;
+  text-align: center;
+}
+.countdown-title {
+  font-family: 'Noto Sans Oriya', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  color: var(--royal-crimson);
+  margin-bottom: 6px;
+}
+.countdown-grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.count-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: clamp(44px, 11vw, 56px);
+  background: #ffffff;
+  border: 1px solid rgba(201, 142, 44, 0.45);
+  border-radius: 8px;
+  padding: 4px 6px;
+  box-shadow: 0 2px 6px rgba(84, 11, 22, 0.06);
+}
+.count-num {
+  font-family: 'Cinzel', 'Noto Serif Oriya', serif;
+  font-weight: 700;
+  font-size: clamp(16px, 4vw, 19px);
+  line-height: 1.1;
+  color: var(--royal-crimson);
+}
+.count-lbl {
+  font-family: 'Noto Sans Oriya', sans-serif;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--gold-dark);
+}
+.count-sep {
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--gold-primary);
+  margin-top: -8px;
+}
+
+/* --- Event Fields --- */
 .field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
+}
+.field__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.field__icon {
+  font-size: 15px;
+  line-height: 1;
 }
 .field__label {
-  font-family: Mukta, sans-serif;
-  font-weight: 600;
-  font-size: 11px;
-  letter-spacing: .22em;
-  text-transform: uppercase;
-  color: #a9711f;
+  font-family: 'Noto Sans Oriya', sans-serif;
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: .04em;
+  color: var(--gold-dark);
 }
 .field__value {
-  font-family: Marcellus, serif;
-  font-size: 21px;
-  color: #5f3a1c;
+  font-family: 'Noto Serif Oriya', serif;
+  font-weight: 700;
+  font-size: clamp(17px, 3.8vw, 20px);
+  color: var(--royal-maroon);
 }
-.field__value--sm { font-size: 18px; }
+.field__value--sm { font-size: clamp(15px, 3.5vw, 18px); }
 .field__note {
-  font-family: Mukta, sans-serif;
-  font-weight: 300;
-  font-size: 14px;
-  color: #6d4b32;
+  font-family: 'Noto Sans Oriya', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--royal-crimson);
 }
 .field__address {
-  font-family: Mukta, sans-serif;
-  font-weight: 400;
-  font-size: 15px;
-  line-height: 1.55;
-  color: #5f3a1c;
-  text-wrap: pretty;
+  font-family: 'Noto Sans Oriya', sans-serif;
+  font-weight: 500;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--text-dark);
 }
+
 .divider {
   height: 1px;
   background: linear-gradient(90deg,
-    rgba(196, 148, 80, 0), rgba(196, 148, 80, .45), rgba(196, 148, 80, 0));
+    rgba(201, 142, 44, 0), rgba(201, 142, 44, .5), rgba(201, 142, 44, 0));
 }
-.field-row { display: flex; gap: 16px; }
-.field-row .field { flex: 1; gap: 3px; }
-.field-row__split { width: 1px; background: rgba(196, 148, 80, .35); }
+.field-row { display: flex; gap: 14px; }
+.field-row .field { flex: 1; gap: 2px; }
+.field-row__split { width: 1px; background: rgba(201, 142, 44, .35); }
 
-.btn-share {
-  margin-top: 2px;
-  align-self: stretch;
-  border: 1px solid rgba(196, 148, 80, .55);
-  background: rgba(255, 255, 255, .5);
-  color: #7a3f12;
-  font-family: Mukta, sans-serif;
-  font-weight: 600;
-  font-size: 14px;
-  letter-spacing: .06em;
-  padding: 13px 16px;
+/* --- Action Buttons --- */
+.btn-action-small {
+  align-self: flex-start;
+  margin-top: 4px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(201, 142, 44, 0.55);
+  color: var(--royal-maroon);
+  font-family: 'Noto Sans Oriya', sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all .15s ease;
+}
+.btn-action-small:hover {
+  background: #ffffff;
+  border-color: var(--gold-rich);
+  transform: translateY(-1px);
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.btn-cal, .btn-share {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: 'Noto Sans Oriya', sans-serif;
+  font-weight: 700;
+  font-size: clamp(12px, 2.8vw, 13.5px);
+  padding: 10px 12px;
   border-radius: 12px;
   cursor: pointer;
-  min-height: 46px;
-  transition: background .18s ease, border-color .18s ease, transform .08s ease;
+  min-height: 44px;
+  transition: transform .12s ease, box-shadow .2s ease, filter .2s ease;
 }
-.btn-share:hover  { background: #fff5e8; border-color: #c4944f; }
-.btn-share:active { transform: scale(.985); }
+
+.btn-cal {
+  background: #ffffff;
+  border: 1.5px solid var(--gold-primary);
+  color: var(--royal-maroon);
+  box-shadow: 0 4px 12px rgba(84, 11, 22, 0.08);
+}
+.btn-cal:hover {
+  background: #fff8eb;
+  border-color: var(--gold-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(84, 11, 22, 0.14);
+}
+
+.btn-share {
+  background: var(--crimson-gradient);
+  border: 1px solid var(--gold-bright);
+  color: #fff9ee;
+  box-shadow: 0 4px 14px rgba(84, 11, 22, 0.25);
+}
+.btn-share:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(84, 11, 22, 0.35);
+}
+
+.btn-cal:active, .btn-share:active {
+  transform: scale(.98);
+}
 
 .card__signoff {
   text-align: center;
-  margin-top: 18px;
-  font-family: Marcellus, serif;
-  font-size: 15px;
-  letter-spacing: .16em;
-  color: #8f5a2a;
+  margin-top: 14px;
+  font-family: 'Noto Serif Oriya', serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: .08em;
+  color: var(--royal-crimson);
 }
 
-/* --- 03: mushak + speech bubble --------------------------- */
+/* --- 03: Mushak & Guidance Bubble --- */
 .mouse-strip {
   position: relative;
   flex: 0 0 auto;
-  height: clamp(132px, 24vh, 208px);
-  height: clamp(132px, 24svh, 208px);
+  height: clamp(124px, 22vh, 196px);
+  height: clamp(124px, 22svh, 196px);
+  width: 100%;
 }
 .bubble {
   position: absolute;
-  right: min(42%, 178px);
+  right: min(38%, 240px);
   top: 2px;
-  width: min(54%, 186px);
+  width: min(58%, 220px);
   z-index: 5;
   opacity: 0;
   will-change: opacity;
 }
 .bubble__box {
-  background: #fffaf1;
-  border: 1px solid rgba(196, 148, 80, .45);
+  background: #ffffff;
+  border: 1.5px solid var(--gold-rich);
   border-radius: 14px;
-  padding: 10px 12px;
-  box-shadow: 0 10px 24px rgba(140, 86, 36, .14);
+  padding: 9px 12px;
+  box-shadow: 0 10px 24px rgba(84, 11, 22, 0.18);
   animation: bob 3.4s ease-in-out infinite;
 }
 .bubble__line {
-  font-family: Mukta, sans-serif;
-  font-weight: 600;
-  font-size: 14px;
+  font-family: 'Noto Sans Oriya', sans-serif;
+  font-weight: 700;
+  font-size: 13.5px;
   line-height: 1.35;
-  color: #7a3f12;
+  color: var(--royal-maroon);
 }
 .bubble__hint {
-  font-family: Mukta, sans-serif;
-  font-weight: 400;
-  font-size: 10.5px;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: #a9711f;
+  font-family: 'Noto Sans Oriya', sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--gold-dark);
   margin-top: 4px;
 }
 .bubble__tail {
@@ -471,14 +794,14 @@ p, h1, h2 { margin: 0; }
   bottom: -7px;
   width: 13px;
   height: 13px;
-  background: #fffaf1;
-  border-right: 1px solid rgba(196, 148, 80, .45);
-  border-bottom: 1px solid rgba(196, 148, 80, .45);
+  background: #ffffff;
+  border-right: 1.5px solid var(--gold-rich);
+  border-bottom: 1.5px solid var(--gold-rich);
   transform: rotate(45deg);
 }
 .mouse {
   position: absolute;
-  right: 2%;
+  right: clamp(2%, 4vw, 8%);
   bottom: 0;
   width: auto;
   height: 100%;
@@ -487,9 +810,10 @@ p, h1, h2 { margin: 0; }
   transform: translate3d(135%, 0, 0);
 }
 .mouse__btn {
+  position: relative;
   display: block;
   height: 100%;
-  min-height: 46px;
+  min-height: 44px;
   padding: 0;
   border: 0;
   background: none;
@@ -497,31 +821,48 @@ p, h1, h2 { margin: 0; }
   animation: bob 4s ease-in-out infinite;
   transition: transform .08s ease;
 }
-.mouse__btn:active { transform: scale(.97); }
+.mouse__btn:active { transform: scale(.96); }
 .mouse__btn img {
   display: block;
   height: 100%;
   width: auto;
-  filter: drop-shadow(0 12px 18px rgba(140, 86, 36, .18));
+  filter: drop-shadow(0 12px 20px rgba(84, 11, 22, 0.22));
+}
+.mouse__aura {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 90px;
+  height: 90px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255, 200, 80, 0.45) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: pulseGlow 3s ease-in-out infinite;
 }
 
-/* --- Accessibility ---------------------------------------- */
+/* --- Accessibility & Reduced Motion --- */
 :focus-visible {
-  outline: 2px solid #b5813a;
+  outline: 2px solid var(--gold-rich);
   outline-offset: 3px;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
-/* Scroll-linked motion is user-driven and stays on; the ambient
-   loops (swinging, bobbing, falling petals, glows) are stilled. */
 @media (prefers-reduced-motion: reduce) {
   .hero__arrow,
   .spark,
   .bell__swing,
   .petal,
   .bubble__box,
-  .mouse__btn {
+  .mouse__btn,
+  .diya__halo,
+  .mouse__aura {
     animation: none !important;
   }
-  .petals { display: none; }
+  .petals, .petal-canvas { display: none !important; }
+}
+
+/* --- Mobile Specific Adaptations --- */
+@media (max-width: 480px) {
+  .actions-grid { grid-template-columns: 1fr; }
 }
