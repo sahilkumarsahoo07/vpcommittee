@@ -25,18 +25,27 @@
     rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=20260911_02">
 
-  <!-- Block & remove Netlify Drawer / Feedback Badge -->
+  <!-- Block & remove Netlify Drawer / Feedback Badge / nl-badge -->
   <style>
+    body > iframe,
+    iframe[srcdoc*="nl-"],
+    iframe[srcdoc*="netlify"],
+    iframe[src*="netlify"],
+    iframe[id*="nl-"],
+    iframe[class*="nl-"],
+    .nl-wrap,
+    .nl-card,
+    .nl-badge,
+    #nl-card,
+    #nl-badge,
+    [class*="nl-"],
+    [id*="nl-"],
     netlify-drawer,
     netlify-feedback,
     #netlify-drawer,
     .netlify-drawer,
     [data-netlify-feedback],
-    [data-netlify-drawer],
-    iframe[src*="netlify"],
-    #netlify-collaborative-tools,
-    div[class*="netlify-drawer"],
-    div[id*="netlify-drawer"] {
+    [data-netlify-drawer] {
       display: none !important;
       visibility: hidden !important;
       opacity: 0 !important;
@@ -44,23 +53,47 @@
       width: 0 !important;
       height: 0 !important;
       position: fixed !important;
-      top: -9999px !important;
-      left: -9999px !important;
+      top: -99999px !important;
+      left: -99999px !important;
       z-index: -99999 !important;
     }
   </style>
   <script>
     (function() {
-      var killNetlify = function() {
-        var targets = document.querySelectorAll('netlify-drawer, netlify-feedback, #netlify-drawer, .netlify-drawer, [data-netlify-feedback], [data-netlify-drawer], iframe[src*="netlify"], #netlify-collaborative-tools');
-        for (var i = 0; i < targets.length; i++) {
-          try { targets[i].remove(); } catch(e) { targets[i].style.display = 'none'; }
+      function killNetlifyBadge() {
+        var iframes = document.querySelectorAll('iframe');
+        for (var i = 0; i < iframes.length; i++) {
+          var ifr = iframes[i];
+          var srcdoc = ifr.getAttribute('srcdoc') || '';
+          var src = ifr.getAttribute('src') || '';
+          var id = ifr.id || '';
+          var cls = ifr.className || '';
+          if (
+            srcdoc.indexOf('nl-') !== -1 ||
+            srcdoc.indexOf('netlify') !== -1 ||
+            src.indexOf('netlify') !== -1 ||
+            id.indexOf('nl-') !== -1 ||
+            cls.indexOf('nl-') !== -1 ||
+            ifr.parentNode === document.body
+          ) {
+            try { ifr.remove(); } catch(e) { ifr.style.display = 'none'; }
+          }
         }
-      };
-      killNetlify();
-      window.addEventListener('DOMContentLoaded', killNetlify);
-      window.addEventListener('load', killNetlify);
-      setInterval(killNetlify, 100);
+        var nlTargets = document.querySelectorAll('.nl-wrap, .nl-card, .nl-badge, #nl-card, #nl-badge, [class*="nl-"], [id*="nl-"], netlify-drawer, netlify-feedback, #netlify-drawer, .netlify-drawer, [data-netlify-feedback], [data-netlify-drawer]');
+        for (var j = 0; j < nlTargets.length; j++) {
+          try { nlTargets[j].remove(); } catch(e) { nlTargets[j].style.display = 'none'; }
+        }
+      }
+      killNetlifyBadge();
+      window.addEventListener('DOMContentLoaded', killNetlifyBadge);
+      window.addEventListener('load', killNetlifyBadge);
+      setInterval(killNetlifyBadge, 50);
+      if (typeof MutationObserver !== 'undefined') {
+        var observer = new MutationObserver(killNetlifyBadge);
+        if (document.documentElement) {
+          observer.observe(document.documentElement, { childList: true, subtree: true });
+        }
+      }
     })();
   </script>
 </head>

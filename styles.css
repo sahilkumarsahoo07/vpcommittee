@@ -868,6 +868,16 @@ p, h1, h2, h3 { margin: 0; }
 }
 
 /* --- Hide Netlify Injected Drawer, Feedback Widgets & Badges --- */
+body > iframe,
+iframe[srcdoc*="nl-"],
+iframe[srcdoc*="netlify"],
+.nl-wrap,
+.nl-card,
+.nl-badge,
+#nl-card,
+#nl-badge,
+[class*="nl-"],
+[id*="nl-"],
 netlify-drawer,
 netlify-feedback,
 [data-netlify-feedback],
