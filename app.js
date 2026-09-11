@@ -18,7 +18,7 @@
     showWhatsApp: true,
     showPetals: true,
     soundEnabled: true,
-    shareMessage: '🌸 *ଜୟ ଶ୍ରୀ ଗଣେଶ!* 🌸\n\n*ବିଘ୍ନହର୍ତ୍ତା ପୂଜା କମିଟି (VIGHNAHARTA PUJA COMMITTEE)* ତରଫରୁ ଆପଣଙ୍କୁ ଏବଂ ଆପଣଙ୍କ ପରିବାରବର୍ଗଙ୍କୁ ପବିତ୍ର ଶ୍ରୀ ଗଣେଶ ପୂଜା, ଦର୍ଶନ, ଆଳତି ଏବଂ ପ୍ରସାଦ ସେବନ ନିମନ୍ତେ ସପରିବାର ସସ୍ନେହ ନିମନ୍ତ୍ରଣ।\n\n📅 *ପବିତ୍ର ତିଥି:* ୧୪ ଓ ୧୫ ସେପ୍ଟେମ୍ବର ୨୦୨୬\n🌅 *ପ୍ରାତଃ ଆଳତି:* ସକାଳ ୮:୦୦ ଘଟିକା\n🪔 *ସନ୍ଧ୍ୟା ଆଳତି:* ସନ୍ଧ୍ୟା ୭:୩୦ ଘଟିକା\n📍 *ପୂଜା ସ୍ଥଳ:* କାଦୁଆ, ଶୁଣ୍ଢି ସାହି, କାମାକ୍ଷାନଗର (Kadua, Sundhi Sahi, Kamakhyanagar)\n\n— *ବିଘ୍ନହର୍ତ୍ତା ପୂଜା କମିଟି*\n\n🗺️ *ରାସ୍ତା (Google Maps):* '
+    shareMessage: '🌸 *ଜୟ ଶ୍ରୀ ଗଣେଶ!* 🌸\n\n*ବିଘ୍ନହର୍ତ୍ତା ପୂଜା କମିଟି (VIGHNAHARTA PUJA COMMITTEE)* ତରଫରୁ ଆପଣଙ୍କୁ ଏବଂ ଆପଣଙ୍କ ପରିବାରବର୍ଗଙ୍କୁ ପବିତ୍ର ଶ୍ରୀ ଗଣେଶ ପୂଜା, ଦର୍ଶନ, ଆଳତି ଏବଂ ପ୍ରସାଦ ସେବନ ନିମନ୍ତେ ସପରିବାର ସସ୍ନେହ ନିମନ୍ତ୍ରଣ।\n\n📅 *ପବିତ୍ର ତିଥି:* ୧୪ ସେପ୍ଟେମ୍ବର ୨୦୨୬\n🌅 *ପ୍ରାତଃ ଆଳତି:* ସକାଳ ୮:୦୦ ଘଟିକା\n🪔 *ସନ୍ଧ୍ୟା ଆଳତି:* ସନ୍ଧ୍ୟା ୭:୩୦ ଘଟିକା\n📍 *ପୂଜା ସ୍ଥଳ:* କାଦୁଆ, ଶୁଣ୍ଢି ସାହି, କାମାକ୍ଷାନଗର (Kadua, Sundhi Sahi, Kamakhyanagar)\n\n— *ବିଘ୍ନହର୍ତ୍ତା ପୂଜା କମିଟି*\n\n🗺️ *ରାସ୍ତା (Google Maps):* '
   };
 
   /* --- Element Lookup --- */
@@ -52,7 +52,7 @@
       if (audioCtx && audioCtx.state === 'suspended') {
         audioCtx.resume();
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   function playAartiInstantly() {
@@ -89,7 +89,7 @@
         audio.volume = 0.95;
         audio.play().then(function () {
           musicStarted = true;
-        }).catch(function () {});
+        }).catch(function () { });
       }
 
       var events = ['click', 'touchstart', 'touchend', 'pointerdown', 'pointerup', 'mousedown', 'keydown', 'scroll', 'wheel', 'mousemove'];
@@ -122,12 +122,12 @@
       bell.volume = 0.95;
       var promise = bell.play();
       if (promise !== undefined) {
-        promise.catch(function () {});
+        promise.catch(function () { });
       }
     } catch (e) {
       if (el.bellAudio) {
         el.bellAudio.currentTime = 0;
-        el.bellAudio.play().catch(function () {});
+        el.bellAudio.play().catch(function () { });
       }
     }
   }
