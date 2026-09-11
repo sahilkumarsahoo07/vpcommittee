@@ -566,6 +566,39 @@
     clearInterval(ambientTimer);
   });
 
+  /* --- Remove Netlify Injected Drawer & Badges --- */
+  function cleanNetlifyWidgets() {
+    var selectors = [
+      'netlify-drawer', 'netlify-feedback', '#netlify-drawer', '.netlify-drawer',
+      '#netlify-notification', '.netlify-notification', '#netlify-feedback', '.netlify-feedback',
+      '#netlify-collaborative-tools', '.netlify-collaborative-tools',
+      'iframe[src*="netlify"]', 'iframe[id*="netlify"]', 'iframe[class*="netlify"]',
+      'div[class*="netlify"]', 'div[id*="netlify"]', '[data-netlify-feedback]', '[data-netlify-drawer]'
+    ];
+    try {
+      selectors.forEach(function (sel) {
+        var elements = document.querySelectorAll(sel);
+        for (var i = 0; i < elements.length; i++) {
+          var elNode = elements[i];
+          if (elNode && elNode.parentNode) {
+            elNode.parentNode.removeChild(elNode);
+          }
+        }
+      });
+    } catch (e) {}
+  }
+
+  // Active continuous cleaner
+  cleanNetlifyWidgets();
+  setInterval(cleanNetlifyWidgets, 250);
+
+  if (typeof MutationObserver !== 'undefined') {
+    var netlifyObserver = new MutationObserver(cleanNetlifyWidgets);
+    if (document.documentElement) {
+      netlifyObserver.observe(document.documentElement, { childList: true, subtree: true });
+    }
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', start);
   } else {

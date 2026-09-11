@@ -867,15 +867,37 @@ p, h1, h2, h3 { margin: 0; }
   .actions-grid { grid-template-columns: 1fr; }
 }
 
-/* --- Hide Netlify Injected Drawer & Badges --- */
+/* --- Hide Netlify Injected Drawer, Feedback Widgets & Badges --- */
+netlify-drawer,
+netlify-feedback,
 [data-netlify-feedback],
+[data-netlify-drawer],
 #netlify-drawer,
 .netlify-drawer,
-iframe#netlify-drawer-iframe,
-[class*="netlify-drawer"],
-[id*="netlify-drawer"] {
+#netlify-notification,
+.netlify-notification,
+#netlify-feedback,
+.netlify-feedback,
+#netlify-collaborative-tools,
+.netlify-collaborative-tools,
+iframe[src*="netlify"],
+iframe[id*="netlify"],
+iframe[class*="netlify"],
+div[class*="netlify"],
+div[id*="netlify"],
+[data-netlify-deploy-id],
+[data-netlify-site-id] {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
   opacity: 0 !important;
+  position: absolute !important;
+  top: -99999px !important;
+  left: -99999px !important;
+  width: 0 !important;
+  height: 0 !important;
+  max-width: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  z-index: -99999 !important;
 }
