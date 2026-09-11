@@ -866,3 +866,16 @@ p, h1, h2, h3 { margin: 0; }
 @media (max-width: 480px) {
   .actions-grid { grid-template-columns: 1fr; }
 }
+
+/* --- Hide Netlify Injected Drawer & Badges --- */
+[data-netlify-feedback],
+#netlify-drawer,
+.netlify-drawer,
+iframe#netlify-drawer-iframe,
+[class*="netlify-drawer"],
+[id*="netlify-drawer"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
